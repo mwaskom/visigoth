@@ -1,0 +1,4 @@
+*.pyc
+*.sw{o,p}
+Icon*
+.iohpid
