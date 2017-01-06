@@ -14,7 +14,7 @@ class EyeTracker(object):
     """Object for managing eyetracking using iohub.
 
     """
-    def __init__(self, exp):
+    def __init__(self, exp, edf_stem="eyedat", calib_background=.5):
 
         # Extract relevant parameters
         self.monitor_eye = exp.p.eye_monitor
@@ -28,7 +28,11 @@ class EyeTracker(object):
         self.offsets = (0, 0)
 
         # Set up a base for log file names
+        self.edf_stem = edf_stem
         self.log_stem = exp.p.log_stem + "_eyedat"
+
+        # Determine the background color
+        self.calib_background = [int(calib_background * 255)] * 3
 
         # Initialize lists for the logged data
         self.log_timestamps = []
@@ -51,10 +55,10 @@ class EyeTracker(object):
         eye_config = dict()
         eye_config["name"] = "tracker"
         eye_config["model_name"] = "EYELINK 1000 DESKTOP"
-        eye_config["default_native_data_file_name"] = "eyedat"
+        eye_config["default_native_data_file_name"] = self.edf_stem
         cal_config = dict(auto_pace=False,
                           type="NINE_POINTS",
-                          screen_background_color=[128, 128, 128],
+                          screen_background_color=self.calib_background,
                           target_type="CIRCLE_TARGET",
                           target_attributes=dict(outer_diameter=33,
                                                  inner_diameter=6,
@@ -153,6 +157,17 @@ class EyeTracker(object):
             gaze = self.log_positions[-1]
         return np.isfinite(gaze).all()
 
+    def last_valid_sample(self, apply_offsets=True):
+        """Return the timestamp and position of the last valid gaze sample."""
+        samples = itertools.izip(reversed(self.log_timestamps),
+                                 reversed(self.log_positions),
+                                 reversed(self.log_offsets))
+        for timestamp, gaze, offsets in samples:
+            if np.isfinite(gaze).all():
+                if apply_offsets:
+                    gaze = gaze + offsets
+                return timestamp, gaze
+
     def update_params(self):
         """Update params by reading data from client."""
         self.cmd_q.put("_")
@@ -208,12 +223,3 @@ class EyeTracker(object):
             self.move_edf_file()
             self.write_log_data()
         self.server.join(timeout=2)
-
-    @property
-    def last_valid_sample(self):
-        """Return the timestamp and position of the last valid gaze sample."""
-        samples = itertools.izip(reversed(self.log_timestamps),
-                                 reversed(self.log_positions))
-        for timestamp, gaze in samples:
-            if np.isfinite(gaze).all():
-                return timestamp, gaze
