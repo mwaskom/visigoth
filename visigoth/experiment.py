@@ -6,7 +6,16 @@ class Experiment(object):
 
         self.trial_data = [] 
 
-        # TODO maybe don't do this all in the constructor?
+        self.p = None
+        self.s = None
+        self.win = None
+        self.tracker = None
+        self.server = None
+
+    def run(self):
+
+        # TODO handle clocks, eyetracker, etc.
+
         try:
 
             self.load_params()
@@ -14,7 +23,12 @@ class Experiment(object):
             self.initialize_eyetracker()
             self.open_window()
             self.create_stimuli()
-            self.run()
+
+            for trial_info in self.generate_trials():
+
+                trial_info = self.run_trial(trial_info)
+                self.trial_data.append(trial_info)
+                self.update_client(trial_info)
 
         finally:
 
@@ -22,16 +36,6 @@ class Experiment(object):
             self.shutdown_server()
             self.shutdown_eyetracker()
             self.close_window()
-
-    def run(self):
-
-        # TODO handle clocks, eyetracker, etc.
-
-        for trial_info in self.generate_trials():
-
-            trial_info = self.run_trial(trial_info)
-            self.trial_data.append(trial_info)
-            self.update_client(trial_info)
 
     def create_stimuli(self):
         """Initialize study-specific stimulus objects.
