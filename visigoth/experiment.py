@@ -4,6 +4,7 @@ import os
 import time
 import argparse
 import yaml
+import pandas as pd
 
 from psychopy import visual, monitors
 
@@ -137,7 +138,9 @@ class Experiment(object):
         each study to allow for more complicated data structures or exit logic.
 
         """
-        raise NotImplementedError
+        data = pd.DataFrame(self.trial_data)
+        out_fname = self.output_stem + "_trials.csv"
+        data.to_csv(out_fname, index=False)
 
     # ==== Initialization functions ====
 
@@ -262,7 +265,7 @@ class Experiment(object):
             return
 
     def shutdown_eyetracker(self):
-        """End Eyetracker recording and transfer EDF file."""
+        """End Eyetracker recording and save eyetracker log files."""
         if self.tracker is not None:
             self.tracker.shutdown()
 
