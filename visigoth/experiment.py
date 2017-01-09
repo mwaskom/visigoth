@@ -1,8 +1,15 @@
+"""Definition of the Experiment object that control most things."""
+import argparse
+
+from .ext.bunch import Bunch
+from . import stimuli
 
 
 class Experiment(object):
 
-    def __init__(self):
+    def __init__(self, arglist=None):
+
+        self.arglist = [] if arglist is None else arglist
 
         self.p = None
         self.s = None
@@ -21,12 +28,12 @@ class Experiment(object):
 
             # Experiment initialization
 
-            self.create_output_directory()
-            self.load_params()
+            self.initialize_data_storage()
+            self.initialize_params()
             self.initialize_server()
             self.initialize_eyetracker()
-            self.open_window()
-            self.create_stimuli()
+            self.initialize_display()
+            self.initialize_stimuli()
 
             # Main experimental loop
 
@@ -40,12 +47,16 @@ class Experiment(object):
 
             # Experiment shutdown
 
+            self.save_data()
             self.shutdown_server()
             self.shutdown_eyetracker()
-            self.save_data()
-            self.close_window()
+            self.shutdown_window()
 
     # ==== Study-specific functions ====
+
+    def define_cmdline_params(self, parser):
+        """Augment the command line parser to set params at runtime."""
+        pass
 
     def create_stimuli(self):
         """Initialize study-specific stimulus objects.
@@ -122,11 +133,28 @@ class Experiment(object):
 
     # ==== Initialization functions ====
 
-    def load_params(self):
+    def initialize_params(self):
         """Determine parameters for this run of the experiment."""
-        pass
+        import params
 
-    def create_output_directory(self):
+        p = Bunch(getattr(params, self.arglist[0]))
+
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-subject", default="test")
+        parser.add_argument("-run", type=int, default=1)
+        parser.add_argument("-nolog", action="store_false", dest="writelog")
+        parser.add_argument("-debug", action="store_true")
+
+        self.define_cmdline_params(parser)
+
+        args = parser.parse_args(self.arglist[1:])
+
+        p.update(args.__dict__)
+
+        self.p = p
+        self.debug = args.debug
+
+    def initialize_data_output(self):
         """Ensure that the outputs can be written."""
         pass
 
@@ -138,9 +166,17 @@ class Experiment(object):
         """Connect to and calibrate eyetracker."""
         pass
 
-    def open_window(self):
+    def initialize_display(self):
         """Open the PsychoPy window to begin the experiment."""
         pass
+
+    def initialize_stimuli(self):
+        """Setup stimulus objects, including experiment specific ones."""
+        stims = Bunch(self.create_stimuli())
+        stims.setdefault("fix", stimuli.Point(self.win,
+                                              self.p.fix_radius,
+                                              self.p.fix_color))
+        self.s = stims
 
     # ==== Shutdown functions ====
 
@@ -154,6 +190,6 @@ class Experiment(object):
         if self.tracker is None:
             return
 
-    def close_window(self):
+    def shutdown_display(self):
         """Cleanly exit out of the psychopy window."""
         pass
