@@ -1,4 +1,6 @@
 """Definition of the Experiment object that control most things."""
+import os
+import time
 import argparse
 
 from .ext.bunch import Bunch
@@ -135,28 +137,45 @@ class Experiment(object):
 
     def initialize_params(self):
         """Determine parameters for this run of the experiment."""
-        import params
 
+        # Import the params module and extract the params for this run
+        import params
         p = Bunch(getattr(params, self.arglist[0]))
 
+        # Define common command-line interface
         parser = argparse.ArgumentParser()
+        parser.add_argument("mode", required=True)
         parser.add_argument("-subject", default="test")
         parser.add_argument("-run", type=int, default=1)
         parser.add_argument("-nolog", action="store_false", dest="writelog")
         parser.add_argument("-debug", action="store_true")
 
+        # Add study-specific command line arguments
         self.define_cmdline_params(parser)
 
-        args = parser.parse_args(self.arglist[1:])
-
+        # Parse the command line arguments into parameters
+        args = parser.parse_args(self.arglist)
         p.update(args.__dict__)
+
+        # Timestamp the execution and add to parameters
+        timestamp = time.localtime()
+        p.timestamp = timestamp
+        p.date = time.strftime("%Y-%m-%d", timestamp)
+        p.time = time.strftime("%H-%M-%S", timestamp)
 
         self.p = p
         self.debug = args.debug
 
     def initialize_data_output(self):
-        """Ensure that the outputs can be written."""
-        pass
+        """Define stem for output filenames and ensure directory exists."""
+        template = self.p.get("output_template", "data/{subject}/{date}/{time}")
+        output_stem = template.format(**self.p)
+
+        output_dir = os.path.dirname(output_stem)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        self.output_stem = output_stem
 
     def initialize_server(self):
         """Start a server in an independent thread for experiment control."""
