@@ -11,10 +11,15 @@ from psychopy.tools.monitorunittools import pix2deg
 
 
 class EyeTracker(object):
-    """Object for managing eyetracking using iohub.
+    """Interface to the psychopy.iohub Eyelink interface.
+
+    The main reason for the additional layer of complexity is to allow simple
+    eyetracker simulation with the mouse in a way that is transparent to the
+    experiment code. This object also has some helpful interface functions,
+    allows for dynamic offset values, and maintains a log of samples.
 
     """
-    def __init__(self, exp, edf_stem="eyedat", calib_background=.5):
+    def __init__(self, exp, edf_stem="eyedat", calib_background=128):
 
         # Extract relevant parameters
         self.monitor_eye = exp.p.eye_monitor
@@ -32,7 +37,7 @@ class EyeTracker(object):
         self.log_stem = exp.p.log_stem + "_eyedat"
 
         # Determine the background color
-        self.calib_background = [int(calib_background * 255)] * 3
+        self.calib_background = calib_background
 
         # Initialize lists for the logged data
         self.log_timestamps = []
@@ -56,9 +61,11 @@ class EyeTracker(object):
         eye_config["name"] = "tracker"
         eye_config["model_name"] = "EYELINK 1000 DESKTOP"
         eye_config["default_native_data_file_name"] = self.edf_stem
+
+        bg_color = [int(self.calib_background)] * 3
         cal_config = dict(auto_pace=False,
                           type="NINE_POINTS",
-                          screen_background_color=self.calib_background,
+                          screen_background_color=bg_color,
                           target_type="CIRCLE_TARGET",
                           target_attributes=dict(outer_diameter=33,
                                                  inner_diameter=6,
@@ -189,8 +196,6 @@ class EyeTracker(object):
         edf_src_fname = "eyedat.EDF"
         edf_trg_fname = self.log_stem + ".edf"
 
-        cregg.archive_old_version(edf_trg_fname)
-
         if os.path.exists(edf_src_fname):
             edf_mtime = os.stat(edf_src_fname).st_mtime
             age = time.time() - edf_mtime
@@ -213,7 +218,6 @@ class EyeTracker(object):
                               columns=["x", "y", "x_offset", "y_offset"])
 
         log_fname = self.log_stem + ".csv"
-        cregg.archive_old_version(log_fname)
         log_df.to_csv(log_fname)
 
     def shutdown(self):

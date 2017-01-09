@@ -14,15 +14,21 @@ class Experiment(object):
 
     def run(self):
 
-        # TODO handle clocks, eyetracker, etc.
+        # Everything is wrapped in a try-block so that errors will exit out
+        # properly and not destroy data or leave hanging connections.
 
         try:
 
+            # Experiment initialization
+
+            self.create_output_directory()
             self.load_params()
             self.initialize_server()
             self.initialize_eyetracker()
             self.open_window()
             self.create_stimuli()
+
+            # Main experimental loop
 
             for trial_info in self.generate_trials():
 
@@ -31,6 +37,8 @@ class Experiment(object):
                 self.update_client(trial_info)
 
         finally:
+
+            # Experiment shutdown
 
             self.shutdown_server()
             self.shutdown_eyetracker()
@@ -116,6 +124,10 @@ class Experiment(object):
 
     def load_params(self):
         """Determine parameters for this run of the experiment."""
+        pass
+
+    def create_output_directory(self):
+        """Ensure that the outputs can be written."""
         pass
 
     def initialize_server(self):
