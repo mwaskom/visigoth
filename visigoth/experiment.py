@@ -4,13 +4,13 @@ class Experiment(object):
 
     def __init__(self):
 
-        self.trial_data = [] 
-
         self.p = None
         self.s = None
         self.win = None
         self.tracker = None
         self.server = None
+
+        self.trial_data = []
 
     def run(self):
 
@@ -32,10 +32,12 @@ class Experiment(object):
 
         finally:
 
-            self.save_data()
             self.shutdown_server()
             self.shutdown_eyetracker()
+            self.save_data()
             self.close_window()
+
+    # ==== Study-specific functions ====
 
     def create_stimuli(self):
         """Initialize study-specific stimulus objects.
@@ -61,7 +63,7 @@ class Experiment(object):
         or on the fly.
 
         It should yield an object that provides trial-specific parameters.
-        This will typically be a Pandas Series, but other datatypes are fine
+        This will typically be a pandas Series, but other datatypes are fine
         as long as the ``run_trial`` method knows how to handle it.
 
         The generator is iterated between each trial, so if it is going to do
@@ -82,7 +84,7 @@ class Experiment(object):
         handling of the input should correspond with what is yielded by the
         ``generate_trials`` method, and the output should be something that the
         ``update_client`` and ``save_data`` methods knows how to handle. It is
-        easiest for this to be a pandas Series, so that those methods to not
+        easiest for this to be a pandas Series, so that those methods do not
         need to be overloaded, but this is not strictly required to allow for
         more complicated designs.
 
@@ -90,9 +92,56 @@ class Experiment(object):
         raise NotImplementedError
 
     def update_client(self, trial_info):
+        """Send the trial results to the experiment client.
 
+        If the object returned by ``run_trial`` is a pandas Series, it's not
+        necessary to overload this function. Howver, it can be defined for each
+        study to allow for more complicated data structures.
+
+        """
         raise NotImplementedError
 
     def save_data(self):
+        """Write out data files at the end of the run.
 
+        If the object returned by ``run_trial`` is a pandas Series and you
+        don't want to do anything special at the end of the experiment, it's
+        not necessary to overload this function. Howver, it can be defined for
+        each study to allow for more complicated data structures or exit logic.
+
+        """
         raise NotImplementedError
+
+    # ==== Initialization functions ====
+
+    def load_params(self):
+        """Determine parameters for this run of the experiment."""
+        pass
+
+    def initialize_server(self):
+        """Start a server in an independent thread for experiment control."""
+        pass
+
+    def initialize_eyetracker(self):
+        """Connect to and calibrate eyetracker."""
+        pass
+
+    def open_window(self):
+        """Open the PsychoPy window to begin the experiment."""
+        pass
+
+    # ==== Shutdown functions ====
+
+    def shutdown_server(self):
+        """Cleanly close down the experiment server process."""
+        if self.server is None:
+            return
+
+    def shutdown_eyetracker(self):
+        """End Eyetracker recording and transfer EDF file."""
+        if self.tracker is None:
+            return
+
+    def close_window(self):
+        """Cleanly exit out of the psychopy window."""
+        pass
