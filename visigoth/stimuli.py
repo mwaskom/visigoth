@@ -9,17 +9,17 @@ class Point(object):
     It is intended to be used for, e.g., a fixation point.
 
     """
-    def __init__(self, win, color="white", radius=.15, **kwargs):
+    def __init__(self, win, radius=.15, color="white", **kwargs):
         """Create the psychopy stimulus object.
 
         Parameters
         ----------
         win : psychopy Window
             Open PsychoPy window that the stimuli will be linked to.
-        color : PsychoPy color
-            Initial color for the point.
         radius : float
             Size of the point in ``win`` units.
+        color : PsychoPy color
+            Initial color for the point.
         kwargs : key, value mappings
             Other keyword arguments are passed to psychopy.visual.Circle.
 
@@ -65,7 +65,7 @@ class Points(object):
     It is intended to be used for, e.g., saccade targets.
 
     """
-    def __init__(self, win, pos, color="white", radius=.15, **kwargs):
+    def __init__(self, win, pos, radius=.15, color="white", **kwargs):
         """Create the psychopy stimulus objects.
 
         Parameters
