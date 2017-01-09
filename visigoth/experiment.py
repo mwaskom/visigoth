@@ -1,7 +1,11 @@
 """Definition of the Experiment object that control most things."""
+from __future__ import division
 import os
 import time
 import argparse
+import yaml
+
+from psychopy import visual, monitors
 
 from .ext.bunch import Bunch
 from . import stimuli
@@ -23,7 +27,7 @@ class Experiment(object):
 
     def run(self):
 
-        # Everything is wrapped in a try-block so that errors will exit out
+        # Everything is wrapped in a try block so that errors will exit out
         # properly and not destroy data or leave hanging connections.
 
         try:
@@ -55,6 +59,8 @@ class Experiment(object):
             self.shutdown_window()
 
     # ==== Study-specific functions ====
+
+    # In most (but not all) cases, these methods will be overloaded by the user
 
     def define_cmdline_params(self, parser):
         """Augment the command line parser to set params at runtime."""
@@ -168,7 +174,8 @@ class Experiment(object):
 
     def initialize_data_output(self):
         """Define stem for output filenames and ensure directory exists."""
-        template = self.p.get("output_template", "data/{subject}/{date}/{time}")
+        default_template = "data/{subject}/{date}/{time}"
+        template = self.p.get("output_template", default_template)
         output_stem = template.format(**self.p)
 
         output_dir = os.path.dirname(output_stem)
@@ -187,7 +194,41 @@ class Experiment(object):
 
     def initialize_display(self):
         """Open the PsychoPy window to begin the experiment."""
-        pass
+
+        # Extract the relevant display information
+        with open("displays.yaml") as fid:
+            display_info = yaml.load(fid)
+        info = display_info[self.p.display_name]
+
+        # Determine the background color of the display
+        color = self.p.display_luminance / info["max_luminance"] * 2 - 1
+
+        # Define information about the monitor
+        monitor = monitors.Monitor(self.p.display_name,
+                                   info["width"],
+                                   info["distance"],
+                                   info["gamma"],
+                                   autoLog=False)
+
+        # Open the psychopy window
+        win = visual.Window(units="deg",
+                            screen=0,
+                            fullscr=True,
+                            allowGUI=False,
+                            color=color,
+                            size=info["size"],
+                            monitor=monitor)
+
+        # Test window performance
+        win.setRecordFrameIntervals(True)
+        flip_time, _, _ = visual.getMsPerFrame(win)
+        refresh_hz = 1000 / flip_time
+        refresh_error = abs(info["refresh_hz"] - refresh_hz)
+        if refresh_error > .5:
+            text = "Display refresh rate differs from expected by {:.2} Hz"
+            return RuntimeError(text.format(refresh_error))
+
+        self.win = win
 
     def initialize_stimuli(self):
         """Setup stimulus objects, including experiment specific ones."""
