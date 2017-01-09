@@ -19,7 +19,7 @@ class EyeTracker(object):
     allows for dynamic offset values, and maintains a log of samples.
 
     """
-    def __init__(self, exp, edf_stem="eyedat", calib_background=128):
+    def __init__(self, exp, edf_stem="eyedat"):
 
         # Extract relevant parameters
         self.monitor_eye = exp.p.eye_monitor
@@ -36,9 +36,6 @@ class EyeTracker(object):
         self.edf_stem = edf_stem
         self.log_stem = exp.p.log_stem + "_eyedat"
 
-        # Determine the background color
-        self.calib_background = calib_background
-
         # Initialize lists for the logged data
         self.log_timestamps = []
         self.log_positions = []
@@ -48,7 +45,7 @@ class EyeTracker(object):
         self.setup_iohub()
         self.run_calibration()
 
-    def setup_iohub(self):
+    def setup_iohub(self, screen_color=128):
         """Initialize iohub with relevant configuration details.
 
         Some of these things should be made configurable either through our
@@ -62,7 +59,7 @@ class EyeTracker(object):
         eye_config["model_name"] = "EYELINK 1000 DESKTOP"
         eye_config["default_native_data_file_name"] = self.edf_stem
 
-        bg_color = [int(self.calib_background)] * 3
+        bg_color = [int(screen_color)] * 3
         cal_config = dict(auto_pace=False,
                           type="NINE_POINTS",
                           screen_background_color=bg_color,
