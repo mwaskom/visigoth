@@ -10,7 +10,20 @@ class Point(object):
 
     """
     def __init__(self, win, color="white", radius=.15, **kwargs):
+        """Create the psychopy stimulus object.
 
+        Parameters
+        ----------
+        win : psychopy Window
+            Open PsychoPy window that the stimuli will be linked to.
+        color : PsychoPy color
+            Initial color for the point.
+        radius : float
+            Size of the point in ``win`` units.
+        kwargs : key, value mappings
+            Other keyword arguments are passed to psychopy.visual.Circle.
+
+        """
         self.win = win
         self.dot = visual.Circle(win,
                                  radius=radius,
@@ -43,6 +56,8 @@ class Points(object):
 
     In addition to the abstractions afforded by the Point object, this object
     also allows you to set the color with a single color or list of colors.
+    The ``color`` property will always return a list with the number of colors
+    equating to the number of points.
 
     Performance will suffer for a large number of objects -- in that case, you
     should use an ElementArrayStim.
@@ -50,15 +65,30 @@ class Points(object):
     It is intended to be used for, e.g., saccade targets.
 
     """
-    def __init__(self, win, pos, color="white", radius=.15):
+    def __init__(self, win, pos, color="white", radius=.15, **kwargs):
+        """Create the psychopy stimulus objects.
 
+        Parameters
+        ----------
+        win : psychopy Window
+            Open PsychoPy window that the stimuli will be linked to.
+        pos : list of tuples
+            List of point positions, in ``win`` units.
+        color : single PsychoPy color or list of colors.
+            Initial color(s) for all or each points.
+        radius : float
+            Size of the point in ``win`` units.
+        kwargs : key, value mappings
+            Other keyword arguments are passed to psychopy.visual.Circle.
+
+        """
         self.win = win
         self.dots = []
         for pos_i in pos:
-            dot = Point(win, color, radius, pos=pos)
+            dot = Point(win, "white", radius, pos=pos, **kwargs)
             self.dots.append(dot)
 
-        self._colors = color
+        self.color = color
 
     @property
     def color(self):
@@ -66,6 +96,7 @@ class Points(object):
 
     @color.setter
     def color(self, color):
+        """Set point colors as a group or individually for each point."""
         if isinstance(color, list):
             if len(color) == len(self.dots):
                 colors = color
@@ -73,6 +104,8 @@ class Points(object):
                 raise ValueError("Wrong number of colors")
         else:
             colors = [color for _ in self.dots]
+
+        self._colors = colors
 
         for color, dot in zip(colors, self.dots):
             dot.color = color
