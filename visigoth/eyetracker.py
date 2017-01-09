@@ -23,20 +23,17 @@ class EyeTracker(object):
 
         self.exp = exp
 
-        # Extract relevant parameters TODO handle differently
-        self.monitor_eye = exp.p.eye_monitor
-        self.simulate = exp.p.eye_mouse_simulate
-        self.writelog = not exp.p.nolog
-
-        # Determine the position and size of the fixation window
-        self.fix_window_radius = exp.p.eye_fix_window
+        # Extract relevant parameters
+        self.simulate = exp.p.eye_simulate
+        self.save_data = exp.p.save_data
+        self.fix_window_radius = exp.p.eye_fix_radius
 
         # Initialize the offsets with default values
         self.offsets = (0, 0)
 
         # Set up a base for log file names
         self.edf_stem = edf_stem
-        self.log_stem = exp.p.log_stem + "_eyedat"
+        self.output_stem = exp.p.output_stem + "_eyedat"
 
         # Initialize lists for the logged data
         self.log_timestamps = []
@@ -102,7 +99,7 @@ class EyeTracker(object):
 
     def read_gaze(self, in_degrees=True, log=True, apply_offsets=True):
         """Read a sample of gaze position and convert coordinates."""
-        timestamp = self.clock.getTime()
+        timestamp = self.exp.clock.getTime()
 
         if self.simulate:
             # Use the correct method for a mouse "tracker"
@@ -192,7 +189,7 @@ class EyeTracker(object):
     def move_edf_file(self):
         """Move the Eyelink edf data to the right location."""
         edf_src_fname = "eyedat.EDF"
-        edf_trg_fname = self.log_stem + ".edf"
+        edf_trg_fname = self.exp.output_stem + ".edf"
 
         if os.path.exists(edf_src_fname):
             edf_mtime = os.stat(edf_src_fname).st_mtime
@@ -215,12 +212,12 @@ class EyeTracker(object):
                               index=self.log_timestamps,
                               columns=["x", "y", "x_offset", "y_offset"])
 
-        log_fname = self.log_stem + ".csv"
+        log_fname = self.exp.output_stem + ".csv"
         log_df.to_csv(log_fname)
 
     def shutdown(self):
         """Handle all of the things that need to happen when ending a run."""
         self.close_connection()
-        if self.writelog:
+        if self.save_data:
             self.move_edf_file()
             self.write_log_data()

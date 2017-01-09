@@ -153,7 +153,7 @@ class Experiment(object):
         parser.add_argument("mode")
         parser.add_argument("-subject", default="test")
         parser.add_argument("-run", type=int, default=1)
-        parser.add_argument("-nolog", action="store_false", dest="writelog")
+        parser.add_argument("-nosave", action="store_false", dest="save_data")
         parser.add_argument("-debug", action="store_true")
 
         # Add study-specific command line arguments
@@ -241,6 +241,10 @@ class Experiment(object):
         if refresh_error > .5:
             text = "Display refresh rate differs from expected by {:.2} Hz"
             return RuntimeError(text.format(refresh_error))
+
+        # Initialize the gaze stimulus
+        if self.p.monitor_eye and self.p.eye_simulate:
+            stimuli.GazeStim(win, self.tracker)
 
     def initialize_stimuli(self):
         """Setup stimulus objects, including experiment specific ones."""
