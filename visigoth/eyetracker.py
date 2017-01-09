@@ -224,4 +224,3 @@ class EyeTracker(object):
         if self.writelog:
             self.move_edf_file()
             self.write_log_data()
-        self.server.join(timeout=2)

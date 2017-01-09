@@ -259,9 +259,10 @@ class Experiment(object):
 
     def shutdown_eyetracker(self):
         """End Eyetracker recording and transfer EDF file."""
-        if self.tracker is None:
-            return
+        if self.tracker is not None:
+            self.tracker.shutdown()
 
     def shutdown_display(self):
         """Cleanly exit out of the psychopy window."""
-        pass
+        if self.win is not None:
+            self.win.close()
