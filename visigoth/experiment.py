@@ -8,7 +8,7 @@ import yaml
 from psychopy import visual, monitors
 
 from .ext.bunch import Bunch
-from . import stimuli
+from . import stimuli, eyetracker
 
 
 class Experiment(object):
@@ -150,7 +150,7 @@ class Experiment(object):
 
         # Define common command-line interface
         parser = argparse.ArgumentParser()
-        parser.add_argument("mode", required=True)
+        parser.add_argument("mode")
         parser.add_argument("-subject", default="test")
         parser.add_argument("-run", type=int, default=1)
         parser.add_argument("-nolog", action="store_false", dest="writelog")
@@ -190,7 +190,21 @@ class Experiment(object):
 
     def initialize_eyetracker(self):
         """Connect to and calibrate eyetracker."""
-        pass
+        if self.p.monitor_eye:
+
+            self.tracker = tracker = eyetracker.Eyetracker(self)
+
+            # Determine the screen background color during calibration
+            # Currently I'm not sure how to get iohub to apply gamma correction
+            # so we need to do that ourselves here.
+            with open("displays.yaml") as fid:
+                display_info = yaml.load(fid)
+            info = display_info[self.p.display_name]
+            ratio = self.p.display_luminance / info["max_luminance"]
+            color = int(round(ratio ** (1 / info["gamma"]) * 255))
+
+            # Configure and calibrate the eyetracker
+            tracker.run_calibration(color)
 
     def initialize_display(self):
         """Open the PsychoPy window to begin the experiment."""
@@ -211,13 +225,13 @@ class Experiment(object):
                                    autoLog=False)
 
         # Open the psychopy window
-        win = visual.Window(units="deg",
-                            screen=0,
-                            fullscr=True,
-                            allowGUI=False,
-                            color=color,
-                            size=info["size"],
-                            monitor=monitor)
+        self.win = win = visual.Window(units="deg",
+                                       screen=0,
+                                       fullscr=True,
+                                       allowGUI=False,
+                                       color=color,
+                                       size=info["size"],
+                                       monitor=monitor)
 
         # Test window performance
         win.setRecordFrameIntervals(True)
@@ -227,8 +241,6 @@ class Experiment(object):
         if refresh_error > .5:
             text = "Display refresh rate differs from expected by {:.2} Hz"
             return RuntimeError(text.format(refresh_error))
-
-        self.win = win
 
     def initialize_stimuli(self):
         """Setup stimulus objects, including experiment specific ones."""

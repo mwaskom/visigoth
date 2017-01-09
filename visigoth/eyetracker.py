@@ -21,7 +21,9 @@ class EyeTracker(object):
     """
     def __init__(self, exp, edf_stem="eyedat"):
 
-        # Extract relevant parameters
+        self.exp = exp
+
+        # Extract relevant parameters TODO handle differently
         self.monitor_eye = exp.p.eye_monitor
         self.simulate = exp.p.eye_mouse_simulate
         self.writelog = not exp.p.nolog
@@ -41,9 +43,8 @@ class EyeTracker(object):
         self.log_positions = []
         self.log_offsets = []
 
-        # Configure and launch iohub
+        # Configure iohub to communicate
         self.setup_iohub()
-        self.run_calibration()
 
     def setup_iohub(self, screen_color=128):
         """Initialize iohub with relevant configuration details.
