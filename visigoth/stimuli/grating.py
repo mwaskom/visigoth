@@ -1,4 +1,12 @@
-"""Module with stimulus code for contrast discrimination experiment."""
+"""Psychopy GratingStim with flexible pedestal luminance.
+
+Psychopy authors have said on record that this functionality should exist in
+Psychopy itself. Future users of this code should double check as to whether
+that has been implemented and if this code can be excised.
+
+Credit to https://github.com/nwilming/PedestalGrating/
+
+"""
 from __future__ import division
 
 import pyglet
