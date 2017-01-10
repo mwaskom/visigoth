@@ -42,6 +42,9 @@ class Experiment(object):
             self.initialize_display()
             self.initialize_stimuli()
 
+            # TODO add scanner trigger/dummy scans
+            # TODO add clock reset, eyetracker start, other onset code
+
             # Main experimental loop
 
             for trial_info in self.generate_trials():
@@ -233,7 +236,7 @@ class Experiment(object):
                                        fullscr=True,
                                        allowGUI=False,
                                        color=color,
-                                       size=info["size"],
+                                       size=info["resolution"],
                                        monitor=monitor)
 
         # Test window performance
@@ -250,12 +253,8 @@ class Experiment(object):
             stimuli.GazeStim(win, self.tracker)
 
     def initialize_stimuli(self):
-        """Setup stimulus objects, including experiment specific ones."""
-        stims = Bunch(self.create_stimuli())
-        stims.setdefault("fix", stimuli.Point(self.win,
-                                              self.p.fix_radius,
-                                              self.p.fix_color))
-        self.s = stims
+        """Setup stimulus objects."""
+        self.s = Bunch(self.create_stimuli())
 
     # ==== Shutdown functions ====
 
