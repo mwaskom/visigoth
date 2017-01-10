@@ -1,5 +1,139 @@
 import numpy as np
-from scipy import stats
+from scipy import stats, distance
+
+from psychopy import core, event
+
+
+class AcquireFixation(object):
+
+    def __init__(self, exp):
+
+        self.check_eye = exp.p.get("eye_fixation", False)
+        self.check_key = exp.p.get("key_fixation", False)
+
+        self.tracker = exp.tracker
+
+        # TODO get from stimulus objects themselves?
+        self.fix_pos = exp.p.get("fix_pos", (0, 0))
+        self.fix_window = exp.p.get("fix_window", 2)
+
+        key_ready = exp.p.get("key_ready", "space")
+        if not isinstance(key_ready, list):
+            key_ready = [key_ready]
+        self.keylist = key_ready
+
+        event.clearEvents()
+
+    def __call__(self):
+
+        fixation = False
+
+        if self.check_key:
+            fixation &= bool(event.getKeys(self.keylist))
+
+        if self.check_eye:
+            fixation &= self.tracker.check_fixation(self.fix_pos,
+                                                    self.fix_window)
+
+        return fixation
+
+
+class AcquireTarget(object):
+
+    def __init__(self, exp):
+
+        self.clock = core.Clock()
+
+        self.check_eye = exp.p.get("eye_response", False)
+        self.check_key = exp.p.get("key_response", False)
+
+        self.tracker = exp.tracker
+
+        if self.check_eye:
+            self.fix_pos = exp.p.get("fix_pos", (0, 0))
+            self.fix_window = exp.p.fix_window
+            self.target_pos = exp.p.target_pos
+            self.target_window = exp.p.target_window
+
+        if self.check_key:
+            self.keylist = exp.p.key_targets
+
+        self.wait_time = self.exp.p.eye_target_wait
+        self.hold_time = self.exp.p.eye_target_hold
+
+        self.fix_break_time = None
+        self.target_time = None
+        self.chosen_target = None
+
+        event.clearEvents()
+
+    def __call__(self):
+
+        if self.check_key:
+
+            keys = event.getKeys(self.keyList)
+            if keys:
+                for key in keys:
+                    choice = self.keylist.index(key)
+                    return (True, choice)
+
+        if self.check_eye:
+
+            now = self.clock.getTime()
+            gaze = self.tracker.read_gaze()
+
+            if self.fix_break_time is None:
+
+                if check_gaze(gaze, self.fix_pos, self.fix_window):
+                    # The eye is still in the fixation window
+                    return False
+                else:
+                    # The eye has just broken fixation
+                    self.fix_break_time = self.clock.getTime()
+
+            success = False
+            failure = False
+
+            for i, pos in enumerate(self.target_pos):
+
+                if check_gaze(gaze, pos, self.target_window):
+
+                    if self.chosen_target is None:
+                        # The eye has just entered a target window
+                        self.chosen_target = i
+                        self.target_time = now
+                    elif self.chosen_target != i:
+                        # The eye used to be on a different target and has moved
+                        failure = True
+
+                    if now > (self.target_time + self.hold_time):
+                        # The eye has successfully held the target
+                        success = True
+
+                else:
+
+                    if self.chosen_target == i:
+                        # The eye had acquired this target but then lost it
+                        failure = True
+
+            if success:
+                return True, self.first_target
+            elif failure:
+                return True, None
+            elif now > (self.fix_break_time + self.wait_time):
+                # The time to find a target has elapsed unsuccessfully
+                return (True, None)
+            else:
+                # No determinate result yet
+                return False
+
+
+def check_gaze(gaze, point, window):
+    """Check whether gaze coordinates are on the point."""
+    if np.isnan(gaze).any():
+        return False
+    delta = distance.euclidean(gaze, point)
+    return delta < window
 
 
 def flexible_values(val, size=1, random_state=None, min=-np.inf, max=np.inf):
