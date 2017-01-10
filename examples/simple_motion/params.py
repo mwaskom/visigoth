@@ -7,6 +7,7 @@ base = dict(
     fix_radius=.15,
     fix_window=2,
 
+    target_pos=[(-6, 0), (6, 0)],
     target_radius=.15,
     target_window=3,
 
@@ -20,6 +21,5 @@ base = dict(
     monitor_eye=True,
 
     n_trials=50,
-
 
 )
