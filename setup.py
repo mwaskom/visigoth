@@ -10,7 +10,7 @@ ZIP_SAFE = False
 DOWNLOAD_URL = "https://github.com/mwaskom/visigoth"
 VERSION = "0.1.dev"
 
-SCRIPTS = ["bin/visigoth", "bin/visigoth-client"]
+SCRIPTS = ["scripts/visigoth", "scripts/visigoth-client"]
 PACKAGES = ["visigoth"]
 PACKAGE_DIR = {"visigoth": "visigoth"}
 PACKAGE_DATA = {"visigoth": ["sounds/*.wav"]}
