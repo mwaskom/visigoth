@@ -78,8 +78,7 @@ class Experiment(object):
         It should return a dictionary that maps stimulus names to the objects
         themselves. The objects can be anything that follow the basic stimulus
         API--namely, they need to define a ``draw`` method. They will end up
-        in the Experiment.s namespace. Some stimuli (e.g. the fixation point)
-        have default objects but can be overloaded here.
+        in the Experiment.s namespace.
 
         """
         raise NotImplementedError
@@ -126,7 +125,7 @@ class Experiment(object):
         """Send the trial results to the experiment client.
 
         If the object returned by ``run_trial`` is a pandas Series, it's not
-        necessary to overload this function. Howver, it can be defined for each
+        necessary to overload this function. However, it can be defined for each
         study to allow for more complicated data structures.
 
         """
@@ -241,12 +240,15 @@ class Experiment(object):
 
         # Test window performance
         win.setRecordFrameIntervals(True)
-        flip_time, _, _ = visual.getMsPerFrame(win)
-        refresh_hz = 1000 / flip_time
+        frametime, _, _ = visual.getMsPerFrame(win)
+        refresh_hz = 1000 / frametime
         refresh_error = abs(info["refresh_hz"] - refresh_hz)
         if refresh_error > .5:
             text = "Display refresh rate differs from expected by {:.2} Hz"
             return RuntimeError(text.format(refresh_error))
+
+        win.frametime = frametime
+        win.refresh_hz = refresh_hz
 
         # Initialize the gaze stimulus
         if self.p.monitor_eye and self.p.eye_simulate:
