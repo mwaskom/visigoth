@@ -140,9 +140,10 @@ class Experiment(object):
         each study to allow for more complicated data structures or exit logic.
 
         """
-        data = pd.DataFrame(self.trial_data)
-        out_fname = self.output_stem + "_trials.csv"
-        data.to_csv(out_fname, index=False)
+        if self.trial_data and self.p.save_data:
+            data = pd.DataFrame(self.trial_data)
+            out_fname = self.output_stem + "_trials.csv"
+            data.to_csv(out_fname, index=False)
 
     # ==== Initialization functions ====
 
