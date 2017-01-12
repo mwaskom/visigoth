@@ -19,7 +19,7 @@ class EyeTracker(object):
     allows for dynamic offset values, and maintains a log of samples.
 
     """
-    def __init__(self, exp, edf_stem="eyedat"):
+    def __init__(self, exp, calibration_screen_color=128, edf_stem="eyedat"):
 
         self.exp = exp
 
@@ -33,7 +33,7 @@ class EyeTracker(object):
 
         # Set up a base for log file names
         self.edf_stem = edf_stem
-        self.output_stem = exp.p.output_stem + "_eyedat"
+        self.output_stem = exp.output_stem + "_eyedat"
 
         # Initialize lists for the logged data
         self.log_timestamps = []
@@ -41,7 +41,7 @@ class EyeTracker(object):
         self.log_offsets = []
 
         # Configure iohub to communicate
-        self.setup_iohub()
+        self.setup_iohub(calibration_screen_color)
 
     def setup_iohub(self, screen_color=128):
         """Initialize iohub with relevant configuration details.
@@ -208,12 +208,13 @@ class EyeTracker(object):
 
     def write_log_data(self):
         """Save the low temporal resolution eye tracking data."""
-        log_df = pd.DataFrame(np.c_[self.log_positions, self.log_offsets],
-                              index=self.log_timestamps,
-                              columns=["x", "y", "x_offset", "y_offset"])
+        if self.log_timestamps:
+            log_df = pd.DataFrame(np.c_[self.log_positions, self.log_offsets],
+                                  index=self.log_timestamps,
+                                  columns=["x", "y", "x_offset", "y_offset"])
 
-        log_fname = self.exp.output_stem + ".csv"
-        log_df.to_csv(log_fname)
+            log_fname = self.exp.output_stem + ".csv"
+            log_df.to_csv(log_fname)
 
     def shutdown(self):
         """Handle all of the things that need to happen when ending a run."""
@@ -221,3 +222,4 @@ class EyeTracker(object):
         if self.save_data:
             self.move_edf_file()
             self.write_log_data()
+        iohub.ioHubConnection.getActiveConnection().quit()

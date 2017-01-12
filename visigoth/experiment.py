@@ -26,6 +26,8 @@ class Experiment(object):
         self.tracker = None
         self.server = None
 
+        self.clock = core.Clock()
+
         self.trial_data = []
 
     def run(self):
@@ -37,8 +39,8 @@ class Experiment(object):
 
             # Experiment initialization
 
-            self.initialize_data_storage()
             self.initialize_params()
+            self.initialize_data_output()
             self.initialize_server()
             self.initialize_eyetracker()
             self.initialize_display()
@@ -46,6 +48,7 @@ class Experiment(object):
 
             # TODO add scanner trigger/dummy scans
             # TODO add clock reset, eyetracker start, other onset code
+            self.clock.reset()
 
             # Main experimental loop
 
@@ -62,7 +65,7 @@ class Experiment(object):
             self.save_data()
             self.shutdown_server()
             self.shutdown_eyetracker()
-            self.shutdown_window()
+            self.shutdown_display()
 
     # ==== Study-specific functions ====
 
@@ -131,7 +134,7 @@ class Experiment(object):
         study to allow for more complicated data structures.
 
         """
-        raise NotImplementedError
+        pass
 
     def save_data(self):
         """Write out data files at the end of the run.
@@ -200,8 +203,6 @@ class Experiment(object):
         """Connect to and calibrate eyetracker."""
         if self.p.monitor_eye:
 
-            self.tracker = tracker = eyetracker.Eyetracker(self)
-
             # Determine the screen background color during calibration
             # Currently I'm not sure how to get iohub to apply gamma correction
             # so we need to do that ourselves here.
@@ -212,7 +213,8 @@ class Experiment(object):
             color = int(round(ratio ** (1 / info["gamma"]) * 255))
 
             # Configure and calibrate the eyetracker
-            tracker.run_calibration(color)
+            self.tracker = eyetracker.EyeTracker(self, color)
+            self.tracker.run_calibration()
 
     def initialize_display(self):
         """Open the PsychoPy window to begin the experiment."""
@@ -231,6 +233,7 @@ class Experiment(object):
                                    distance=info["distance"],
                                    gamma=info["gamma"],
                                    autoLog=False)
+        monitor.setSizePix(info["resolution"])
 
         # Open the psychopy window
         self.win = win = visual.Window(units="deg",

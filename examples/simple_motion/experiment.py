@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
 
-from visigoth.utils import flexible_values
+from psychopy import core
+
+from visigoth.tools import flexible_values
 from visigoth.stimuli import Point, Points, GratingStim
 
 
@@ -27,7 +29,7 @@ def generate_trials(exp):
     for t in range(1, exp.p.n_trials + 1):
 
         now = exp.clock.getTime()
-        iti = flexible_values(exp.p.iti_dur)
+        iti = flexible_values(exp.p.dur_iti)
         trial_time = now + iti
 
         motion = flexible_values([-1, 1])
@@ -54,9 +56,18 @@ def generate_trials(exp):
 
         )
 
-        return pd.Series(trial_info, dtype=np.object)
+        yield pd.Series(trial_info, dtype=np.object)
 
 
 def run_trial(exp, trial_info):
 
-    pass
+    core.wait(trial_info.iti)
+
+    exp.s.grating.draw()
+    exp.s.fix.draw()
+    exp.win.flip()
+
+    core.wait(exp.p.dur_stim)
+
+    exp.s.fix.draw()
+    exp.win.flip()

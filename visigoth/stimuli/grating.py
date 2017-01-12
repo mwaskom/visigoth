@@ -14,7 +14,7 @@ pyglet.options['debug_gl'] = False
 GL = pyglet.gl
 
 from psychopy.visual.basevisual import ColorMixin, ContainerMixin, TextureMixin
-from psychopy.visual.grating import GratingStim as OrigGratingStim
+from psychopy.visual.grating import GratingStim
 from psychopy.tools.attributetools import attributeSetter
 
 from psychopy import _shadersPyglet as _shaders
@@ -35,8 +35,7 @@ fragSignedColorTexMask = '''
     '''
 
 
-class GratingStim(OrigGratingStim,
-                  TextureMixin, ColorMixin, ContainerMixin):
+class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
     """Psychopy grating stimulus with variable luminance pedestal.
 
     Usage is the same as psychopy.visual.grating.GratingStim. See those docs
@@ -71,7 +70,7 @@ class GratingStim(OrigGratingStim,
                  autoLog=None, autoDraw=False, maskParams=None, pedestal=None):
 
         # Initialise parent class
-        super(OrigGratingStim, self).__init__(
+        super(Grating, self).__init__(
             win, units=units, name=name,
             autoLog=autoLog, tex=tex, mask=mask, pos=pos, size=size, sf=sf,
             ori=ori, phase=phase, texRes=texRes, rgb=rgb, dkl=dkl, lms=lms,

@@ -19,7 +19,12 @@ base = dict(
     stim_speed=3,
 
     monitor_eye=True,
+    eye_simulate=True,
+    eye_fix_radius=2,
 
     n_trials=50,
+
+    dur_iti=2,
+    dur_stim=.5,
 
 )
