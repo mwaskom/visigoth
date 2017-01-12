@@ -29,7 +29,7 @@ def generate_trials(exp):
     for t in range(1, exp.p.n_trials + 1):
 
         now = exp.clock.getTime()
-        iti = flexible_values(exp.p.dur_iti)
+        iti = flexible_values(exp.p.wait_iti)
         trial_time = now + iti
 
         motion = flexible_values([-1, 1])
@@ -63,11 +63,21 @@ def run_trial(exp, trial_info):
 
     core.wait(trial_info.iti)
 
-    exp.s.grating.draw()
-    exp.s.fix.draw()
-    exp.win.flip()
+    phase_shift = trial_info.motion * exp.p.stim_speed / exp.win.refresh_hz
 
-    core.wait(exp.p.dur_stim)
+    exp.s.fix.draw()
+    exp.s.targets.draw()
+    exp.win.flip()
+    core.wait(exp.p.wait_prestim)
+
+    for _ in exp.frame_range(seconds=exp.p.wait_stim):
+
+        exp.s.grating.phase += phase_shift
+
+        exp.s.grating.draw()
+        exp.s.fix.draw()
+        exp.s.targets.draw()
+        exp.win.flip()
 
     exp.s.fix.draw()
     exp.win.flip()

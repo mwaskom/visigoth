@@ -8,7 +8,7 @@ base = dict(
     fix_window=2,
 
     target_pos=[(-6, 0), (6, 0)],
-    target_radius=.15,
+    target_radius=.25,
     target_window=3,
 
     stim_sf=3,
@@ -24,7 +24,8 @@ base = dict(
 
     n_trials=50,
 
-    dur_iti=2,
-    dur_stim=.5,
+    wait_iti=2,
+    wait_prestim=.5,
+    wait_stim=.5,
 
 )
