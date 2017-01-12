@@ -153,7 +153,23 @@ def wait_until(func, timeout=np.inf, sleep=0, win=None, stims=None,
 
 
 def check_gaze(gaze, point, window):
-    """Check whether gaze coordinates are on the point."""
+    """Check whether gaze coordinates are on the point.
+
+    Parameters
+    ----------
+    gaze : 2 tuple
+        Gaze coordinates, (x, y).
+    point : 2 tuple
+        Target location coordiantes, (x, y).
+    window : float
+        Radius of circular window around ``point`` for accepting gaze location.
+
+    Returns
+    -------
+    valid : bool
+        True if the gaze is within the window of the point.
+
+    """
     if np.isnan(gaze).any():
         return False
     delta = distance.euclidean(gaze, point)
@@ -162,11 +178,31 @@ def check_gaze(gaze, point, window):
 
 def flexible_values(val, size=1, random_state=None, min=-np.inf, max=np.inf):
     """Flexibly determine a number of values.
+
     Input format can be:
         - A numeric value, which will be used exactly.
         - A list of possible values, which will be randomly chosen from.
         - A tuple of (dist, arg0[, arg1, ...]), which will be used to generate
           random observations from a scipy random variable.
+
+    Parameters
+    ----------
+    val : float, list, or tuple
+        Flexibile specification of value, set of values, or distribution
+        parameters. See above for more information.
+    size : int or tuple, optional
+        Output shape. A ``size`` of 1 implies a scalar result.
+    random_state : numpy.random.RandomState object, optional
+        Object to allow reproducible random values.
+    min, max : float
+        Exclusive limits on the return values that are enforced using rejection
+        sampling.
+
+    Returns
+    -------
+    out : scalar or array
+        Output values with shape ``size``, or a scalar if ``size`` is 1.
+    
     """
     if random_state is None:
         random_state = np.random.RandomState()
@@ -187,10 +223,29 @@ def flexible_values(val, size=1, random_state=None, min=-np.inf, max=np.inf):
     return out
 
 
-def truncated_sample(rv, size=1, min=-np.inf, max=np.inf, **kws):
+def truncated_sample(rv, size=1, min=-np.inf, max=np.inf, **kwargs):
+    """Iteratively sample from a random variate rejecting values outside limits.
+
+    Parameters
+    ----------
+    rv : random variate object
+        Must have a ``.rvs`` method for generating random samples.
+    size : int or tuple, optional
+        Output shape.
+    min, max : float
+        Exclusive limits on the distribution values.
+    kwargs : key, value mappings
+        Other keyword arguments are passed to ``rv.rvs()``.
+
+    Returns
+    -------
+    out : array
+        Samples from ``rv`` that are within (min, max).
+
+    """
     out = np.empty(np.prod(size))
     replace = np.ones(np.prod(size), np.bool)
     while replace.any():
-        out[replace] = rv.rvs(replace.sum(), **kws)
+        out[replace] = rv.rvs(replace.sum(), **kwargs)
         replace = (out < min) | (out > max)
     return out.reshape(size)
