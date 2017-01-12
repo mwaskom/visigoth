@@ -14,8 +14,8 @@ base = dict(
     stim_sf=3,
     stim_tex="sin",
     stim_mask="gauss",
-    stim_size=3,
-    stim_contrast=.5,
+    stim_size=6,
+    stim_contrast=.2,
     stim_speed=3,
 
     monitor_eye=True,

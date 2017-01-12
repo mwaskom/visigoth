@@ -4,22 +4,22 @@ import pandas as pd
 from psychopy import core
 
 from visigoth.tools import flexible_values
-from visigoth.stimuli import Point, Points, GratingStim
+from visigoth.stimuli import Point, Points, Grating
 
 
 def create_stimuli(exp):
 
     fix = Point(exp.win, exp.p.fix_radius)
     targets = Points(exp.win, exp.p.target_pos, exp.p.target_radius)
-    grating = GratingStim(exp.win,
-                          sf=exp.p.stim_sf,
-                          tex=exp.p.stim_tex,
-                          mask=exp.p.stim_mask,
-                          size=exp.p.stim_size,
-                          contrast=exp.p.stim_contrast,
-                          pos=(0, 0),
-                          ori=0,
-                          autoLog=False)
+    grating = Grating(exp.win,
+                      sf=exp.p.stim_sf,
+                      tex=exp.p.stim_tex,
+                      mask=exp.p.stim_mask,
+                      size=exp.p.stim_size,
+                      contrast=exp.p.stim_contrast,
+                      pos=(0, 0),
+                      ori=0,
+                      autoLog=False)
 
     return dict(fix=fix, targets=targets, grating=grating)
 

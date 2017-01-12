@@ -251,7 +251,7 @@ class Experiment(object):
         refresh_error = abs(info["refresh_hz"] - refresh_hz)
         if refresh_error > .5:
             text = "Display refresh rate differs from expected by {:.2} Hz"
-            return RuntimeError(text.format(refresh_error))
+            raise RuntimeError(text.format(refresh_error))
 
         win.frametime = frametime
         win.refresh_hz = refresh_hz
