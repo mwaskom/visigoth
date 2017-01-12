@@ -2,3 +2,4 @@
 *.sw{o,p}
 Icon*
 .iohpid
+*.egg-info
