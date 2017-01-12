@@ -224,10 +224,10 @@ class Experiment(object):
         color = self.p.display_luminance / info["max_luminance"] * 2 - 1
 
         # Define information about the monitor
-        monitor = monitors.Monitor(self.p.display_name,
-                                   info["width"],
-                                   info["distance"],
-                                   info["gamma"],
+        monitor = monitors.Monitor(name=self.p.display_name,
+                                   width=info["width"],
+                                   distance=info["distance"],
+                                   gamma=info["gamma"],
                                    autoLog=False)
 
         # Open the psychopy window
