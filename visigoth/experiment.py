@@ -3,10 +3,12 @@ from __future__ import division
 import os
 import time
 import argparse
+
 import yaml
+import numpy as np
 import pandas as pd
 
-from psychopy import visual, monitors
+from psychopy import core, visual, monitors
 
 from .ext.bunch import Bunch
 from . import stimuli, eyetracker
@@ -275,3 +277,29 @@ class Experiment(object):
         """Cleanly exit out of the psychopy window."""
         if self.win is not None:
             self.win.close()
+
+    # === Execution functions
+
+    def wait_until(func, timeout=np.inf, sleep=0, win=None, stims=None,
+                   args=(), **kwargs):
+
+        clock = core.Clock()
+
+        stims = [] if stims is None else stims
+
+        while clock.getTime() < timeout:
+
+            func_val = func(*args, **kwargs)
+
+            if func_val:
+                return func_val
+
+            if sleep:
+                core.wait(sleep, sleep)
+
+            else:
+                for stim in stims:
+                    stim.draw()
+                win.flip()
+
+
