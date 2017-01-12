@@ -7,7 +7,7 @@ base = dict(
     fix_radius=.15,
     fix_window=2,
 
-    target_pos=[(-6, 0), (6, 0)],
+    target_pos=[(-8, 0), (8, 0)],
     target_radius=.25,
     target_window=3,
 
