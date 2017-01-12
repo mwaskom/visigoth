@@ -86,7 +86,7 @@ class Points(object):
         self.win = win
         self.dots = []
         for pos_i in pos:
-            dot = Point(win, radius=radius, color="white", pos=pos, **kwargs)
+            dot = Point(win, radius=radius, color="white", pos=pos_i, **kwargs)
             self.dots.append(dot)
 
         self.color = color
