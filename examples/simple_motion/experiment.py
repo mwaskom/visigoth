@@ -56,6 +56,7 @@ def generate_trials(exp):
 
         return pd.Series(trial_info, dtype=np.object)
 
+
 def run_trial(exp, trial_info):
 
     pass

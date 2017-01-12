@@ -1,5 +1,6 @@
 import numpy as np
-from scipy import stats, distance
+from scipy import stats
+from scipy.spatial import distance
 
 from psychopy import core, event
 
@@ -126,6 +127,29 @@ class AcquireTarget(object):
             else:
                 # No determinate result yet
                 return False
+
+
+def wait_until(func, timeout=np.inf, sleep=0, win=None, stims=None,
+               args=(), **kwargs):
+
+    clock = core.Clock()
+
+    stims = [] if stims is None else stims
+
+    while clock.getTime() < timeout:
+
+        func_val = func(*args, **kwargs)
+
+        if func_val:
+            return func_val
+
+        if sleep:
+            core.wait(sleep, sleep)
+
+        else:
+            for stim in stims:
+                stim.draw()
+            win.flip()
 
 
 def check_gaze(gaze, point, window):
