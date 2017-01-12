@@ -305,7 +305,7 @@ class Experiment(object):
                     stim.draw()
                 win.flip()
 
-    def frame_range(self, seconds=None, frames=None):
+    def frame_range(self, seconds=None, frames=None, round_func=np.floor):
 
         if seconds is None and frames is None:
             raise ValueError("Must specify `seconds` or `frames`")
@@ -313,6 +313,6 @@ class Experiment(object):
             raise ValueError("Must specify only one of `seconds` or `frames`")
 
         if seconds is not None:
-            frames = round(seconds * self.win.refresh_hz)
+            frames = int(round_func(seconds * self.win.refresh_hz))
 
-        return range(int(frames))
+        return range(frames)
