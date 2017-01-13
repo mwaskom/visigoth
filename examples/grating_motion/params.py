@@ -7,6 +7,10 @@ base = dict(
     fix_radius=.15,
     fix_window=2,
 
+    fix_iti_color=None,
+    fix_ready_color="white",
+    fix_trial_color="white",
+
     target_pos=[(-8, 0), (8, 0)],
     target_radius=.25,
     target_window=3,
@@ -19,8 +23,14 @@ base = dict(
     stim_speed=3,
 
     monitor_eye=True,
+
     eye_simulate=True,
+    eye_fixation=True,
+    eye_response=True,
+
     eye_fix_radius=2,
+    eye_target_wait=.3,
+    eye_target_hold=.3,
 
     n_trials=50,
 

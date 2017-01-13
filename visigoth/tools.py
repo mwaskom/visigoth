@@ -43,6 +43,8 @@ class AcquireTarget(object):
 
     def __init__(self, exp):
 
+        self.exp = exp
+
         self.clock = core.Clock()
 
         self.check_eye = exp.p.get("eye_response", False)

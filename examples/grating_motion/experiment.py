@@ -3,7 +3,7 @@ import pandas as pd
 
 from psychopy import core
 
-from visigoth.tools import flexible_values
+from visigoth.tools import AcquireFixation, AcquireTarget, flexible_values
 from visigoth.stimuli import Point, Points, Grating
 
 
@@ -63,8 +63,14 @@ def run_trial(exp, trial_info):
 
     core.wait(trial_info.iti)
 
+    exp.s.fix.color = exp.p.fix_ready_color
+    exp.s.fix.draw()
+    exp.win.flip()
+    exp.wait_until(AcquireFixation(exp), 5, stims=[exp.s.fix])
+
     phase_shift = trial_info.motion * exp.p.stim_speed / exp.win.refresh_hz
 
+    exp.s.fix.color = exp.p.fix_trial_color
     exp.s.fix.draw()
     exp.s.targets.draw()
     exp.win.flip()
@@ -79,5 +85,9 @@ def run_trial(exp, trial_info):
         exp.s.targets.draw()
         exp.win.flip()
 
+    exp.s.targets.draw()
+    _, response = exp.wait_until(AcquireTarget(exp), stims=[exp.s.targets])
+
+    exp.s.fix.color = exp.p.fix_iti_color
     exp.s.fix.draw()
     exp.win.flip()

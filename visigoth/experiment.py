@@ -283,7 +283,7 @@ class Experiment(object):
 
     # === Execution functions
 
-    def wait_until(self, func, timeout=np.inf, sleep=0, win=None, stims=None,
+    def wait_until(self, func, timeout=np.inf, sleep=0, stims=None,
                    args=(), **kwargs):
 
         clock = core.Clock()
@@ -303,7 +303,7 @@ class Experiment(object):
             else:
                 for stim in stims:
                     stim.draw()
-                win.flip()
+                self.win.flip()
 
     def frame_range(self, seconds=None, frames=None, round_func=np.floor):
 
