@@ -1,6 +1,7 @@
 """Definition of the Experiment object that control most things."""
 from __future__ import division
 import os
+import re
 import time
 import argparse
 
@@ -11,7 +12,7 @@ import pandas as pd
 from psychopy import core, visual, monitors
 
 from .ext.bunch import Bunch
-from . import stimuli, eyetracker
+from . import stimuli, eyetracker, commandline
 
 
 class Experiment(object):
@@ -130,8 +131,8 @@ class Experiment(object):
         """Send the trial results to the experiment client.
 
         If the object returned by ``run_trial`` is a pandas Series, it's not
-        necessary to overload this function. However, it can be defined for each
-        study to allow for more complicated data structures.
+        necessary to overload this function. However, it can be defined for
+        each study to allow for more complicated data structures.
 
         """
         pass
@@ -155,23 +156,41 @@ class Experiment(object):
     def initialize_params(self):
         """Determine parameters for this run of the experiment."""
 
-        # Import the params module and extract the params for this run
-        import params
-        p = Bunch(getattr(params, self.arglist[0]))
+        """
+        TODO let's make sure this is the right organization of things.
+        Should we parse the main command line arguments outside of the
+        Experiment class and then pass in a params bunch/dict?
+        Not sure right now what's cleanest.
+        """
 
-        # Define common command-line interface
-        parser = argparse.ArgumentParser()
-        parser.add_argument("mode")
-        parser.add_argument("-subject", default="test")
-        parser.add_argument("-run", type=int, default=1)
-        parser.add_argument("-nosave", action="store_false", dest="save_data")
-        parser.add_argument("-debug", action="store_true")
+        # Define the standard set of command line argument
+        parser = commandline.define_parser("visigoth")
 
         # Add study-specific command line arguments
         self.define_cmdline_params(parser)
 
-        # Parse the command line arguments into parameters
+        # Parse the commend line args associated with this class instance
+        # NOTE this is the part that smells bad
         args = parser.parse_args(self.arglist)
+
+        # Import the params module and extract the params for this run
+        import params
+
+        dicts = [v for k, v in vars(params).iteritems()
+                 if isinstance(v, dict) and not re.match("__\w+__", k)]
+
+        if len(dicts) == 1:
+            param_dict = dicts[0]
+        else:
+            if args.paramset is None:
+                err = "Must specify `-paramset` when multiple are defined"
+                raise RuntimeError(err)
+            else:
+                param_dict = getattr(params, args.paramset)
+
+        # Define the parameters object with information from the params
+        # module and from the command line invocation
+        p = Bunch(param_dict)
         p.update(args.__dict__)
 
         # Timestamp the execution and add to parameters
@@ -206,7 +225,8 @@ class Experiment(object):
             # Determine the screen background color during calibration
             # Currently I'm not sure how to get iohub to apply gamma correction
             # so we need to do that ourselves here.
-            with open("displays.yaml") as fid:
+            fname = os.path.join(self.p.study_dir, "displays.yaml")
+            with open(fname) as fid:
                 display_info = yaml.load(fid)
             info = display_info[self.p.display_name]
             ratio = self.p.display_luminance / info["max_luminance"]
@@ -220,7 +240,8 @@ class Experiment(object):
         """Open the PsychoPy window to begin the experiment."""
 
         # Extract the relevant display information
-        with open("displays.yaml") as fid:
+        fname = os.path.join(self.p.study_dir, "displays.yaml")
+        with open(fname) as fid:
             display_info = yaml.load(fid)
         info = display_info[self.p.display_name]
 
