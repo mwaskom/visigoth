@@ -10,7 +10,7 @@ class Point(object):
     It is intended to be used for, e.g., a fixation point.
 
     """
-    def __init__(self, win, radius=.15, color="white", **kwargs):
+    def __init__(self, win, radius=.15, color=1, **kwargs):
         """Create the psychopy stimulus object.
 
         Parameters
@@ -45,8 +45,8 @@ class Point(object):
         if color is None:
             color = self.win.color
         self._color = color
-        self.dot.setFillColor(color)
-        self.dot.setLineColor(color)
+        self.dot.fillColor = color
+        self.dot.lineColor = color
 
     def draw(self):
         self.dot.draw()

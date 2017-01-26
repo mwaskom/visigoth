@@ -66,6 +66,7 @@ def run_trial(exp, trial_info):
     exp.s.fix.color = exp.p.fix_ready_color
     exp.s.fix.draw()
     exp.win.flip()
+
     exp.wait_until(AcquireFixation(exp), 5, stims=[exp.s.fix])
 
     phase_shift = trial_info.motion * exp.p.stim_speed / exp.win.refresh_hz
