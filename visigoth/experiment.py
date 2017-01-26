@@ -3,13 +3,12 @@ from __future__ import division
 import os
 import re
 import time
-import argparse
 
 import yaml
 import numpy as np
 import pandas as pd
 
-from psychopy import core, visual, monitors
+from psychopy import core, visual, event, monitors
 
 from .ext.bunch import Bunch
 from . import stimuli, eyetracker, commandline
@@ -56,8 +55,12 @@ class Experiment(object):
             for trial_info in self.generate_trials():
 
                 trial_info = self.run_trial(trial_info)
+
+                # TODO define ITI start here, use it to define wait time
+
                 self.trial_data.append(trial_info)
                 self.update_client(trial_info)
+                self.check_quit()
 
         finally:
 
@@ -337,3 +340,8 @@ class Experiment(object):
             frames = int(round_func(seconds * self.win.refresh_hz))
 
         return range(frames)
+
+    def check_quit(self):
+
+        if event.getKeys(["escape"]):
+            core.quit()

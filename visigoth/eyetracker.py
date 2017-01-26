@@ -213,7 +213,7 @@ class EyeTracker(object):
                                   index=self.log_timestamps,
                                   columns=["x", "y", "x_offset", "y_offset"])
 
-            log_fname = self.exp.output_stem + ".csv"
+            log_fname = self.exp.output_stem + "_eyedat.csv"
             log_df.to_csv(log_fname)
 
     def shutdown(self):

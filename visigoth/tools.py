@@ -23,11 +23,11 @@ class AcquireFixation(object):
             key_ready = [key_ready]
         self.keylist = key_ready
 
-        event.clearEvents()
+        # TODO should probably clear events on initialization
 
     def __call__(self):
 
-        fixation = False
+        fixation = True
 
         if self.check_key:
             fixation &= bool(event.getKeys(self.keylist))
@@ -68,7 +68,7 @@ class AcquireTarget(object):
         self.target_time = None
         self.chosen_target = None
 
-        event.clearEvents()
+        # TODO should probably clear events on initialization
 
     def __call__(self):
 
@@ -120,7 +120,7 @@ class AcquireTarget(object):
                         failure = True
 
             if success:
-                return True, self.first_target
+                return True, self.chosen_target
             elif failure:
                 return True, None
             elif now > (self.fix_break_time + self.wait_time):
