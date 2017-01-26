@@ -4,3 +4,4 @@ Icon*
 .iohpid
 *.egg-info
 examples/*/data
+data/
