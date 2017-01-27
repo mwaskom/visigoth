@@ -64,31 +64,30 @@ def run_trial(exp, trial_info):
     core.wait(trial_info.iti)
 
     exp.s.fix.color = exp.p.fix_ready_color
-    exp.s.fix.draw()
+    exp.draw("fix")
     exp.win.flip()
 
-    exp.wait_until(AcquireFixation(exp), 5, stims=[exp.s.fix])
+    res = exp.wait_until(AcquireFixation(exp), timeout=5, stims=exp.s.fix)
+    if res is None:
+        pass
+        # TODO handle nofix
 
     phase_shift = trial_info.motion * exp.p.stim_speed / exp.win.refresh_hz
 
     exp.s.fix.color = exp.p.fix_trial_color
-    exp.s.fix.draw()
-    exp.s.targets.draw()
+    exp.draw(["fix", "targets"])
     exp.win.flip()
     core.wait(exp.p.wait_prestim)
 
     for _ in exp.frame_range(seconds=exp.p.wait_stim):
 
         exp.s.grating.phase += phase_shift
-
-        exp.s.grating.draw()
-        exp.s.fix.draw()
-        exp.s.targets.draw()
+        exp.draw(["grating", "fix", "targets"])
         exp.win.flip()
 
-    exp.s.targets.draw()
-    _, response = exp.wait_until(AcquireTarget(exp), stims=[exp.s.targets])
+    exp.draw("targets")
+    _, response = exp.wait_until(AcquireTarget(exp), stims=exp.s.targets)
 
     exp.s.fix.color = exp.p.fix_iti_color
-    exp.s.fix.draw()
+    exp.draw("fix")
     exp.win.flip()

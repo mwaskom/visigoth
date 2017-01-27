@@ -309,7 +309,7 @@ class Experiment(object):
 
     def wait_until(self, func, timeout=np.inf, sleep=0, stims=None,
                    args=(), **kwargs):
-
+        """TODO this needs a docstring."""
         clock = core.Clock()
 
         stims = [] if stims is None else stims
@@ -325,12 +325,11 @@ class Experiment(object):
                 core.wait(sleep, sleep)
 
             else:
-                for stim in stims:
-                    stim.draw()
+                self.draw(stims)
                 self.win.flip()
 
     def frame_range(self, seconds=None, frames=None, round_func=np.floor):
-
+        """Convenience function for converting to screen refresh units."""
         if seconds is None and frames is None:
             raise ValueError("Must specify `seconds` or `frames`")
         if seconds is not None and frames is not None:
@@ -342,6 +341,13 @@ class Experiment(object):
         return range(frames)
 
     def check_quit(self):
-
+        """Check whether the quit key has been pressed and exit if so."""
         if event.getKeys(["escape"]):
             core.quit()
+
+    def draw(self, stims):
+        """Draw each named stimulus in the order provided."""
+        if not isinstance(stims, list):
+            stims = [stims]
+        for stim in stims:
+            self.s[stim].draw()
