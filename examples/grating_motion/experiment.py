@@ -59,26 +59,25 @@ def generate_trials(exp):
         yield pd.Series(trial_info, dtype=np.object)
 
 
-def run_trial(exp, trial_info):
+def run_trial(exp, info):
 
-    core.wait(trial_info.iti)
-
-    exp.s.fix.color = exp.p.fix_ready_color
+    exp.s.fix.color = exp.p.fix_iti_color
     exp.draw("fix")
     exp.win.flip()
+    core.wait(info.iti)
 
-    res = exp.wait_until(AcquireFixation(exp), timeout=5, stims=exp.s.fix)
+    exp.s.fix.color = exp.p.fix_ready_color
+    res = exp.wait_until(AcquireFixation(exp), timeout=5, draw="fix")
     if res is None:
-        pass
-        # TODO handle nofix
-
-    phase_shift = trial_info.motion * exp.p.stim_speed / exp.win.refresh_hz
+        info["result"] = "nofix"
+        return info
 
     exp.s.fix.color = exp.p.fix_trial_color
     exp.draw(["fix", "targets"])
     exp.win.flip()
     core.wait(exp.p.wait_prestim)
 
+    phase_shift = info.motion * exp.p.stim_speed / exp.win.refresh_hz
     for _ in exp.frame_range(seconds=exp.p.wait_stim):
 
         exp.s.grating.phase += phase_shift
@@ -86,8 +85,10 @@ def run_trial(exp, trial_info):
         exp.win.flip()
 
     exp.draw("targets")
-    _, response = exp.wait_until(AcquireTarget(exp), stims=exp.s.targets)
+    _, response = exp.wait_until(AcquireTarget(exp), draw="targets")
 
     exp.s.fix.color = exp.p.fix_iti_color
     exp.draw("fix")
     exp.win.flip()
+
+    return info

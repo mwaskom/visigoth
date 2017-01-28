@@ -307,12 +307,12 @@ class Experiment(object):
 
     # === Execution functions
 
-    def wait_until(self, func, timeout=np.inf, sleep=0, stims=None,
+    def wait_until(self, func, timeout=np.inf, sleep=0, draw=None,
                    args=(), **kwargs):
         """TODO this needs a docstring."""
         clock = core.Clock()
 
-        stims = [] if stims is None else stims
+        stims = [] if draw is None else draw
 
         while clock.getTime() < timeout:
 
