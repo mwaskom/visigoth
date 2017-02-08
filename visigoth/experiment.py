@@ -344,10 +344,13 @@ class Experiment(object):
         """Check whether the quit key has been pressed and exit if so."""
         if event.getKeys(["escape"]):
             core.quit()
+        return False
 
-    def draw(self, stims):
+    def draw(self, stims, flip=False):
         """Draw each named stimulus in the order provided."""
         if not isinstance(stims, list):
             stims = [stims]
         for stim in stims:
             self.s[stim].draw()
+        if flip:
+            self.win.flip()
