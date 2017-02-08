@@ -67,7 +67,7 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
                  lms=None, color=(1.0, 1.0, 1.0), colorSpace='rgb',
                  contrast=1.0, opacity=1.0, depth=0,
                  rgbPedestal=(0.0, 0.0, 0.0), interpolate=False, name=None,
-                 autoLog=None, autoDraw=False, maskParams=None, pedestal=None):
+                 autoLog=False, autoDraw=False, maskParams=None, pedestal=None):
 
         # Initialise parent class
         super(Grating, self).__init__(
