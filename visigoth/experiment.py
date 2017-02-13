@@ -376,7 +376,7 @@ class Experiment(object):
             raise ValueError("Must specify only one of `seconds` or `frames`")
 
         if seconds is not None:
-            frames = int(round_func(seconds * self.win.refresh_hz))
+            frames = int(round_func(seconds * self.win.framerate))
 
         return range(frames)
 
