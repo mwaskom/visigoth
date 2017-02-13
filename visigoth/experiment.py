@@ -318,26 +318,55 @@ class Experiment(object):
 
     # === Execution functions
 
-    def wait_until(self, func, timeout=np.inf, sleep=0, draw=None,
+    def wait_until(self, func=None, timeout=np.inf, sleep=0, draw=None,
                    args=(), **kwargs):
-        """TODO this needs a docstring."""
-        clock = core.Clock()
+        """Wait limited by callback and timout, possibly drawing stimuli.
 
+        Parameters
+        ----------
+        func : callable, optional
+            Function to call on each interval. Waiting ends if the value
+            returned by this function evaluates to True.
+        timeout : float, optional
+            Maximum amount of time to wait regardless of ``func`` outcome.
+        sleep : float, optional
+            Amount of time to wait on each interval. If ``0``, the window is
+            drawn after each call to ``func`` and so the interval is controlled
+            by the window's framerate.
+        draw : string or list of strings, optional
+            Name(s) of stimuli to draw in each interval.
+        args : tuple
+            Positional arguments to `func`.
+        kwargs : key, value pairs
+            Other keyword arguments are passed through to `func`.
+
+        Returns
+        -------
+        func_val or None
+            If ``func`` returns something that evaluates to True before the
+            timeout, it is returned. Otherwise this function returns None.
+
+        """
         stims = [] if draw is None else draw
 
+        if sleep and stims:
+            raise ValueError("`sleep` must be `0` to draw stimuli.")
+
+        if not sleep:
+            timeout -= self.win.frametime
+
+        clock = core.Clock()
         while clock.getTime() < timeout:
 
-            func_val = func(*args, **kwargs)
-
-            if func_val:
-                return func_val
+            if func is not None:
+                func_val = func(*args, **kwargs)
+                if func_val:
+                    return func_val
 
             if sleep:
                 core.wait(sleep, sleep)
-
             else:
-                self.draw(stims)
-                self.win.flip()
+                self.draw(stims, flip=True)
 
     def frame_range(self, seconds=None, frames=None, round_func=np.floor):
         """Convenience function for converting to screen refresh units."""
