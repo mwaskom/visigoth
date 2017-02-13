@@ -63,6 +63,18 @@ class Pattern(object):
         self.array.contrs = individual_val
         self._contrast = val
 
+    @property
+    def pos(self):
+        """Position of the elements."""
+        return self._pos
+
+    @pos.setter
+    def pos(self, val):
+        """Set the position of the elements."""
+        xys = np.tile(val, self.n).reshape(self.n, 2)
+        self.array.xys = xys
+        self._pos = val
+
     def draw(self):
         """Draw the element array on the window."""
         self.array.draw()
