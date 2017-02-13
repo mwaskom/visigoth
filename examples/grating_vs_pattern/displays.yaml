@@ -5,3 +5,11 @@ laptop:
   refresh_hz: 60
   gamma: 2.13
   max_luminance: 259.1
+
+kianilab-ps1:
+  width: 40
+  distance: 52
+  size: [1600, 1200]
+  refresh_hz: 75
+  max_luminance: 100.52
+  gamma: 2.0721

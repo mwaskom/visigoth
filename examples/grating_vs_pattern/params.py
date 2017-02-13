@@ -26,8 +26,8 @@ base = dict(
                   .11, .12, .12, .13, .14],
 
     monitor_eye=True,
-
     eye_simulate=True,
+
     eye_fixation=True,
     eye_response=True,
 
