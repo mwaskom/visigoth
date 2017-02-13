@@ -8,7 +8,7 @@ import yaml
 import numpy as np
 import pandas as pd
 
-from psychopy import core, visual, event, monitors
+from psychopy import core, tools, visual, event, monitors
 
 from .ext.bunch import Bunch
 from . import stimuli, eyetracker, commandline
@@ -239,7 +239,7 @@ class Experiment(object):
             self.tracker = eyetracker.EyeTracker(self, color)
             self.tracker.run_calibration()
 
-    def initialize_display(self):
+    def initialize_display(self, gamma_correct=True, debug=False):
         """Open the PsychoPy window to begin the experiment."""
 
         # Extract the relevant display information
@@ -252,20 +252,22 @@ class Experiment(object):
         color = self.p.display_luminance / info["max_luminance"] * 2 - 1
 
         # Define information about the monitor
+        gamma = info["gamma"] if gamma_correct else None
         monitor = monitors.Monitor(name=self.p.display_name,
                                    width=info["width"],
                                    distance=info["distance"],
-                                   gamma=info["gamma"],
+                                   gamma=gamma,
                                    autoLog=False)
         monitor.setSizePix(info["resolution"])
 
         # Open the psychopy window
+        res = (800, 600) if debug else info["resolution"]
         self.win = win = visual.Window(units="deg",
                                        screen=0,
-                                       fullscr=True,
-                                       allowGUI=False,
+                                       fullscr=not debug,
+                                       allowGUI=debug,
                                        color=color,
-                                       size=info["resolution"],
+                                       size=res,
                                        monitor=monitor)
 
         # Test window performance
@@ -273,16 +275,25 @@ class Experiment(object):
         frametime, _, _ = visual.getMsPerFrame(win)
         refresh_hz = 1000 / frametime
         refresh_error = abs(info["refresh_hz"] - refresh_hz)
-        if refresh_error > .5:
+        if refresh_error > .5 and not debug:
             text = "Display refresh rate differs from expected by {:.2} Hz"
             raise RuntimeError(text.format(refresh_error))
 
-        win.frametime = frametime
-        win.refresh_hz = refresh_hz
+        # Assign attributes with helpful information and log in params
+        win.frametime = 1 / info["refresh_hz"]
+        win.framerate = info["refresh_hz"]
+        win.deg_per_pix = tools.monitorunittools.pix2deg(1, monitor)
+        win.pix_per_deg = tools.monitorunittools.deg2pix(1, monitor)
+        self.p.update(win_frametime=win.frametime,
+                      win_framerate=win.framerate,
+                      win_deg_per_pix=win.deg_per_pix,
+                      win_pix_per_deg=win.pix_per_deg)
 
         # Initialize the gaze stimulus
         if self.p.monitor_eye and self.p.eye_simulate:
             stimuli.GazeStim(win, self.tracker)
+
+        return win
 
     def initialize_stimuli(self):
         """Setup stimulus objects."""
