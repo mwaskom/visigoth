@@ -11,7 +11,7 @@ import pandas as pd
 from psychopy import core, tools, visual, event, monitors
 
 from .ext.bunch import Bunch
-from . import stimuli, eyetracker, commandline
+from . import stimuli, feedback, eyetracker, commandline
 
 
 class Experiment(object):
@@ -27,6 +27,8 @@ class Experiment(object):
         self.server = None
 
         self.clock = core.Clock()
+
+        self.auditory_feedback = feedback.AuditoryFeedback()
 
         self.trial_data = []
 

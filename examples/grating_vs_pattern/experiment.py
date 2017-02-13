@@ -43,7 +43,10 @@ def generate_trials(exp):
 
         g_side, p_side = np.random.permutation([0, 1])
         g_c, p_c = flexible_values(exp.p.contrast_gen, 2)
-        target = g_side if g_c > p_c else p_side
+        if g_c == p_c:
+            target = np.random.choice([0, 1])
+        else:
+            target = g_side if g_c > p_c else p_side
 
         trial_info = dict(
 
@@ -101,9 +104,24 @@ def run_trial(exp, info):
         exp.draw(["grating", "pattern", "fix", "targets"], flip=True)
 
     exp.draw("targets")
-    _, response = exp.wait_until(AcquireTarget(exp),
-                                 exp.p.wait_resp,
-                                 draw="targets")
+    res = exp.wait_until(AcquireTarget(exp),
+                         exp.p.wait_resp,
+                         draw="targets")
+    # TODO all of this logic should happen somewhere else
+    if res is None:
+        result = "nochoice"
+    else:
+        _, response = res
+        if isinstance(response, int):
+            correct = response == info.target
+            result = "correct" if correct else "wrong"
+            info["correct"] = correct
+            info["response"] = response
+            info["responded"] = True
+        else:
+            result = "nochoice"
+    exp.auditory_feedback(result)
+    info["result"] = result
 
     exp.s.fix.color = exp.p.fix_iti_color
     exp.draw("fix", flip=True)

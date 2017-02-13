@@ -92,7 +92,7 @@ class AcquireTarget(object):
                     return False
                 else:
                     # The eye has just broken fixation
-                    self.fix_break_time = self.clock.getTime()
+                    self.fix_break_time = now
 
             success = False
             failure = False

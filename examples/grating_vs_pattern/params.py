@@ -22,8 +22,8 @@ base = dict(
     stim_size=6,
     stim_pattern_n=8,
 
-    contrast_gen=[0, .02, .04, .06, .08, .10,
-                  .12, .14, .16, .18, .20],
+    contrast_gen=[.06, .07, .08, .09, .10,
+                  .11, .12, .12, .13, .14],
 
     monitor_eye=True,
 
@@ -32,7 +32,7 @@ base = dict(
     eye_response=True,
 
     eye_fix_radius=2,
-    eye_target_wait=.3,
+    eye_target_wait=.5,
     eye_target_hold=.3,
 
     n_trials=50,
