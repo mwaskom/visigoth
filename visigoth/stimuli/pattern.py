@@ -60,7 +60,7 @@ class Pattern(object):
         individual_val = val * np.sqrt(self.n)
         if individual_val > 1:
             raise ValueError("Illegal contrast value")
-        self.array.contrs = individual_val
+        self.array.contrs = np.ones(self.n) * individual_val
         self._contrast = val
 
     @property

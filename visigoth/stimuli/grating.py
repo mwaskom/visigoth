@@ -69,6 +69,10 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
                  rgbPedestal=(0.0, 0.0, 0.0), interpolate=False, name=None,
                  autoLog=False, autoDraw=False, maskParams=None, pedestal=None):
 
+        # Set the default pedestal assuming a gray window color
+        pedestal = win.color.mean() if pedestal is None else pedestal
+        self.pedestal = pedestal
+
         # Initialise parent class
         super(Grating, self).__init__(
             win, units=units, name=name,
@@ -77,10 +81,6 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
             color=color, colorSpace=colorSpace, contrast=contrast,
             opacity=opacity, depth=depth, rgbPedestal=rgbPedestal,
             interpolate=interpolate, autoDraw=autoDraw, maskParams=maskParams)
-
-        # Set the default pedestal assuming a gray window color
-        pedestal = win.color.mean() if pedestal is None else pedestal
-        self.pedestal = pedestal
 
         mask_shader = _shaders.compileProgram(_shaders.vertSimple,
                                               fragSignedColorTexMask)
@@ -94,6 +94,14 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
         """
         # Recode phase to numpy array
         self.__dict__['pedestal'] = value
+        self._needUpdate = True
+
+    @attributeSetter
+    def contrast(self, value):
+        """Stimulus contrast, accounting for pedestal."""
+        # TODO this is potentiall confusion -- revisit later
+        value = value * (self.pedestal + 1)
+        self.__dict__["contrast"] = value
         self._needUpdate = True
 
     def _updateListShaders(self):

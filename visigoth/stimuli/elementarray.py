@@ -80,6 +80,10 @@ class ElementArray(ElementArrayStim, MinimalStim, TextureMixin):
                  maskParams=None,
                  pedestal=None):
 
+        # Set the default pedestal assuming a gray window color
+        pedestal = win.color.mean() if pedestal is None else pedestal
+        self.pedestal = pedestal
+
         super(ElementArray, self).__init__(
             win, units=units, fieldPos=fieldPos, fieldSize=fieldSize,
             fieldShape=fieldShape, nElements=nElements, sizes=sizes, xys=xys,
@@ -91,10 +95,6 @@ class ElementArray(ElementArrayStim, MinimalStim, TextureMixin):
             maskParams=maskParams)
 
 
-        # Set the default pedestal assuming a gray window color
-        pedestal = win.color.mean() if pedestal is None else pedestal
-        self.pedestal = pedestal
-
         self._progSignedTexMask = _shaders.compileProgram(
             _shaders.vertSimple, fragSignedColorTexMask)
 
@@ -105,6 +105,14 @@ class ElementArray(ElementArrayStim, MinimalStim, TextureMixin):
         """
         # Recode phase to numpy array
         self.__dict__['pedestal'] = value
+        self._needUpdate = True
+
+    @attributeSetter
+    def contrs(self, value):
+        """Stimulus contrast, accounting for pedestal."""
+        # TODO this is potentially confusing -- revisit later
+        value = value * (self.pedestal + 1)
+        self.__dict__["contrs"] = value
         self._needUpdate = True
 
     def draw(self, win=None):
