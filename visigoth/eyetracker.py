@@ -189,7 +189,7 @@ class EyeTracker(object):
     def move_edf_file(self):
         """Move the Eyelink edf data to the right location."""
         edf_src_fname = "eyedat.EDF"
-        edf_trg_fname = self.exp.output_stem + ".edf"
+        edf_trg_fname = self.exp.output_stem + "_eyedat.edf"
 
         if os.path.exists(edf_src_fname):
             edf_mtime = os.stat(edf_src_fname).st_mtime
