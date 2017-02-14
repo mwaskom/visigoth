@@ -9,7 +9,7 @@ laptop:
 kianilab-ps1:
   width: 40
   distance: 52
-  size: [1600, 1200]
+  resolution: [1600, 1200]
   refresh_hz: 75
   max_luminance: 100.52
   gamma: 2.0721
