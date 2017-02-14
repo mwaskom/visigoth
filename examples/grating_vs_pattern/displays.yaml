@@ -11,5 +11,5 @@ kianilab-ps1:
   distance: 52
   resolution: [1600, 1200]
   refresh_hz: 75
-  max_luminance: 100.52
-  gamma: 2.0721
+  max_luminance: 110.864
+  gamma: 1.938
