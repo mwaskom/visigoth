@@ -351,22 +351,26 @@ class Experiment(object):
             timeout, it is returned. Otherwise this function returns None.
 
         """
+        # QC input arguments
         stims = [] if draw is None else draw
-
         if sleep and stims:
             raise ValueError("`sleep` must be `0` to draw stimuli.")
 
+        # Don't include final window refresh in the timeout check
         if not sleep:
             timeout -= self.win.frametime
 
+        # Maximum wait is controlled by timeout value
         clock = core.Clock()
         while clock.getTime() < timeout:
 
+            # Check for a nonzero return from the function
             if func is not None:
                 func_val = func(*args, **kwargs)
                 if func_val:
                     return func_val
 
+            # Either sleep or draw and wait for the screen refresh
             if sleep:
                 core.wait(sleep, sleep)
             else:

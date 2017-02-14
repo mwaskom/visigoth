@@ -1,17 +1,19 @@
 import numpy as np
 import pandas as pd
 
-from psychopy import core
-
 from visigoth.tools import AcquireFixation, AcquireTarget, flexible_values
 from visigoth.stimuli import Point, Points, Grating, Pattern
 
 
 def create_stimuli(exp):
 
+    # Fixation point
     fix = Point(exp.win, exp.p.fix_radius)
+
+    # Saccade targets
     targets = Points(exp.win, exp.p.target_pos, exp.p.target_radius)
 
+    # Simple sinusoidal grating stimulus
     grating = Grating(exp.win,
                       sf=exp.p.stim_sf,
                       tex=exp.p.stim_tex,
@@ -21,6 +23,7 @@ def create_stimuli(exp):
                       ori=0
                       )
 
+    # Average of multiple sinusoidal grating stimulus
     pattern = Pattern(exp.win,
                       n=exp.p.stim_pattern_n,
                       elementTex=exp.p.stim_tex,
@@ -30,7 +33,8 @@ def create_stimuli(exp):
                       pos=(0, 0)
                       )
 
-    return dict(fix=fix, targets=targets, grating=grating, pattern=pattern)
+    return dict(fix=fix, targets=targets,
+                grating=grating, pattern=pattern)
 
 
 def generate_trials(exp):
@@ -76,9 +80,18 @@ def generate_trials(exp):
 
 def run_trial(exp, info):
 
+    # Update stimuli to trial values
+    exp.s.grating.pos = exp.p.stim_pos[info.grating_side]
+    exp.s.pattern.pos = exp.p.stim_pos[info.pattern_side]
+
+    exp.s.grating.contrast = info.grating_contrast
+    exp.s.pattern.contrast = info.pattern_contrast
+
+    # Inter-trial interval
     exp.s.fix.color = exp.p.fix_iti_color
     exp.wait_until(exp.iti_end, draw="fix", iti_duration=info.iti)
 
+    # Beginning of trial
     exp.s.fix.color = exp.p.fix_ready_color
     res = exp.wait_until(AcquireFixation(exp),
                          timeout=exp.p.wait_fix,
@@ -88,19 +101,15 @@ def run_trial(exp, info):
         info["result"] = "nofix"
         return info
 
+    # Pre-stimulus fixation
     exp.s.fix.color = exp.p.fix_trial_color
     exp.wait_until(timeout=exp.p.wait_prestim, draw=["fix", "targets"])
 
-    exp.s.grating.pos = exp.p.stim_pos[info.grating_side]
-    exp.s.pattern.pos = exp.p.stim_pos[info.pattern_side]
-
-    exp.s.grating.contrast = info.grating_contrast
-    exp.s.pattern.contrast = info.pattern_contrast
-
+    # Stimulus event
     for _ in exp.frame_range(seconds=exp.p.wait_stim):
         exp.draw(["grating", "pattern", "fix", "targets"], flip=True)
 
-    exp.draw("targets")
+    # Collect eye response
     res = exp.wait_until(AcquireTarget(exp),
                          exp.p.wait_resp,
                          draw="targets")
@@ -118,9 +127,11 @@ def run_trial(exp, info):
             info["responded"] = True
         else:
             result = "nochoice"
+
     exp.auditory_feedback(result)
     info["result"] = result
 
+    # Perpate for inter-trial interval
     exp.s.fix.color = exp.p.fix_iti_color
     exp.draw("fix", flip=True)
 
