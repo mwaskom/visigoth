@@ -4,6 +4,9 @@ Psychopy authors have said on record that this functionality should exist in
 Psychopy itself. Future users of this code should double check as to whether
 that has been implemented and if this code can be excised.
 
+Note however that we have also added some functinoality to set the contrast in
+a way that depends on the pedestal, which may not get added.
+
 This module is adapted from a similar extension to GratingStim
 Original credit to https://github.com/nwilming/PedestalGrating/
 
@@ -17,6 +20,8 @@ import pyglet
 pyglet.options['debug_gl'] = False
 import ctypes
 GL = pyglet.gl
+
+import numpy as np
 
 from psychopy.visual.elementarray import ElementArrayStim
 from psychopy.visual.basevisual import MinimalStim, TextureMixin
@@ -80,10 +85,6 @@ class ElementArray(ElementArrayStim, MinimalStim, TextureMixin):
                  maskParams=None,
                  pedestal=None):
 
-        # Set the default pedestal assuming a gray window color
-        pedestal = win.color.mean() if pedestal is None else pedestal
-        self.pedestal = pedestal
-
         super(ElementArray, self).__init__(
             win, units=units, fieldPos=fieldPos, fieldSize=fieldSize,
             fieldShape=fieldShape, nElements=nElements, sizes=sizes, xys=xys,
@@ -94,26 +95,24 @@ class ElementArray(ElementArrayStim, MinimalStim, TextureMixin):
             interpolate=interpolate, name=name, autoLog=autoLog,
             maskParams=maskParams)
 
+        # Set the default pedestal assuming a gray window color
+        pedestal = win.color.mean() if pedestal is None else pedestal
+        self.pedestal = pedestal
 
         self._progSignedTexMask = _shaders.compileProgram(
             _shaders.vertSimple, fragSignedColorTexMask)
 
-    @attributeSetter
-    def pedestal(self, value):
-        """Luminance pedestal of the grating varies.
-        Should a scalar in the range -1:1.
-        """
-        # Recode phase to numpy array
-        self.__dict__['pedestal'] = value
-        self._needUpdate = True
+    @property
+    def pedestal_contrs(self):
+        """Stimulsu contrast, accounting for pedestal"""
+        return self.contrs / (self.pedestal + 1)
 
-    @attributeSetter
-    def contrs(self, value):
+    @pedestal_contrs.setter
+    def pedestal_contrs(self, values):
         """Stimulus contrast, accounting for pedestal."""
         # TODO this is potentially confusing -- revisit later
-        value = value * (self.pedestal + 1)
-        self.__dict__["contrs"] = value
-        self._needUpdate = True
+        adjusted_values = values * (self.pedestal + 1)
+        self.contrs = adjusted_values
 
     def draw(self, win=None):
         """
