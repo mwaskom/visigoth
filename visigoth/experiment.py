@@ -51,6 +51,7 @@ class Experiment(object):
             # TODO add scanner trigger/dummy scans
             # TODO add clock reset, eyetracker start, other onset code
             self.clock.reset()
+            self.tracker.start_run()
 
             # Main experimental loop
 
