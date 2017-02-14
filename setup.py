@@ -11,7 +11,7 @@ DOWNLOAD_URL = "https://github.com/mwaskom/visigoth"
 VERSION = "0.1.dev"
 
 SCRIPTS = ["scripts/visigoth", "scripts/visigoth-client"]
-PACKAGES = ["visigoth"]
+PACKAGES = ["visigoth", "visigoth.stimuli", "visigoth.ext"]
 PACKAGE_DIR = {"visigoth": "visigoth"}
 PACKAGE_DATA = {"visigoth": ["sounds/*.wav"]}
 
