@@ -37,6 +37,7 @@ base = dict(
     n_trials=200,
 
     wait_iti=1,
+    wait_fix=5,
     wait_prestim=.5,
     wait_stim=.2,
     wait_resp=2,

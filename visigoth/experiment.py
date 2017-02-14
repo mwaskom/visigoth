@@ -49,17 +49,18 @@ class Experiment(object):
             self.initialize_stimuli()
 
             # TODO add scanner trigger/dummy scans
-            # TODO add clock reset, eyetracker start, other onset code
+
+            # Initialize the experimental run
             self.clock.reset()
             self.tracker.start_run()
+            self.iti_start = 0 
 
             # Main experimental loop
 
             for trial_info in self.generate_trials():
 
                 trial_info = self.run_trial(trial_info)
-
-                # TODO define ITI start here, use it to define wait time
+                self.iti_start = self.clock.getTime() 
 
                 self.trial_data.append(trial_info)
                 self.update_client(trial_info)
@@ -397,3 +398,9 @@ class Experiment(object):
             self.s[stim].draw()
         if flip:
             self.win.flip()
+
+    def iti_end(self, iti_duration): 
+        """Return True if current time is within a flip of the ITI end."""
+        now = self.clock.getTime() 
+        end = self.iti_start + iti_duration 
+        return (now + self.win.frametime) >= end 

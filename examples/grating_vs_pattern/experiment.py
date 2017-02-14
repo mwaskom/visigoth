@@ -37,9 +37,7 @@ def generate_trials(exp):
 
     for t in range(1, exp.p.n_trials + 1):
 
-        now = exp.clock.getTime()
         iti = flexible_values(exp.p.wait_iti)
-        trial_time = now + iti
 
         g_side, p_side = np.random.permutation([0, 1])
         g_c, p_c = flexible_values(exp.p.contrast_gen, 2)
@@ -56,7 +54,6 @@ def generate_trials(exp):
             trial=t,
 
             iti=iti,
-            trial_time=trial_time,
 
             grating_side=g_side,
             pattern_side=p_side,
@@ -80,11 +77,12 @@ def generate_trials(exp):
 def run_trial(exp, info):
 
     exp.s.fix.color = exp.p.fix_iti_color
-    exp.draw("fix", flip=True)
-    core.wait(info.iti)
+    exp.wait_until(exp.iti_end, draw="fix", iti_duration=info.iti)
 
     exp.s.fix.color = exp.p.fix_ready_color
-    res = exp.wait_until(AcquireFixation(exp), timeout=5, draw="fix")
+    res = exp.wait_until(AcquireFixation(exp),
+                         timeout=exp.p.wait_fix,
+                         draw="fix")
 
     if res is None:
         info["result"] = "nofix"
@@ -106,6 +104,7 @@ def run_trial(exp, info):
     res = exp.wait_until(AcquireTarget(exp),
                          exp.p.wait_resp,
                          draw="targets")
+
     # TODO all of this logic should happen somewhere else
     if res is None:
         result = "nochoice"
