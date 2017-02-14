@@ -53,14 +53,14 @@ class Experiment(object):
             # Initialize the experimental run
             self.clock.reset()
             self.tracker.start_run()
-            self.iti_start = 0 
+            self.iti_start = 0
 
             # Main experimental loop
 
             for trial_info in self.generate_trials():
 
                 trial_info = self.run_trial(trial_info)
-                self.iti_start = self.clock.getTime() 
+                self.iti_start = self.clock.getTime()
 
                 self.trial_data.append(trial_info)
                 self.update_client(trial_info)
@@ -403,8 +403,8 @@ class Experiment(object):
         if flip:
             self.win.flip()
 
-    def iti_end(self, iti_duration): 
+    def iti_end(self, iti_duration):
         """Return True if current time is within a flip of the ITI end."""
-        now = self.clock.getTime() 
-        end = self.iti_start + iti_duration 
-        return (now + self.win.frametime) >= end 
+        now = self.clock.getTime()
+        end = self.iti_start + iti_duration
+        return (now + self.win.frametime) >= end

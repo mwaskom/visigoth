@@ -5,7 +5,6 @@ from psychopy import sound
 
 class AuditoryFeedback(object):
 
-
     def __init__(self, play_sounds=True, correct="ding", wrong="signon",
                  nochoice="click", fixbreak="click", nofix="secalert"):
 
@@ -35,4 +34,3 @@ class AuditoryFeedback(object):
             sound_obj = self.sound_dict[event]
             if sound_obj is not None:
                 sound_obj.play()
-

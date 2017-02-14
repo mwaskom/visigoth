@@ -102,21 +102,21 @@ class AcquireTarget(object):
                 if check_gaze(gaze, pos, self.target_window):
 
                     if self.chosen_target is None:
-                        # The eye has just entered a target window
+                        # Eye has just entered a target window
                         self.chosen_target = i
                         self.target_time = now
                     elif self.chosen_target != i:
-                        # The eye used to be on a different target and has moved
+                        # Eye used to be on a different target and has moved
                         failure = True
 
                     if now > (self.target_time + self.hold_time):
-                        # The eye has successfully held the target
+                        # Eye has successfully held the target
                         success = True
 
                 else:
 
                     if self.chosen_target == i:
-                        # The eye had acquired this target but then lost it
+                        # Eye had acquired this target but then lost it
                         failure = True
 
             if success:
@@ -181,7 +181,7 @@ def flexible_values(val, size=1, random_state=None, min=-np.inf, max=np.inf):
     -------
     out : scalar or array
         Output values with shape ``size``, or a scalar if ``size`` is 1.
-    
+
     """
     if random_state is None:
         random_state = np.random.RandomState()

@@ -30,7 +30,9 @@ fragSignedColorTexMask = '''
         vec4 textureFrag = texture2D(texture,gl_TexCoord[0].st);
         vec4 maskFrag = texture2D(mask,gl_TexCoord[1].st);
         gl_FragColor.a = gl_Color.a*maskFrag.a*textureFrag.a;
-        gl_FragColor.rgb =  ((pedestal+1.0)/2.0) + ((textureFrag.rgb* (gl_Color.rgb*2.0-1.0)+1.0)/2.0) -0.5;
+        gl_FragColor.rgb =  ((pedestal+1.0)/2.0)
+                            + ((textureFrag.rgb
+                            * (gl_Color.rgb*2.0-1.0)+1.0)/2.0) -0.5;
     }
     '''
 

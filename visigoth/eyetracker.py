@@ -131,8 +131,8 @@ class EyeTracker(object):
             gaze = tuple(np.add(self.offsets, gaze))
 
         # Put in the queue to send to the client
-        #if log:
-        #    self.gaze_q.put(gaze)
+        # if log:
+        #     self.gaze_q.put(gaze)
 
         return gaze
 

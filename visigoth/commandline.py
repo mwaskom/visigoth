@@ -1,5 +1,6 @@
 import argparse
 
+
 def define_parser(script):
 
     if script == "visigoth":
