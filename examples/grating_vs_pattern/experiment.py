@@ -85,13 +85,13 @@ def run_trial(exp, info):
 
     exp.s.fix.color = exp.p.fix_ready_color
     res = exp.wait_until(AcquireFixation(exp), timeout=5, draw="fix")
+
     if res is None:
         info["result"] = "nofix"
         return info
 
     exp.s.fix.color = exp.p.fix_trial_color
-    exp.draw(["fix", "targets"], flip=True)
-    exp.win.flip()
+    exp.wait_until(timeout=exp.p.wait_prestim, draw=["fix", "targets"])
 
     exp.s.grating.pos = exp.p.stim_pos[info.grating_side]
     exp.s.pattern.pos = exp.p.stim_pos[info.pattern_side]
@@ -100,7 +100,6 @@ def run_trial(exp, info):
     exp.s.pattern.contrast = info.pattern_contrast
 
     for _ in exp.frame_range(seconds=exp.p.wait_stim):
-
         exp.draw(["grating", "pattern", "fix", "targets"], flip=True)
 
     exp.draw("targets")
