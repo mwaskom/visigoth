@@ -216,7 +216,7 @@ class Experiment(object):
         output_stem = template.format(**self.p)
 
         output_dir = os.path.dirname(output_stem)
-        if not os.path.exists(output_dir):
+        if self.p.save_data and not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
         self.output_stem = output_stem

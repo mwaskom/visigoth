@@ -1,0 +1,15 @@
+laptop:
+  width: 28.65
+  distance: 45
+  resolution: [1440, 900]
+  refresh_hz: 60
+  gamma: 2.13
+  max_luminance: 259.1
+
+kianilab-ps1:
+  width: 40
+  distance: 52
+  resolution: [1600, 1200]
+  refresh_hz: 75
+  max_luminance: 110.864
+  gamma: 1.938

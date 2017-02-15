@@ -6,10 +6,10 @@ from psychopy.visual import ImageStim
 
 class GaussianNoise(object):
     """Noise field with Gaussian statistics parameterized by contrast."""
-    def __init__(self, win, contrast, pix_per_deg=None, **kwargs):
+    def __init__(self, win, contrast=1, pix_per_deg=None, **kwargs):
 
         self._contrast = contrast
-        self._constant = .7
+        self._constant = .7  # Approximately matches RMS contrast of grating
         self.mean = win.color.mean(axis=-1)
         self.sd = (self.mean + 1) * self._constant * contrast
         self.rv = stats.norm(self.mean, self.sd)
@@ -36,12 +36,12 @@ class GaussianNoise(object):
     @property
     def opacity(self):
         """Opacity of the stimulus."""
-        return self.array.opacity
+        return self.image.opacity
 
     @opacity.setter
     def opacity(self, val):
         """Opacity of the stimulus."""
-        self.array.opacity = val
+        self.image.opacity = val
 
     def update(self, rng=None):
 
