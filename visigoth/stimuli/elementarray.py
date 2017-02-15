@@ -110,7 +110,6 @@ class ElementArray(ElementArrayStim, MinimalStim, TextureMixin):
     @pedestal_contrs.setter
     def pedestal_contrs(self, values):
         """Stimulus contrast, accounting for pedestal."""
-        # TODO this is potentially confusing -- revisit later
         adjusted_values = values * (self.pedestal + 1)
         self.contrs = adjusted_values
 
