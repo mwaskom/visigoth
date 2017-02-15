@@ -22,9 +22,8 @@ base = dict(
     stim_size=6,
     stim_pattern_n=8,
 
-    pattern_contrast=[.05, .06, .08, .11, .15, .2],
-
-    noise_contrast_multiple=[.5, 1, 2, 4],
+    pattern_contrast=[0, .02, .04, .08, .16, .32],
+    noise_contrast=[0, .1, .2, .4],
     noise_opacity=.5,
     noise_resolution=20,
     noise_hz=5,

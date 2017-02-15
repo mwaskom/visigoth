@@ -52,8 +52,7 @@ def generate_trials(exp):
         noise_frames = exp.p.noise_hz / exp.p.wait_stim
         pattern_frame = flexible_values(range(1, noise_frames + 1))
 
-        noise_multiple = flexible_values(exp.p.noise_contrast_multiple)
-        noise_contrast = pattern_contrast * noise_multiple
+        noise_contrast = flexible_values(exp.p.noise_contrast)
         noise_opacity = flexible_values(exp.p.noise_opacity)
 
         trial_info = dict(
