@@ -16,16 +16,14 @@ Copyright (C) 2015 Jonathan Peirce
 Distributed under the terms of the GNU General Public License (GPL).
 
 """
+from __future__ import division
 import pyglet
 pyglet.options['debug_gl'] = False
 import ctypes
 GL = pyglet.gl
 
-import numpy as np
-
 from psychopy.visual.elementarray import ElementArrayStim
 from psychopy.visual.basevisual import MinimalStim, TextureMixin
-from psychopy.tools.attributetools import attributeSetter
 from psychopy import _shadersPyglet as _shaders
 
 # Framgent shader for the gabor stimulus. This is needed to add the pedestal to
