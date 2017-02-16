@@ -4,22 +4,14 @@ from scipy import stats
 from psychopy.visual import ImageStim
 
 
-class GaussianNoise(object):
-    """Noise field with Gaussian statistics parameterized by contrast."""
-    def __init__(self, win, contrast=1, pix_per_deg=None, **kwargs):
+class Noise(object):
 
-        self._contrast = contrast
-        self._constant = .7  # Approximately matches RMS contrast of grating
-        self.mean = win.color.mean(axis=-1)
-        self.sd = (self.mean + 1) * self._constant * contrast
-        self.rv = stats.norm(self.mean, self.sd)
+    def __init__(self, win, contrast, pix_per_deg, **kwargs):
 
-        self.image = image = ImageStim(win, **kwargs)
+        self.image = ImageStim(win, **kwargs)
         if pix_per_deg is None:
             pix_per_deg = win.pix_per_deg
-        self.size = np.ceil(image.size * pix_per_deg).astype(int)
-
-        self.update()
+        self.size = np.ceil(self.image.size * pix_per_deg).astype(int)
 
     @property
     def contrast(self):
@@ -29,8 +21,7 @@ class GaussianNoise(object):
     @contrast.setter
     def contrast(self, val):
         """Control on 0-1 scale, approximately matched to a grating."""
-        self.sd = (self.mean + 1) * self._constant * val
-        self.rv = stats.norm(self.mean, self.sd)
+        self._set_rv(val)
         self._contrast = val
 
     @property
@@ -44,7 +35,7 @@ class GaussianNoise(object):
         self.image.opacity = val
 
     def update(self, rng=None):
-
+        """Generate new random values."""
         if rng is None:
             rng = np.random.RandomState()
 
@@ -53,5 +44,45 @@ class GaussianNoise(object):
         self.image.image = vals
 
     def draw(self):
-
+        """Draw the stimulus to the window."""
         self.image.draw()
+
+
+class GaussianNoise(Noise):
+    """Noise field with Gaussian statistics parameterized by contrast."""
+    def __init__(self, win, contrast=1, pix_per_deg=None, **kwargs):
+
+        self._constant = .7  # Approximately matches RMS contrast of grating
+        self.mean = win.color.mean(axis=-1)
+        self.contrast = contrast
+
+        super(GaussianNoise, self).__init__(
+            win, contrast, pix_per_deg, **kwargs)
+
+        self.update()
+
+    def _set_rv(self, contrast):
+
+        self.sd = (self.mean + 1) * self._constant * contrast
+        self.rv = stats.norm(self.mean, self.sd)
+
+
+class UniformNoise(Noise):
+    """Noise field with uniform statistics parameterized by contrast."""
+    def __init__(self, win, contrast=1, pix_per_deg=None, **kwargs):
+
+        self.mean = win.color.mean(axis=-1)
+        self.contrast = contrast
+
+        super(UniformNoise, self).__init__(
+            win, contrast, pix_per_deg, **kwargs)
+
+        self.update()
+
+    def _set_rv(self, contrast):
+
+        mean = (self.mean + 1) / 2
+        range = contrast * (2 * mean)
+        low = mean  - range / 2
+        low, range = low * 2 - 1, range * 2
+        self.rv = stats.uniform(low, range)
