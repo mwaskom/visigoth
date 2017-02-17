@@ -52,13 +52,13 @@ class SocketThread(threading.Thread):
 
 class SocketClientThread(SocketThread):
 
-    def __init__(self, screen_q, param_q, trial_q):
+    def __init__(self, remote):
 
         super(SocketClientThread, self).__init__()
 
-        self.screen_q = screen_q
-        self.param_q = param_q
-        self.trial_q = trial_q
+        self.screen_q = remote.screen_q
+        self.param_q = remote.param_q
+        self.trial_q = remote.trial_q
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect(("localhost", 50001))

@@ -4,11 +4,14 @@ import json
 import socket
 import Queue as queue
 
-from visigoth import clientserver
+from PyQt4.QtGui import QApplication
+
+from visigoth import remote, clientserver
 
 
 if __name__ == "__main__":
 
+    """
     trial_q = queue.Queue()
     param_q = queue.Queue()
     screen_q = queue.Queue()
@@ -32,3 +35,9 @@ if __name__ == "__main__":
             print("Screen data:", screen)
         except queue.Empty:
             pass
+    """
+
+    app = QApplication([])
+    win = remote.RemoteApp()
+    win.show()
+    app.exec_()
