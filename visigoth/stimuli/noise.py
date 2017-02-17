@@ -83,6 +83,6 @@ class UniformNoise(Noise):
 
         mean = (self.mean + 1) / 2
         range = contrast * (2 * mean)
-        low = mean  - range / 2
+        low = mean - range / 2
         low, range = low * 2 - 1, range * 2
         self.rv = stats.uniform(low, range)

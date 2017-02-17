@@ -130,10 +130,6 @@ class EyeTracker(object):
         if apply_offsets:
             gaze = tuple(np.add(self.offsets, gaze))
 
-        # Put in the queue to send to the client
-        # if log:
-        #     self.gaze_q.put(gaze)
-
         return gaze
 
     def check_fixation(self, pos=(0, 0), radius=None,

@@ -3,6 +3,7 @@ from __future__ import division
 import os
 import re
 import time
+import json
 import Queue as queue
 
 import yaml
@@ -225,12 +226,14 @@ class Experiment(object):
 
     def initialize_server(self):
         """Start a server in an independent thread for experiment control."""
-        self.screen_q = queue.Queue()
-        self.param_q = queue.Queue()
         self.cmd_q = queue.Queue()
+        self.trial_q = queue.Queue()
+        self.param_q = queue.Queue()
+        self.screen_q = queue.Queue()
 
-        # TODO enhance robustness
+        # TODO enhance robustness later :-/
         self.server = clientserver.SocketServerThread(self)
+        self.server.start()
 
     def initialize_eyetracker(self):
         """Connect to and calibrate eyetracker."""
@@ -314,6 +317,7 @@ class Experiment(object):
 
     def shutdown_server(self):
         """Cleanly close down the experiment server process."""
+        # TODO need to fill this out so we close the server cleanly
         if self.server is None:
             return
 
@@ -403,12 +407,34 @@ class Experiment(object):
 
     def draw(self, stims, flip=False):
         """Draw each named stimulus in the order provided."""
+
+        # TODO We want to use this central drawing method to send information
+        # about what's on the screen to the client in a standardized way.
+        # Originally this was conceived as a simple helper function for
+        # one-line drawing of a number of stimuli (identified by strings).
+        # We want consider whether we want to enforce that *all* drawing must
+        # happen in this method, and if we ever want to allow separation of
+        # drawing and flipping the scren. Right now we are going to assume
+        # code is written that way, but not enforce it (or handle cases where
+        # it is not true well)
+
         if not isinstance(stims, list):
             stims = [stims]
         for stim in stims:
             self.s[stim].draw()
+
+        self.update_screen(stims)
+
         if flip:
             self.win.flip()
+
+    def update_screen(self, stims):
+        """Send information about what's on the screen to the client."""
+        # TODO Need to figure out how to handle non eye-tracking centrally
+        gaze = self.tracker.read_gaze()
+        data = json.dumps(dict(gaze=gaze,
+                          stims=stims))
+        self.screen_q.put(data)
 
     def iti_end(self, iti_duration):
         """Return True if current time is within a flip of the ITI end."""
