@@ -3,6 +3,7 @@ from __future__ import division
 import os
 import re
 import time
+import Queue as queue
 
 import yaml
 import numpy as np
@@ -11,7 +12,7 @@ import pandas as pd
 from psychopy import core, tools, visual, event, monitors
 
 from .ext.bunch import Bunch
-from . import stimuli, feedback, eyetracker, commandline
+from . import stimuli, feedback, eyetracker, commandline, clientserver
 
 
 class Experiment(object):
@@ -28,6 +29,7 @@ class Experiment(object):
 
         self.clock = core.Clock()
 
+        # TODO feedback implementation needs to be improved
         self.auditory_feedback = feedback.AuditoryFeedback()
 
         self.trial_data = []
@@ -223,7 +225,12 @@ class Experiment(object):
 
     def initialize_server(self):
         """Start a server in an independent thread for experiment control."""
-        pass
+        self.screen_q = queue.Queue()
+        self.param_q = queue.Queue()
+        self.cmd_q = queue.Queue()
+
+        # TODO enhance robustness
+        self.server = clientserver.SocketServerThread(self)
 
     def initialize_eyetracker(self):
         """Connect to and calibrate eyetracker."""
