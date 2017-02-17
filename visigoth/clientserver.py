@@ -28,6 +28,18 @@ class SocketThread(threading.Thread):
         package = "".join([kind, size, data])
         return package
 
+    def recvall(self, size, source=None):
+
+        if source is None:
+            source = self.socket
+
+        data = ""
+        missing = size - len(data)
+        while missing:
+            data = "".join([data, source.recv(missing)])
+            missing = size - len(data)
+        return data
+
     def read_header(self, s):
 
         if s:
@@ -72,7 +84,8 @@ class SocketClientThread(SocketThread):
                     continue
                 elif kind == self.NEW_SCREEN:
                     try:
-                        data = self.socket.recv(size)
+                        data = self.recvall(size)
+                        print(data)
                         self.screen_q.put(data)
                     except socket.timeout:
                         continue
@@ -80,7 +93,7 @@ class SocketClientThread(SocketThread):
                 # Update trial data
                 elif kind == self.TRIAL_DATA:
                     try:
-                        data = self.socket.recv(size)
+                        data = self.recvall(size)
                         self.trial_q.put(data)
                     except socket.timeout:
                         continue
@@ -139,7 +152,7 @@ class SocketServerThread(SocketThread):
                             clientsocket.recv(self.HEADER_SIZE))
                         if kind == self.NEW_PARAMS:
                             try:
-                                data = clientsocket.recv(size)
+                                data = self.recvall(size, clientsocket)
                                 self.param_q.put(data)
                             except socket.timeout:
                                 continue
