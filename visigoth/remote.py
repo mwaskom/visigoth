@@ -1,4 +1,5 @@
 
+import json
 import socket
 import Queue as queue
 
@@ -25,44 +26,51 @@ class RemoteApp(QMainWindow):
         QMainWindow.__init__(self, parent)
         self.setWindowTitle("Visigoth Remote")
 
-        self.poll_dur = 50
+        self.screen_q = queue.Queue()
+        self.param_q = queue.Queue()
+        self.trial_q = queue.Queue()
 
+        self.poll_dur = 50
         self.client = None
 
-        self.initialize_main_frame()
+        self.main_frame = QWidget()
+        self.gaze_app = GazeApp(self)
+        self.trial_app = TrialApp(self)
+        self.initialize_layout()
+
+    def poll(self):
+
+        if self.client is None:
+            self.initialize_client()
+
+        try:
+            screen_data = json.loads(self.screen_q.get())
+            self.gaze_app.update_screen(screen_data)
+        except queue.Empty:
+            pass
 
     def initialize_client(self):
 
         try:
             self.client = clientserver.SocketClientThread(self)
+            self.client.start()
         except socket.error:
             pass
 
-    def initialize_main_frame(self):
-
-        self.main_frame = QWidget()
-
-        gaze_app = GazeApp(self)
-
-        trial_fig = self.initialize_trial_figure()
-        trial_canvas = FigureCanvasQTAgg(trial_fig)
-        trial_canvas.setParent(self.main_frame)
-
-        trial_vbox = QVBoxLayout()
-        trial_vbox.addWidget(trial_canvas)
+    def initialize_layout(self):
 
         main_hbox = QHBoxLayout()
-        main_hbox.addLayout(gaze_app.layout)
-        main_hbox.addLayout(trial_vbox)
+        main_hbox.addLayout(self.gaze_app.layout)
+        main_hbox.addLayout(self.trial_app.layout)
 
         self.main_frame.setLayout(main_hbox)
         self.setCentralWidget(self.main_frame)
 
-    def initialize_trial_figure(self):
+    def initialize_timers(self):
 
-        fig = Figure((5, 5), dpi=100, facecolor="white")
-        ax = fig.add_subplot(111)
-        return fig
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.poll)
+        self.start(self.poll_dur)
 
 
 class GazeApp(object):
@@ -72,21 +80,25 @@ class GazeApp(object):
         self.remote_app = remote_app
 
         fig, ax = self.initialize_figure()
-        self.fig_canvas = FigureCanvasQTAgg(fig)
-        self.fig_canvas.setParent(remote_app.main_frame)
+        self.fig = fig
+        self.ax = ax
+        self.screen_canvas = FigureCanvasQTAgg(fig)
+        self.screen_canvas.setParent(remote_app.main_frame)
 
         update_button = QPushButton("Update")
         update_button.clicked.connect(self.update_params)
         reset_button = QPushButton("Reset")
         reset_button.clicked.connect(self.reset_params)
 
-        self.buttons = Bunch(update=update_button,
-                             reset=reset_button)
+        self.buttons = Bunch(
+            update=update_button,
+            reset=reset_button
+            )
 
         self.sliders = Bunch(
             x_offset=ParamSlider("x offset", 0, (-4, 4)),
             y_offset=ParamSlider("y offset", 0, (-4, 4)),
-            fix_window=ParamSlider("fix window", 2.5, (0, 5))
+            fix_window=ParamSlider("fix window", 3, (0, 6))
             )
 
         self.initialize_layout()
@@ -107,6 +119,30 @@ class GazeApp(object):
         grid_kws = dict(which="minor", lw=.5, ls="-", c=".8")
         ax.xaxis.grid(True, **grid_kws)
         ax.yaxis.grid(True, **grid_kws)
+
+        self.plot_objects = Bunch(
+            fix=plt.Circle((0, 0),
+                           radius=.05,
+                           facecolor="k",
+                           linewidth=0,
+                           animated=True),
+            fix_window=plt.Circle((0, 0),
+                                  radius=3,
+                                  facecolor="none",
+                                  linestyle="--",
+                                  edgecolor=".3",
+                                  animated=True),
+            gaze=plt.Circle((0, 0),
+                            radius=.05,
+                            facecolor="b",
+                            linewidth=0,
+                            animated=True)
+            )
+
+        self.axes_background = None
+
+        for _, stim in self.plot_objects.items():
+            ax.add_artist(stim)
 
         return fig, ax
 
@@ -129,10 +165,31 @@ class GazeApp(object):
         controls.addLayout(vbox)
 
         vbox = QVBoxLayout()
-        vbox.addWidget(self.fig_canvas)
+        vbox.addWidget(self.screen_canvas)
         vbox.addLayout(controls)
 
         self.layout = vbox
+
+    def update_screen(self, screen_data):
+
+        if self.axes_background is None:
+            self.fig.canvas.draw()
+            ax_bg = self.fig.canvas.copy_from_bbox(self.ax.bbox)
+            self.axes_background = ax_bg
+
+        # Update gaze position
+        # TODO
+
+        # Update fix window size
+        # TODO
+
+        # Draw stimuli on the screen
+        for stim in screen_data["stims"]:
+            self.ax.draw_artist(self.stim_objects[stim])
+        if "fix" in screen_data["stims"]:
+            self.ax.draw_artist(self.stim_objects["fix_window"])
+
+        self.screen_canvas.blit(self.ax.bbox)
 
     def update_params(self):
 
@@ -141,6 +198,28 @@ class GazeApp(object):
     def reset_params(self):
 
         pass
+
+
+class TrialApp(object):
+
+    def __init__(self, remote_app):
+
+        self.remote_app = remote_app
+
+        fig, axes = self.initialize_figure()
+        fig_canvas = FigureCanvasQTAgg(fig)
+        fig_canvas.setParent(remote_app.main_frame)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(fig_canvas)
+
+        self.layout = vbox
+
+    def initialize_figure(self):
+
+        fig = Figure((5, 5), dpi=100, facecolor="white")
+        axes = [fig.add_subplot(3, 1, i) for i in range(1, 4)]
+        return fig, axes
 
 
 class ParamSlider(object):
@@ -165,5 +244,5 @@ class ParamSlider(object):
     def update(self):
 
         # TODO find best place to handle colors indicating changed values
-        value = self.slider.value * self.res
+        value = self.slider.value() * self.res
         self.label.setText(self.label_template.format(value))

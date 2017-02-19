@@ -85,7 +85,6 @@ class SocketClientThread(SocketThread):
                 elif kind == self.NEW_SCREEN:
                     try:
                         data = self.recvall(size)
-                        print(data)
                         self.screen_q.put(data)
                     except socket.timeout:
                         continue
