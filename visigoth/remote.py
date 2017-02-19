@@ -10,11 +10,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from PyQt4.QtCore import Qt, QTimer
-from PyQt4.QtGui import (QApplication, QMainWindow, QDialog,
-                         QWidget, QSlider, QPushButton, QLabel,
+from PyQt4.QtGui import (QMainWindow, QWidget,
+                         QSlider, QPushButton, QLabel,
                          QVBoxLayout, QHBoxLayout)
 
 from . import clientserver
+from .ext.bunch import Bunch
 
 
 class RemoteApp(QMainWindow):
@@ -57,7 +58,6 @@ class RemoteApp(QMainWindow):
         self.main_frame.setLayout(main_hbox)
         self.setCentralWidget(self.main_frame)
 
-
     def initialize_trial_figure(self):
 
         fig = Figure((5, 5), dpi=100, facecolor="white")
@@ -70,6 +70,28 @@ class GazeApp(object):
     def __init__(self, remote_app):
 
         self.remote_app = remote_app
+
+        fig, ax = self.initialize_figure()
+        self.fig_canvas = FigureCanvasQTAgg(fig)
+        self.fig_canvas.setParent(remote_app.main_frame)
+
+        update_button = QPushButton("Update")
+        update_button.clicked.connect(self.update_params)
+        reset_button = QPushButton("Reset")
+        reset_button.clicked.connect(self.reset_params)
+
+        self.buttons = Bunch(update=update_button,
+                             reset=reset_button)
+
+        self.sliders = Bunch(
+            x_offset=ParamSlider("x offset", 0, (-4, 4)),
+            y_offset=ParamSlider("y offset", 0, (-4, 4)),
+            fix_window=ParamSlider("fix window", 2.5, (0, 5))
+            )
+
+        self.initialize_layout()
+
+    def initialize_figure(self):
 
         fig = Figure((5, 5), dpi=100, facecolor="white")
 
@@ -86,58 +108,62 @@ class GazeApp(object):
         ax.xaxis.grid(True, **grid_kws)
         ax.yaxis.grid(True, **grid_kws)
 
-        self.canvas = FigureCanvasQTAgg(fig)
-        self.canvas.setParent(remote_app.main_frame)
+        return fig, ax
 
-        self.fix_label = QLabel("Fix window: 2.0")
-        self.fix_slider = QSlider(Qt.Horizontal)
-        self.fix_slider.setRange(0, 50)
-        #self.fix_slider.setValue(int(self.current_params["fix_radius"] * 10))
-        self.fix_slider.setTickPosition(QSlider.TicksBelow)
-        self.fix_slider.setTracking(True)
-        #self.fix_slider.valueChanged.connect(self.update_fix_radius)
-
-        self.x_label = QLabel("x offset: 0.0")
-        self.x_slider = QSlider(Qt.Horizontal)
-        self.x_slider.setRange(-40, 40)
-        #self.x_slider.setValue(int(self.current_params["x_offset"] * 10))
-        self.x_slider.setTickPosition(QSlider.TicksBelow)
-        self.x_slider.setTracking(True)
-        #self.x_slider.valueChanged.connect(self.update_x_offset)
-
-        self.y_label = QLabel("y offset: 0.0")
-        self.y_slider = QSlider(Qt.Horizontal)
-        self.y_slider.setRange(-40, 40)
-        #self.y_slider.setValue(int(self.current_params["y_offset"] * 10))
-        self.y_slider.setTickPosition(QSlider.TicksBelow)
-        self.y_slider.setTracking(True)
-        #self.y_slider.valueChanged.connect(self.update_y_offset)
-
-        self.update_button = QPushButton("Update")
-        #self.update_button.clicked.connect(self.update_params)
-
-        self.reset_button = QPushButton("Reset")
-        #self.reset_button.clicked.connect(self.reset_params)
+    def initialize_layout(self):
 
         controls = QHBoxLayout()
 
-        for (l, w) in [(self.fix_label, self.fix_slider),
-                       (self.x_label, self.x_slider),
-                       (self.y_label, self.y_slider)]:
+        for key in ["x_offset", "y_offset", "fix_window"]:
 
+            s = self.sliders[key]
             vbox = QVBoxLayout()
-            vbox.addWidget(l)
-            vbox.addWidget(w)
-            vbox.setAlignment(w, Qt.AlignVCenter)
+            vbox.addWidget(s.label)
+            vbox.addWidget(s.slider)
+            vbox.setAlignment(s.slider, Qt.AlignVCenter)
             controls.addLayout(vbox)
 
         vbox = QVBoxLayout()
-        vbox.addWidget(self.update_button)
-        vbox.addWidget(self.reset_button)
+        vbox.addWidget(self.buttons["update"])
+        vbox.addWidget(self.buttons["reset"])
         controls.addLayout(vbox)
 
         vbox = QVBoxLayout()
-        vbox.addWidget(self.canvas)
+        vbox.addWidget(self.fig_canvas)
         vbox.addLayout(controls)
 
         self.layout = vbox
+
+    def update_params(self):
+
+        pass
+
+    def reset_params(self):
+
+        pass
+
+
+class ParamSlider(object):
+
+    def __init__(self, name, start_val, range, res=.1, fmt="{:.1f}"):
+
+        self.res = res
+        self.fmt = fmt
+        self.label_template = name + ": " + fmt
+
+        self.label = QLabel(self.label_template.format(start_val))
+        self.slider = slider = QSlider(Qt.Horizontal)
+
+        slider_range = range[0] / res, range[1] / res
+        slider.setRange(*slider_range)
+        slider.setTickPosition(QSlider.TicksBelow)
+        slider.setTracking(True)
+        slider.setValue(int(start_val / res))
+
+        slider.valueChanged.connect(self.update)
+
+    def update(self):
+
+        # TODO find best place to handle colors indicating changed values
+        value = self.slider.value * self.res
+        self.label.setText(self.label_template.format(value))
