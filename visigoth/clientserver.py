@@ -130,7 +130,7 @@ class SocketClientThread(SocketThread):
                         new_params = self.param_q.get(block=False)
                         data = self.package(self.NEW_PARAMS, new_params)
                     except queue.Empty:
-                        data = self.OLD_PARAMS + "0"
+                        data = self.package(self.OLD_PARAMS)
                     self.socket.sendall(data)
 
         finally:
@@ -163,8 +163,10 @@ class SocketServerThread(SocketThread):
     @property
     def gaze_params(self):
 
-        param_dict = {k: self.exp.p[k]
-                      for k in ["x_offset", "y_offset", "fix_window"]}
+        x_offset, y_offset = self.exp.tracker.offsets
+        param_dict = dict(x_offset=x_offset,
+                          y_offset=y_offset,
+                          fix_window=self.exp.p.fix_window)
         return json.dumps(param_dict)
 
     def run(self):

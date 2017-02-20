@@ -31,7 +31,7 @@ class RemoteApp(QMainWindow):
         self.trial_q = queue.Queue()
         self.cmd_q = queue.Queue()
 
-        self.poll_dur = 10
+        self.poll_dur = 20
         self.client = None
 
         self.p = Bunch(x_offset=0, y_offset=0, fix_window=2)
@@ -47,11 +47,18 @@ class RemoteApp(QMainWindow):
         if self.client is None:
             self.initialize_client()
 
-        try:
-            screen_data = json.loads(self.screen_q.get(block=False))
+        # TODO previously we showed a "trail" of gaze positions rather
+        # than just one, which looked pretty and is more informative.
+        # It is a bit tricker so I am skipping for the moment to get things
+        # running, but worth revisiting.
+        screen_data = None
+        while True:
+            try:
+                screen_data = json.loads(self.screen_q.get(block=False))
+            except queue.Empty:
+                break
+        if screen_data is not None:
             self.gaze_app.update_screen(screen_data)
-        except queue.Empty:
-            pass
 
     def initialize_client(self):
 
@@ -203,7 +210,8 @@ class GazeApp(object):
 
         self.ax.draw_artist(self.plot_objects["gaze"])
         for stim in screen_data["stims"]:
-            self.ax.draw_artist(self.plot_objects[stim])
+            if stim in self.plot_objects:
+                self.ax.draw_artist(self.plot_objects[stim])
         if "fix" in screen_data["stims"]:
             self.ax.draw_artist(self.plot_objects["fix_window"])
 

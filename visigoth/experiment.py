@@ -46,8 +46,8 @@ class Experiment(object):
 
             self.initialize_params()
             self.initialize_data_output()
-            self.initialize_server()
             self.initialize_eyetracker()
+            self.initialize_server()
             self.initialize_display()
             self.initialize_stimuli()
 
@@ -321,6 +321,8 @@ class Experiment(object):
 
     def shutdown_server(self):
         """Cleanly close down the experiment server process."""
+        # TODO we should send some sort of shutdown signal to the
+        # remote client so it can handle things well (currently just crashes)
         if self.server is not None:
             self.server.join(timeout=2)
 
@@ -338,7 +340,7 @@ class Experiment(object):
 
     # TODO Need to figure out how to handle non eye-tracking centrally
 
-    def snyc_remote_screen(self, stims):
+    def sync_remote_screen(self, stims):
         """Send information about what's on the screen to the client."""
         if self.server.connected:
             gaze = self.tracker.read_gaze()
@@ -373,7 +375,7 @@ class Experiment(object):
             try:
                 new_params = self.param_q.get(timeout=.5)
             except queue.Empty:
-                pass
+                new_params = ""
             if new_params:
                 p = json.loads(new_params)
                 self.tracker.offsets = (p.x_offset, p.y_offset)
