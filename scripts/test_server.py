@@ -23,6 +23,5 @@ if __name__ == "__main__":
                 exp.screen_q.put(json.dumps(data))
             time.sleep(1.016)
 
-
     finally:
         exp.shutdown_server()

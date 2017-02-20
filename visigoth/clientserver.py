@@ -197,23 +197,29 @@ class SocketServerThread(SocketThread):
 
                 # -- Otherwise it is up to the server what to send
 
-                # Check if we should send params down to the client
+                # Check if we should get new params from the client
                 try:
                     cmd = self.cmd_q.get(block=False)
 
                     if cmd == self.PARAM_REQUEST:
 
+                        # Send a param request to the client
                         data = self.package(self.PARAM_REQUEST, "")
                         clientsocket.sendall(data)
 
+                        # Handle the reply with new params
                         kind, size = self.read_header(
                             clientsocket.recv(self.HEADER_SIZE))
+
+                        # Params have been updated client-side
                         if kind == self.NEW_PARAMS:
                             try:
                                 data = self.recvall(size, clientsocket)
                                 self.param_q.put(data)
                             except socket.timeout:
                                 continue
+
+                        # No change to the client-side params
                         elif kind == self.OLD_PARAMS:
                             self.param_q.put("")
 

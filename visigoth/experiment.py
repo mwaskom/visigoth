@@ -66,7 +66,10 @@ class Experiment(object):
                 self.iti_start = self.clock.getTime()
 
                 self.trial_data.append(trial_info)
-                self.update_remote(trial_info)
+                self.sync_remote_trials(trial_info)
+
+                self.sync_remote_params()
+
                 self.check_quit()
 
         finally:
@@ -129,23 +132,24 @@ class Experiment(object):
         but it should be coordinated with the other methods. Specifically, the
         handling of the input should correspond with what is yielded by the
         ``generate_trials`` method, and the output should be something that the
-        ``update_client`` and ``save_data`` methods knows how to handle. It is
-        easiest for this to be a pandas Series, so that those methods do not
-        need to be overloaded, but this is not strictly required to allow for
-        more complicated designs.
+        ``serialize_trial_info`` and ``save_data`` methods knows how to handle.
+
+        It is easiest for this to be a pandas Series, so that those methods do
+        not need to be overloaded, but this is not strictly required to allow
+        for more complicated designs.
 
         """
         raise NotImplementedError
 
-    def update_remote(self, trial_info):
-        """Send the trial results to the experiment client.
+    def serialize_trial_info(self, trial_info):
+        """Serialze the trial results so they can be be sent to the remote.
 
         If the object returned by ``run_trial`` is a pandas Series, it's not
         necessary to overload this function. However, it can be defined for
         each study to allow for more complicated data structures.
 
         """
-        pass
+        return trial_info.to_json()
 
     def save_data(self):
         """Write out data files at the end of the run.
@@ -332,14 +336,51 @@ class Experiment(object):
 
     # === Networking functions (communication with remote)
 
-    def update_screen(self, stims):
+    # TODO Need to figure out how to handle non eye-tracking centrally
+
+    def snyc_remote_screen(self, stims):
         """Send information about what's on the screen to the client."""
-        # TODO Need to figure out how to handle non eye-tracking centrally
         if self.server.connected:
             gaze = self.tracker.read_gaze()
             data = json.dumps(dict(gaze=gaze,
                               stims=stims))
             self.screen_q.put(data)
+
+    def sync_remote_trials(self, trial_info):
+        """Send trial information to the remote client for plotting."""
+        if self.server.connected:
+            self.trial_q.put(self.serialize_trial_info(trial_info))
+
+    def sync_remote_params(self):
+        """Update eyetracking params using values from the remote client.
+
+        A note about the scalability of this method: ultimately, we'd like
+        to be able to change *any* parameters on the client side. Currently
+        we only know how to handle a subset of parametesr that pertain to
+        eye-tracking. These are not that cleanly handled anyway, as the
+        offsets "belong" to the eyetracker, but the fixation window size
+        doesn't. Maybe it should?
+
+        Also worth noting that elsewhere, the "params" are considered to be
+        run-specific and are only saved out at the end. Maybe we want to save
+        some kind of "params delta" file, as it doesn't seem worthwhile to
+        write out the (mostly static) set of params on every trial. Experiment
+        code can be written to log parameters in the trial info anyway.
+
+        """
+        if self.server.connected:
+            self.cmd_q.put(self.server.PARAM_REQUEST)
+            try:
+                new_params = self.param_q.get(timeout=.5)
+            except queue.Empty:
+                pass
+            if new_params:
+                p = json.loads(new_params)
+                self.tracker.offsets = (p.x_offset, p.y_offset)
+
+                # TODO this really needs to be handled better
+                # Currently it's not dynamically logged. See notes above.
+                self.p.fix_window = p.fix_window
 
     # === Execution functions
 
@@ -419,7 +460,7 @@ class Experiment(object):
         for stim in stims:
             self.s[stim].draw()
 
-        self.update_screen(stims)
+        self.sync_remote_screen(stims)
 
         if flip:
             self.win.flip()
