@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
             x, y = np.random.randn(2)
             data = dict(gaze=(x, y),
-                        stims=[])
+                        stims=["fix"])
             exp.screen_q.put(json.dumps(data))
             time.sleep(1)
 

@@ -135,18 +135,18 @@ class GazeApp(object):
 
         self.plot_objects = Bunch(
             fix=plt.Circle((0, 0),
-                           radius=.05,
+                           radius=.2,
                            facecolor="k",
                            linewidth=0,
                            animated=True),
             fix_window=plt.Circle((0, 0),
                                   radius=3,
                                   facecolor="none",
-                                  linestyle="--",
+                                  #linestyle="--",
                                   edgecolor=".3",
                                   animated=True),
             gaze=plt.Circle((0, 0),
-                            radius=.05,
+                            radius=.3,
                             facecolor="b",
                             linewidth=0,
                             animated=True)
@@ -197,10 +197,13 @@ class GazeApp(object):
         # TODO
 
         # Draw stimuli on the screen
+        self.fig.canvas.restore_region(self.axes_background)
+
+        self.ax.draw_artist(self.plot_objects["gaze"])
         for stim in screen_data["stims"]:
-            self.ax.draw_artist(self.stim_objects[stim])
+            self.ax.draw_artist(self.plot_objects[stim])
         if "fix" in screen_data["stims"]:
-            self.ax.draw_artist(self.stim_objects["fix_window"])
+            self.ax.draw_artist(self.plot_objects["fix_window"])
 
         self.screen_canvas.blit(self.ax.bbox)
 

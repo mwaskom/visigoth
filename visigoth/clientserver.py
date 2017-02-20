@@ -1,4 +1,5 @@
 import time
+import json
 import socket
 import threading
 import Queue as queue
@@ -160,7 +161,9 @@ class SocketServerThread(SocketThread):
     @property
     def gaze_params(self):
 
-        return {self.exp.p[k] for k in ["x_offset", "y_offset", "fix_window"]}
+        param_dict = {k: self.exp.p[k]
+                      for k in ["x_offset", "y_offset", "fix_window"]}
+        return json.dumps(param_dict)
 
     def run(self):
 
