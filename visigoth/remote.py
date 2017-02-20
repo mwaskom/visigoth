@@ -152,6 +152,8 @@ class GazeApp(object):
                             animated=True)
             )
 
+        # TODO add study-specific stimulus artist definition here
+
         self.axes_background = None
 
         for _, stim in self.plot_objects.items():
