@@ -66,7 +66,7 @@ class Experiment(object):
                 self.iti_start = self.clock.getTime()
 
                 self.trial_data.append(trial_info)
-                self.update_client(trial_info)
+                self.update_remote(trial_info)
                 self.check_quit()
 
         finally:
@@ -137,7 +137,7 @@ class Experiment(object):
         """
         raise NotImplementedError
 
-    def update_client(self, trial_info):
+    def update_remote(self, trial_info):
         """Send the trial results to the experiment client.
 
         If the object returned by ``run_trial`` is a pandas Series, it's not
@@ -330,7 +330,22 @@ class Experiment(object):
         if self.win is not None:
             self.win.close()
 
+    # === Networking functions (communication with remote)
+
+    def update_screen(self, stims):
+        """Send information about what's on the screen to the client."""
+        # TODO Need to figure out how to handle non eye-tracking centrally
+        if self.server.connected:
+            gaze = self.tracker.read_gaze()
+            data = json.dumps(dict(gaze=gaze,
+                              stims=stims))
+            self.screen_q.put(data)
+
     # === Execution functions
+
+    # Study-specific code will generally only need to interact with these
+    # methods; the ones above are mostly called interally (despite not
+    # having private names)
 
     def wait_until(self, func=None, timeout=np.inf, sleep=0, draw=None,
                    args=(), **kwargs):
@@ -386,24 +401,6 @@ class Experiment(object):
             else:
                 self.draw(stims, flip=True)
 
-    def frame_range(self, seconds=None, frames=None, round_func=np.floor):
-        """Convenience function for converting to screen refresh units."""
-        if seconds is None and frames is None:
-            raise ValueError("Must specify `seconds` or `frames`")
-        if seconds is not None and frames is not None:
-            raise ValueError("Must specify only one of `seconds` or `frames`")
-
-        if seconds is not None:
-            frames = int(round_func(seconds * self.win.framerate))
-
-        return range(frames)
-
-    def check_quit(self):
-        """Check whether the quit key has been pressed and exit if so."""
-        if event.getKeys(["escape"]):
-            core.quit()
-        return False
-
     def draw(self, stims, flip=False):
         """Draw each named stimulus in the order provided."""
 
@@ -427,13 +424,23 @@ class Experiment(object):
         if flip:
             self.win.flip()
 
-    def update_screen(self, stims):
-        """Send information about what's on the screen to the client."""
-        # TODO Need to figure out how to handle non eye-tracking centrally
-        gaze = self.tracker.read_gaze()
-        data = json.dumps(dict(gaze=gaze,
-                          stims=stims))
-        self.screen_q.put(data)
+    def frame_range(self, seconds=None, frames=None, round_func=np.floor):
+        """Convenience function for converting to screen refresh units."""
+        if seconds is None and frames is None:
+            raise ValueError("Must specify `seconds` or `frames`")
+        if seconds is not None and frames is not None:
+            raise ValueError("Must specify only one of `seconds` or `frames`")
+
+        if seconds is not None:
+            frames = int(round_func(seconds * self.win.framerate))
+
+        return range(frames)
+
+    def check_quit(self):
+        """Check whether the quit key has been pressed and exit if so."""
+        if event.getKeys(["escape"]):
+            core.quit()
+        return False
 
     def iti_end(self, iti_duration):
         """Return True if current time is within a flip of the ITI end."""

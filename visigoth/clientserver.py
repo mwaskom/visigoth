@@ -158,6 +158,8 @@ class SocketServerThread(SocketThread):
 
         self.daemon = True
 
+        self.connected = False
+
     @property
     def gaze_params(self):
 
@@ -170,6 +172,7 @@ class SocketServerThread(SocketThread):
         # TODO can we make it so that the client can be persistent?
         clientsocket, _ = self.socket.accept()
         clientsocket.settimeout(.2)
+        self.connected = True
 
         try:
 
@@ -179,7 +182,8 @@ class SocketServerThread(SocketThread):
                     kind, size = self.read_header(
                         clientsocket.recv(self.HEADER_SIZE))
                 except socket.timeout:
-                    time.sleep(.1)
+                    # time.sleep(.1)
+                    # TODO take items off the screen queue here?
                     continue
 
                 # Handle a request for server-side params
@@ -239,3 +243,4 @@ class SocketServerThread(SocketThread):
 
             clientsocket.close()
             self.socket.close()
+            self.connected = False
