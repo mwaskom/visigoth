@@ -6,7 +6,8 @@ import Queue as queue
 
 class SocketThread(threading.Thread):
 
-    NEW_SCREEN, TRIAL_DATA, PARAM_REQUEST, NEW_PARAMS, OLD_PARAMS = range(5)
+    (SERVER_REQUEST, NEW_SCREEN, TRIAL_DATA,
+     PARAM_REQUEST, NEW_PARAMS, OLD_PARAMS) = range(6)
     HEADER_SIZE = 10
 
     def __init__(self):
@@ -20,7 +21,7 @@ class SocketThread(threading.Thread):
         self.alive.clear()
         threading.Thread.join(self, timeout)
 
-    def package(self, kind, data):
+    def package(self, kind, data=""):
 
         kind = str(kind)
         size = str(len(data)).zfill(self.HEADER_SIZE - 1)
@@ -59,16 +60,31 @@ class SocketClientThread(SocketThread):
         self.screen_q = remote.screen_q
         self.param_q = remote.param_q
         self.trial_q = remote.trial_q
+        self.cmd_q = remote.cmd_q
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect(("localhost", 50001))
-        self.socket.settimeout(.005)
+        self.socket.settimeout(.01)
 
     def run(self):
 
         try:
 
             while self.alive.isSet():
+
+                try:
+
+                    # Check if we want to get params from the server
+                    cmd = self.cmd_q.get(block=False)
+                    if cmd == self.PARAM_REQUEST:
+                        self.socket.sendall(self.package(self.PARAM_REQUEST))
+
+                except queue.Empty:
+
+                    # Otherwise ask the server to send us something
+                    self.socket.sendall(self.package(self.SERVER_REQUEST))
+
+                # -- Get incoming data
 
                 try:
                     kind, size = self.read_header(
@@ -82,6 +98,7 @@ class SocketClientThread(SocketThread):
                 # Update gaze and stimulus information
                 if kind is None:
                     continue
+
                 elif kind == self.NEW_SCREEN:
                     try:
                         data = self.recvall(size)
@@ -94,6 +111,14 @@ class SocketClientThread(SocketThread):
                     try:
                         data = self.recvall(size)
                         self.trial_q.put(data)
+                    except socket.timeout:
+                        continue
+
+                # Update client params
+                elif kind == self.NEW_PARAMS:
+                    try:
+                        data = self.recvall(size)
+                        self.param_q.put(data)
                     except socket.timeout:
                         continue
 
@@ -118,6 +143,8 @@ class SocketServerThread(SocketThread):
 
         super(SocketServerThread, self).__init__()
 
+        self.exp = exp
+
         self.cmd_q = exp.cmd_q
         self.param_q = exp.param_q
         self.trial_q = exp.trial_q
@@ -127,6 +154,11 @@ class SocketServerThread(SocketThread):
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind(("localhost", 50001))
         self.socket.listen(2)
+
+    @property
+    def gaze_params(self):
+
+        return {self.exp.p[k] for k in ["x_offset", "y_offset", "fix_window"]}
 
     def run(self):
 
@@ -138,7 +170,22 @@ class SocketServerThread(SocketThread):
 
             while self.alive.isSet():
 
-                # Check for a command to get new parameters from client
+                try:
+                    kind, size = self.read_header(
+                        clientsocket.recv(self.HEADER_SIZE))
+                except socket.timeout:
+                    continue
+
+                # Handle a request for server-side params
+                if kind == self.PARAM_REQUEST:
+                    data = self.package(self.NEW_PARAMS, self.gaze_params)
+                    clientsocket.sendall(data)
+
+                # Check if we got something surprising
+                elif kind != self.SERVER_REQUEST:
+                    raise RuntimeError("Unexpected request from the client.")
+
+                # Otherwise it is up to the server what to send
                 try:
                     cmd = self.cmd_q.get(block=False)
 

@@ -29,9 +29,12 @@ class RemoteApp(QMainWindow):
         self.screen_q = queue.Queue()
         self.param_q = queue.Queue()
         self.trial_q = queue.Queue()
+        self.cmd_q = queue.Queue()
 
         self.poll_dur = 50
         self.client = None
+
+        self.p = Bunch(x_offset=0, y_offset=0, fix_window=2)
 
         self.main_frame = QWidget()
         self.gaze_app = GazeApp(self)
@@ -52,8 +55,16 @@ class RemoteApp(QMainWindow):
     def initialize_client(self):
 
         try:
+
+            # Boot up the client thread
             self.client = clientserver.SocketClientThread(self)
             self.client.start()
+
+            # Ask the server for the params it is currently using
+            self.cmd_q.put(self.client.PARAM_REQUEST)
+            params = json.loads(self.param_q.get())
+            self.p.update(params)
+
         except socket.error:
             pass
 
@@ -78,6 +89,7 @@ class GazeApp(object):
     def __init__(self, remote_app):
 
         self.remote_app = remote_app
+        self.p = remote_app.p
 
         fig, ax = self.initialize_figure()
         self.fig = fig
@@ -96,9 +108,9 @@ class GazeApp(object):
             )
 
         self.sliders = Bunch(
-            x_offset=ParamSlider("x offset", 0, (-4, 4)),
-            y_offset=ParamSlider("y offset", 0, (-4, 4)),
-            fix_window=ParamSlider("fix window", 3, (0, 6))
+            x_offset=ParamSlider("x offset", self.p.x_offset, (-4, 4)),
+            y_offset=ParamSlider("y offset", self.p.y_offset, (-4, 4)),
+            fix_window=ParamSlider("fix window", self.p.fix_window, (0, 6))
             )
 
         self.initialize_layout()
