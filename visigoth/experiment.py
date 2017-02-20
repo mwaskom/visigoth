@@ -317,9 +317,8 @@ class Experiment(object):
 
     def shutdown_server(self):
         """Cleanly close down the experiment server process."""
-        # TODO need to fill this out so we close the server cleanly
-        if self.server is None:
-            return
+        if self.server is not None:
+            self.server.join(timeout=2)
 
     def shutdown_eyetracker(self):
         """End Eyetracker recording and save eyetracker log files."""

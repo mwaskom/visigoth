@@ -155,6 +155,8 @@ class SocketServerThread(SocketThread):
         self.socket.bind(("localhost", 50001))
         self.socket.listen(2)
 
+        self.daemon = True
+
     @property
     def gaze_params(self):
 
@@ -174,6 +176,7 @@ class SocketServerThread(SocketThread):
                     kind, size = self.read_header(
                         clientsocket.recv(self.HEADER_SIZE))
                 except socket.timeout:
+                    time.sleep(.1)
                     continue
 
                 # Handle a request for server-side params
@@ -185,7 +188,9 @@ class SocketServerThread(SocketThread):
                 elif kind != self.SERVER_REQUEST:
                     raise RuntimeError("Unexpected request from the client.")
 
-                # Otherwise it is up to the server what to send
+                # -- Otherwise it is up to the server what to send
+
+                # Check if we should send params down to the client
                 try:
                     cmd = self.cmd_q.get(block=False)
 
@@ -223,11 +228,11 @@ class SocketServerThread(SocketThread):
                     screen = self.screen_q.get(block=False)
                     data = self.package(self.NEW_SCREEN, screen)
                     clientsocket.sendall(data)
-                    continue
 
                 except queue.Empty:
                     pass
 
         finally:
 
+            clientsocket.close()
             self.socket.close()

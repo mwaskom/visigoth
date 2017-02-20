@@ -40,6 +40,7 @@ class RemoteApp(QMainWindow):
         self.gaze_app = GazeApp(self)
         self.trial_app = TrialApp(self)
         self.initialize_layout()
+        self.initialize_timers()
 
     def poll(self):
 
@@ -47,7 +48,7 @@ class RemoteApp(QMainWindow):
             self.initialize_client()
 
         try:
-            screen_data = json.loads(self.screen_q.get())
+            screen_data = json.loads(self.screen_q.get(block=False))
             self.gaze_app.update_screen(screen_data)
         except queue.Empty:
             pass
@@ -81,7 +82,7 @@ class RemoteApp(QMainWindow):
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.poll)
-        self.start(self.poll_dur)
+        self.timer.start(self.poll_dur)
 
 
 class GazeApp(object):
@@ -190,7 +191,7 @@ class GazeApp(object):
             self.axes_background = ax_bg
 
         # Update gaze position
-        # TODO
+        self.plot_objects.gaze.center = screen_data["gaze"]
 
         # Update fix window size
         # TODO
