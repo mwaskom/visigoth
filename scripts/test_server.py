@@ -14,14 +14,18 @@ if __name__ == "__main__":
     try:
 
         print ("Simulating eye data")
+        xy = (0, 0)
         while True:
 
             if exp.server.connected:
-                x, y = np.random.randn(2)
-                data = dict(gaze=(x, y),
+                xy += np.random.randn(2) / 3
+                signs = np.sign(xy)
+                oob = np.abs(xy) > 5
+                xy[oob] = (signs * 5)[oob]
+                data = dict(gaze=tuple(xy),
                             stims=["fix"])
                 exp.screen_q.put(json.dumps(data))
-            time.sleep(1.016)
+            time.sleep(.016)
 
     finally:
         exp.shutdown_server()

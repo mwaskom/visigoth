@@ -31,7 +31,7 @@ class RemoteApp(QMainWindow):
         self.trial_q = queue.Queue()
         self.cmd_q = queue.Queue()
 
-        self.poll_dur = 50
+        self.poll_dur = 10
         self.client = None
 
         self.p = Bunch(x_offset=0, y_offset=0, fix_window=2)
@@ -142,7 +142,7 @@ class GazeApp(object):
             fix_window=plt.Circle((0, 0),
                                   radius=3,
                                   facecolor="none",
-                                  #linestyle="--",
+                                  linestyle="dashed",
                                   edgecolor=".3",
                                   animated=True),
             gaze=plt.Circle((0, 0),
@@ -196,7 +196,7 @@ class GazeApp(object):
         self.plot_objects.gaze.center = screen_data["gaze"]
 
         # Update fix window size
-        # TODO
+        self.plot_objects.fix_window.radius = self.sliders.fix_window.value
 
         # Draw stimuli on the screen
         self.fig.canvas.restore_region(self.axes_background)
@@ -211,11 +211,14 @@ class GazeApp(object):
 
     def update_params(self):
 
-        pass
+        gaze_params = ["x_offset", "y_offset", "fix_window"]
+        new_params = {k: self.p[k] for k in gaze_params}
+        self.remote_app.param_q.put(json.dumps(new_params))
 
     def reset_params(self):
 
-        pass
+        for name, obj in self.sliders.items():
+            obj.slider.setValue(self.p[name] / obj.res)
 
 
 class TrialApp(object):
@@ -264,3 +267,7 @@ class ParamSlider(object):
         # TODO find best place to handle colors indicating changed values
         value = self.slider.value() * self.res
         self.label.setText(self.label_template.format(value))
+
+    @property
+    def value(self):
+        return self.slider.value() * self.res
