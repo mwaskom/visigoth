@@ -8,6 +8,7 @@ from matplotlib.figure import Figure
 from matplotlib.colors import rgb2hex
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from PyQt4.QtCore import Qt, QTimer
@@ -59,6 +60,12 @@ class RemoteApp(QMainWindow):
                 break
         if screen_data is not None:
             self.gaze_app.update_screen(screen_data)
+
+        try:
+            trial_data = self.trial_q.get(block=False)
+            self.trial_app.update_figure(trial_data)
+        except queue.Empty:
+            pass
 
     def initialize_client(self):
 
@@ -239,6 +246,12 @@ class TrialApp(object):
         fig_canvas = FigureCanvasQTAgg(fig)
         fig_canvas.setParent(remote_app.main_frame)
 
+        self.fig = fig
+        self.axes = axes
+        self.fig_canvas = fig_canvas
+
+        self.trial_data = []
+
         vbox = QVBoxLayout()
         vbox.addWidget(fig_canvas)
 
@@ -246,10 +259,58 @@ class TrialApp(object):
 
     def initialize_figure(self):
 
+        # TODO this is a method that it should be able to overlaod
+        # in a study-specific remote.py file
+
         fig = Figure((5, 5), dpi=100, facecolor="white")
         axes = [fig.add_subplot(3, 1, i) for i in range(1, 4)]
+
+        axes[0].set(ylim=(-.1, 1.1),
+                    yticks=[0, 1],
+                    yticklabels=["Yes", "No"],
+                    ylabel="Responded")
+
+        axes[1].set(ylim=(-.1, 1.1),
+                    yticks=[0, 1],
+                    yticklabels=["Yes", "No"],
+                    ylabel="Correct")
+
+        axes[2].set(ylim=(0, None),
+                    xlabel="RT (s)")
+
+        fig.subplots_adjust(.15, .125, .95, .95)
+
         return fig, axes
 
+    def update_figure(self, trial_data):
+
+        # TODO this is a method that it should be able to overlaod
+        # in a study-specific remote.py file
+
+        # TODO note that we need to handle deserialization here
+        trial_data = pd.read_json(trial_data, typ="series")
+
+        self.trial_data.append(trial_data)
+
+        trial_df = pd.DataFrame(self.trial_data)
+
+        resp_ax, cor_ax, rt_ax = self.axes
+
+        resp_line, = resp_ax.plot(trial_df.trial, trial_df.responded, "ko")
+        resp_ax.set(xlim=(.5, trial_df.trial.max() + .5))
+
+        cor_line, = cor_ax.plot(trial_df.trial, trial_df.correct, "ko")
+        cor_ax.set(xlim=(.5, trial_df.trial.max() + .5))
+
+        bins = np.arange(0, 5.2, .2)
+        heights, bins = np.histogram(trial_data.rt, bins)
+        rt_bars = rt_ax.bar(bins[:-1], heights, .2)
+
+        self.fig_canvas.draw()
+
+        resp_line.remove()
+        cor_line.remove()
+        rt_bars.remove()
 
 class ParamSlider(object):
 
