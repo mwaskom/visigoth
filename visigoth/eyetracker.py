@@ -26,7 +26,7 @@ class EyeTracker(object):
         # Extract relevant parameters
         self.simulate = exp.p.eye_simulate
         self.save_data = exp.p.save_data
-        self.fix_window_radius = exp.p.eye_fix_radius
+        self.fix_window_radius = exp.p.fix_radius
 
         # Initialize the offsets with default values
         self.offsets = (0, 0)

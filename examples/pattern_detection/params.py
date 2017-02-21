@@ -34,7 +34,6 @@ base = dict(
     eye_fixation=True,
     eye_response=True,
 
-    eye_fix_radius=2,
     eye_target_wait=.5,
     eye_target_hold=.3,
 
