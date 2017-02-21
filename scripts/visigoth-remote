@@ -10,11 +10,14 @@ from visigoth.remote import RemoteApp, GazeApp, TrialApp
 
 if __name__ == "__main__":
 
+    # Parse the command line arguments to locate study-specific code
     parser = define_parser("visigoth-remote")
     args, _ = parser.parse_known_args()
     sys.path.insert(0, os.path.realpath(args.study_dir))
 
     try:
+
+        # Attach study-specific methods to the RemoteApp object
 
         import remote
 
@@ -26,8 +29,10 @@ if __name__ == "__main__":
             TrialApp.update_figure = remote.update_trial_figure
 
     except ImportError:
+
         print("Could not import study-specific remote methods")
 
+    # Start the PyQT GUI Application
     app = QApplication([])
     win = RemoteApp()
     win.show()

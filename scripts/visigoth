@@ -8,10 +8,12 @@ from visigoth.experiment import Experiment
 
 if __name__ == "__main__":
 
+    # Parse the command lines to find study-specific code
     parser = define_parser("visigoth")
     args, _ = parser.parse_known_args()
     sys.path.insert(0, os.path.realpath(args.study_dir))
 
+    # Attach study-specific methods to the Experiment object
     import experiment
 
     Experiment.create_stimuli = experiment.create_stimuli
@@ -24,5 +26,6 @@ if __name__ == "__main__":
     if hasattr(experiment, "save_data"):
         Experiment.save_data = experiment.save_data
 
+    # Start the expeiment
     e = Experiment(sys.argv[1:])
     e.run()
