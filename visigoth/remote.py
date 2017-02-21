@@ -32,9 +32,9 @@ class RemoteApp(QMainWindow):
         self.poll_dur = 20
         self.client = None
 
-        # TODO Define some parameters that we need to set up the basic
-        # GazeApp GUI here -- but we don't yet update the values later
-        # when we download params from the server. Need to work that out.
+        # Intialize the parameters and eyeopts
+        # This is just one example of how this division is unclear
+        # but it gets more obvious later
         self.p = Bunch()
         self.eyeopt = Bunch(x_offset=0, y_offset=0, fix_window=3)
         self.local_eyeopt = Bunch(x_offset=0, y_offset=0, fix_window=3)
@@ -52,7 +52,7 @@ class RemoteApp(QMainWindow):
             self.initialize_client()
 
         # Get the most recent gaze position
-        # TODO previously we showed a "trail" of gaze positions rather
+        # Previously we showed a "trail" of gaze positions rather
         # than just one, which looked pretty and is more informative.
         # It is a bit tricker so I am skipping for the moment to get things
         # running, but worth revisiting.
@@ -173,27 +173,43 @@ class GazeApp(object):
 
     def initialize_stim_artists(self):
         """Set up the artists that represent stimuli and gaze location."""
-        fix = Bunch(
-            point=mpl.patches.Circle((0, 0),
-                                     radius=.2,
-                                     facecolor="k",
-                                     linewidth=0,
-                                     animated=True),
-            window=mpl.patches.Circle((0, 0),
-                                      radius=3,
-                                      facecolor="none",
-                                      linestyle="dashed",
-                                      edgecolor=".3",
-                                      animated=True)
-            )
-
         gaze = mpl.patches.Circle((0, 0),
                                   radius=.3,
                                   facecolor="b",
                                   linewidth=0,
                                   animated=True)
 
-        self.plot_objects = Bunch(fix=fix, gaze=gaze)
+        fix = Bunch(
+            point=mpl.patches.Circle((0, 0),
+                                     radius=.15,
+                                     facecolor="k",
+                                     linewidth=0,
+                                     animated=True),
+            window=mpl.patches.Circle((0, 0),
+                                      radius=self.eyeopt.fix_window,
+                                      facecolor="none",
+                                      linestyle="dashed",
+                                      edgecolor=".3",
+                                      animated=True)
+            )
+
+        targets = []
+        if "target_pos" in self.p:
+            for pos in self.p.target_pos:
+                point = mpl.patches.Circle(pos,
+                                           .3,
+                                           facecolor="k",
+                                           linewidth=0,
+                                           animated=True)
+                window = mpl.patches.Circle(pos,
+                                            self.p.target_window,
+                                            facecolor="none",
+                                            linestyle="dashed",
+                                            edgecolor=".3",
+                                            animated=True)
+                targets.extend([point, window])
+
+        self.plot_objects = Bunch(fix=fix, gaze=gaze, targets=targets)
         self.plot_objects.update(self.create_stim_artists())
 
         for _, stim in self.plot_objects.items():
@@ -417,12 +433,15 @@ class TrialApp(object):
         # Another approach would be to keep around references to the artists
         # and update their data using the appropriate matplotlib methods.
 
+        # Draw valid and invalid responses
         resp_line, = resp_ax.plot(trial_df.trial, trial_df.responded, "ko")
         resp_ax.set(xlim=(.5, trial_df.trial.max() + .5))
 
+        # Draw correct and incorrect responses
         cor_line, = cor_ax.plot(trial_df.trial, trial_df.correct, "ko")
         cor_ax.set(xlim=(.5, trial_df.trial.max() + .5))
 
+        # Draw a histogram of RTs
         bins = np.arange(0, 5.2, .2)
         heights, bins = np.histogram(trial_df.rt, bins)
         rt_bars = rt_ax.bar(bins[:-1], heights, .2)
@@ -466,7 +485,6 @@ class ParamSlider(object):
 
     def update(self):
         """React to a change in slider position."""
-        # TODO find best place to handle colors indicating changed values
         value = self.slider.value() * self.res
         self.label.setText(self.label_template.format(value))
         self.gaze_app.local_eyeopt[self.key] = value
