@@ -10,7 +10,6 @@ if __name__ == "__main__":
 
     parser = define_parser("visigoth")
     args, _ = parser.parse_known_args()
-
     sys.path.insert(0, os.path.realpath(args.study_dir))
 
     import experiment
