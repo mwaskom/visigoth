@@ -378,7 +378,7 @@ class Experiment(object):
                 new_params = ""
             if new_params:
                 p = json.loads(new_params)
-                self.tracker.offsets = (p.x_offset, p.y_offset)
+                self.tracker.offsets = p["x_offset"], p["y_offset"]
 
                 # TODO this really needs to be handled better
                 # Currently it's not dynamically logged. See notes above.

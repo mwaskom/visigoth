@@ -1,11 +1,35 @@
 #! /usr/bin/env python2
+import os
+import sys
+
 from PyQt4.QtGui import QApplication
-from visigoth import remote
+
+from visigoth.commandline import define_parser
+from visigoth.remote import RemoteApp, GazeApp, TrialApp
 
 
 if __name__ == "__main__":
 
+    parser = define_parser("visigoth-remote")
+    args, _ = parser.parse_known_args()
+
+    sys.path.insert(0, os.path.realpath(args.study_dir))
+
+    try:
+
+        import remote
+
+        if hasattr(remote, "create_stim_artists"):
+            GazeApp.create_stim_artists = remote.create_stim_artists
+        if hasattr(remote, "initialize_trial_figure"):
+            TrialApp.initialize_figure = remote.initialize_trial_figure
+        if hasattr(remote, "update_trial_figure"):
+            TrialApp.update_figure = remote.update_trial_figure
+
+    except ImportError:
+        print("Could not import study-specific remote methods")
+
     app = QApplication([])
-    win = remote.RemoteApp()
+    win = RemoteApp()
     win.show()
     app.exec_()

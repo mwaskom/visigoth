@@ -3,13 +3,10 @@ import json
 import socket
 import Queue as queue
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
-from matplotlib.figure import Figure
-from matplotlib.colors import rgb2hex
-
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import matplotlib as mpl
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 
 from PyQt4.QtCore import Qt, QTimer
 from PyQt4.QtGui import (QMainWindow, QWidget,
@@ -35,6 +32,12 @@ class RemoteApp(QMainWindow):
         self.poll_dur = 20
         self.client = None
 
+        # TODO here's a problem. We need to get more parameter
+        # information from the server than this, but a lot of setup
+        # is dependent on it. We are going to need to defer the creation
+        # of stimulus artists in the GazeApp until we have established
+        # a connection to the server. This is going to take some additional
+        # thinking / work.
         self.p = Bunch(x_offset=0, y_offset=0, fix_window=2)
 
         self.main_frame = QWidget()
@@ -132,7 +135,7 @@ class GazeApp(object):
 
     def initialize_figure(self):
 
-        fig = Figure((5, 5), dpi=100, facecolor="white")
+        fig = mpl.figure.Figure((5, 5), dpi=100, facecolor="white")
 
         ax = fig.add_subplot(111)
         ax.set(xlim=(-10, 10),
@@ -147,31 +150,35 @@ class GazeApp(object):
         ax.xaxis.grid(True, **grid_kws)
         ax.yaxis.grid(True, **grid_kws)
 
-        self.plot_objects = Bunch(
-            fix=plt.Circle((0, 0),
-                           radius=.2,
-                           facecolor="k",
-                           linewidth=0,
-                           animated=True),
-            fix_window=plt.Circle((0, 0),
-                                  radius=3,
-                                  facecolor="none",
-                                  linestyle="dashed",
-                                  edgecolor=".3",
-                                  animated=True),
-            gaze=plt.Circle((0, 0),
-                            radius=.3,
-                            facecolor="b",
-                            linewidth=0,
-                            animated=True)
+        fix = Bunch(
+            point=mpl.patches.Circle((0, 0),
+                                     radius=.2,
+                                     facecolor="k",
+                                     linewidth=0,
+                                     animated=True),
+            window=mpl.patches.Circle((0, 0),
+                                      radius=3,
+                                      facecolor="none",
+                                      linestyle="dashed",
+                                      edgecolor=".3",
+                                      animated=True)
             )
 
-        # TODO add study-specific stimulus artist definition here
+        gaze = mpl.patches.Circle((0, 0),
+                                  radius=.3,
+                                  facecolor="b",
+                                  linewidth=0,
+                                  animated=True)
+
+        self.plot_objects = Bunch(fix=fix, gaze=gaze)
+        self.plot_objects.update(self.create_stim_artists())
+
+        print(self.plot_objects.keys())
 
         self.axes_background = None
 
         for _, stim in self.plot_objects.items():
-            ax.add_artist(stim)
+            self.add_artist(ax, stim)
 
         return fig, ax
 
@@ -199,6 +206,47 @@ class GazeApp(object):
 
         self.layout = vbox
 
+    # -----
+
+    def create_stim_artists(self):
+        """Define addition """
+        # TODO what's the best way to link stimulus parameters
+        # (which are in the params file and determine at runtime)
+        # to the stimulus artists? Especially if we are being forward-
+        # looking and want the remote to eventually be able to change them
+
+        # TODO even more important, properties like position (especially)
+        # can change. We could enforce that you can't move a stimulus and
+        # need to use multiple ones if you want it to appear in multiple
+        # places, but come on who wants that. We need a better way to link
+        # stimulus objects in the Experiment to stimulus artists in the 
+        # remote
+        return dict()
+
+    # -----
+
+    def add_artist(self, ax, obj):
+        """Add either each artist in an interable or a single artist."""
+        if isinstance(obj, list):
+            for artist in obj:
+                ax.add_artist(artist)
+        elif isinstance(obj, dict):
+            for _, artist in obj.items():
+                ax.add_artist(artist)
+        else:
+            ax.add_artist(obj)
+
+    def draw_artist(self, ax, obj):
+        """Draw either each artist in an iterable or a single artist."""
+        if isinstance(obj, list):
+            for artist in obj:
+                ax.draw_artist(artist)
+        elif isinstance(obj, dict):
+            for _, artist in obj.items():
+                ax.draw_artist(artist)
+        else:
+            ax.draw_artist(obj)
+
     def update_screen(self, screen_data):
 
         if self.axes_background is None:
@@ -210,7 +258,7 @@ class GazeApp(object):
         self.plot_objects.gaze.center = screen_data["gaze"]
 
         # Update fix window size
-        self.plot_objects.fix_window.radius = self.sliders.fix_window.value
+        self.plot_objects.fix.window.radius = self.sliders.fix_window.value
 
         # Draw stimuli on the screen
         self.fig.canvas.restore_region(self.axes_background)
@@ -218,9 +266,7 @@ class GazeApp(object):
         self.ax.draw_artist(self.plot_objects["gaze"])
         for stim in screen_data["stims"]:
             if stim in self.plot_objects:
-                self.ax.draw_artist(self.plot_objects[stim])
-        if "fix" in screen_data["stims"]:
-            self.ax.draw_artist(self.plot_objects["fix_window"])
+                self.draw_artist(self.ax, self.plot_objects[stim])
 
         self.screen_canvas.blit(self.ax.bbox)
 
@@ -257,12 +303,14 @@ class TrialApp(object):
 
         self.layout = vbox
 
+    # -----
+
     def initialize_figure(self):
 
         # TODO this is a method that it should be able to overlaod
         # in a study-specific remote.py file
 
-        fig = Figure((5, 5), dpi=100, facecolor="white")
+        fig = mpl.figure.Figure((5, 5), dpi=100, facecolor="white")
         axes = [fig.add_subplot(3, 1, i) for i in range(1, 4)]
 
         axes[0].set(ylim=(-.1, 1.1),
