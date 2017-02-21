@@ -322,7 +322,7 @@ class Experiment(object):
     def shutdown_server(self):
         """Cleanly close down the experiment server process."""
         # TODO we should send some sort of shutdown signal to the
-        # remote client so it can handle things well (currently just crashes)
+        # remote client so it can handle hangups well (currently just crashes)
         if self.server is not None:
             self.server.join(timeout=2)
 
@@ -345,6 +345,11 @@ class Experiment(object):
         if self.server.connected:
 
             gaze = self.tracker.read_gaze()
+
+            # Pass stimuli on the screen and their position
+            # (if they have a `pos` attribute).
+            # Note that we want to find a better way to sync aribtrary
+            # Psychopy and matplotlib commands for a richer client view
             stims = {s: getattr(self.s[s], "pos", None) for s in stims}
 
             data = json.dumps(dict(gaze=gaze,
@@ -447,7 +452,7 @@ class Experiment(object):
             else:
                 self.draw(stims, flip=True)
 
-    def draw(self, stims, flip=False):
+    def draw(self, stims, flip=True):
         """Draw each named stimulus in the order provided."""
 
         # TODO We want to use this central drawing method to send information

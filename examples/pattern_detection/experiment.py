@@ -127,7 +127,7 @@ def run_trial(exp, info):
         stims = ["noise_l", "noise_r", "fix", "targets"]
         if noise_frame == info.pattern_frame:
             stims = ["pattern"] + stims
-        exp.draw(stims, flip=True)
+        exp.draw(stims)
 
     # Collect eye response
     res = exp.wait_until(AcquireTarget(exp),
@@ -153,6 +153,6 @@ def run_trial(exp, info):
 
     # Perpate for inter-trial interval
     exp.s.fix.color = exp.p.fix_iti_color
-    exp.draw("fix", flip=True)
+    exp.draw("fix")
 
     return info
