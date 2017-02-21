@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from visigoth.tools import AcquireFixation, AcquireTarget, flexible_values
-from visigoth.stimuli import Point, Points, Pattern, GaussianNoise 
+from visigoth.stimuli import Point, Points, Pattern, GaussianNoise
 
 
 def create_stimuli(exp):
@@ -130,33 +130,21 @@ def run_trial(exp, info):
         exp.draw(stims)
 
     # Collect eye response
-    res = exp.wait_until(AcquireTarget(exp),
+    res = exp.wait_until(AcquireTarget(exp, info.target),
                          exp.p.wait_resp,
                          draw="targets")
 
-    # TODO all of this logic should happen somewhere else
+    # Handle eye response
     if res is None:
-        result = "nochoice"
+        # TODO wouldn't need to do this if not going fast enough
+        # was handled within `AcquireTarget` instead of `wait_until`
+        info["result"] = "nochoice"
     else:
-        _, response = res
-        if isinstance(response, int):
-            correct = response == info.target
-            result = "correct" if correct else "wrong"
-            info["correct"] = correct
-            info["response"] = response
-            info["responded"] = True
-        else:
-            result = "nochoice"
+        info.update(pd.Series(res))
+    exp.auditory_feedback(info.result)
 
-    exp.auditory_feedback(result)
-    info["result"] = result
-
-    # Perpate for inter-trial interval
+    # Prepare for inter-trial interval
     exp.s.fix.color = exp.p.fix_iti_color
     exp.draw("fix")
-
-    # TODO We don't compute RT yet!
-    if info["responded"]:
-        info["rt"] = np.random.gamma(3, .25)
 
     return info

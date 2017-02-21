@@ -4,6 +4,8 @@ from scipy.spatial import distance
 
 from psychopy import core, event
 
+from .ext.bunch import Bunch
+
 
 class AcquireFixation(object):
 
@@ -41,7 +43,7 @@ class AcquireFixation(object):
 
 class AcquireTarget(object):
 
-    def __init__(self, exp):
+    def __init__(self, exp, correct_target=None):
 
         self.exp = exp
 
@@ -67,6 +69,7 @@ class AcquireTarget(object):
         self.fix_break_time = None
         self.target_time = None
         self.chosen_target = None
+        self.correct_target = correct_target
 
         # TODO should probably clear events on initialization
 
@@ -74,11 +77,27 @@ class AcquireTarget(object):
 
         if self.check_key:
 
-            keys = event.getKeys(self.keyList)
+            # Check for a press of one of the valid keys
+            keys = event.getKeys(self.keyList, timestamped=self.clock)
+
+            # Handle a keypress response
             if keys:
-                for key in keys:
-                    choice = self.keylist.index(key)
-                    return (True, choice)
+
+                use_key, use_rt = keys[0]
+                response = self.keylist.index(use_key)
+
+                res = Bunch(key_response=True,
+                            responded=True,
+                            response=response,
+                            key=use_key,
+                            rt=use_rt)
+
+                if self.correct_target is not None:
+                    correct = response == self.correct_target
+                    res["correct"] = correct
+                    res["result"] = "correct" if correct else "wrong"
+
+                return res
 
         if self.check_eye:
 
@@ -101,33 +120,55 @@ class AcquireTarget(object):
 
                 if check_gaze(gaze, pos, self.target_window):
 
+                    # Check eye has just entered a target window
                     if self.chosen_target is None:
-                        # Eye has just entered a target window
                         self.chosen_target = i
                         self.target_time = now
+
+                    # Check eye used to be on a different target and has moved
                     elif self.chosen_target != i:
-                        # Eye used to be on a different target and has moved
                         failure = True
 
+                    # Check eye has successfully held first target
                     if now > (self.target_time + self.hold_time):
-                        # Eye has successfully held the target
                         success = True
 
                 else:
 
+                    # Check eye is no longer holding first target
                     if self.chosen_target == i:
-                        # Eye had acquired this target but then lost it
                         failure = True
 
+            # Fail if too much time has elapsed since breaking fixation
+            # without landing on a target
+            if now > (self.fix_break_time + self.wait_time):
+                failure = True
+
+            # Handle a successful choice of a target
+            # (not neccessarily the right one!)
             if success:
-                return True, self.chosen_target
+
+                res = Bunch(eye_response=True,
+                            responded=True,
+                            response=self.chosen_target,
+                            rt=self.fix_break_time)
+
+                if self.correct_target is not None:
+                    correct = self.chosen_target == self.correct_target
+                    res["correct"] = correct
+                    res["result"] = "correct" if correct else "wrong"
+
+                return res
+
+            # Handle a failure to choose a target
             elif failure:
-                return True, None
-            elif now > (self.fix_break_time + self.wait_time):
-                # The time to find a target has elapsed unsuccessfully
-                return (True, None)
+
+                res = Bunch(responded=False,
+                            result="nochoice")
+                return res
+
+            # No determinate result yet
             else:
-                # No determinate result yet
                 return False
 
 
