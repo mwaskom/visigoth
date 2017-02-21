@@ -424,8 +424,9 @@ class TrialApp(object):
         cor_ax.set(xlim=(.5, trial_df.trial.max() + .5))
 
         bins = np.arange(0, 5.2, .2)
-        heights, bins = np.histogram(trial_data.rt, bins)
+        heights, bins = np.histogram(trial_df.rt, bins)
         rt_bars = rt_ax.bar(bins[:-1], heights, .2)
+        rt_ax.set(ylim=(0, heights.max() + 1))
 
         # Draw the canvas to show the new data
         self.fig_canvas.draw()
