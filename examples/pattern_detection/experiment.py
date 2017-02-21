@@ -155,4 +155,8 @@ def run_trial(exp, info):
     exp.s.fix.color = exp.p.fix_iti_color
     exp.draw("fix")
 
+    # TODO We don't compute RT yet!
+    if info["responded"]:
+        info["rt"] = np.random.gamma(3, .25)
+
     return info

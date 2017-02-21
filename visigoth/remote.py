@@ -344,12 +344,12 @@ class TrialApp(object):
 
         axes[0].set(ylim=(-.1, 1.1),
                     yticks=[0, 1],
-                    yticklabels=["Yes", "No"],
+                    yticklabels=["No", "Yes"],
                     ylabel="Responded")
 
         axes[1].set(ylim=(-.1, 1.1),
                     yticks=[0, 1],
-                    yticklabels=["Yes", "No"],
+                    yticklabels=["No", "Yes"],
                     ylabel="Correct")
 
         axes[2].set(ylim=(0, None),
