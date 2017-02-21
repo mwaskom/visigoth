@@ -35,7 +35,9 @@ class RemoteApp(QMainWindow):
         # TODO Define some parameters that we need to set up the basic
         # GazeApp GUI here -- but we don't yet update the values later
         # when we download params from the server. Need to work that out.
-        self.p = Bunch(x_offset=0, y_offset=0, fix_window=2)
+        self.p = Bunch()
+        self.eyeopt = Bunch(x_offset=0, y_offset=0, fix_window=3)
+        self.local_eyeopt = Bunch(x_offset=0, y_offset=0, fix_window=3)
 
         self.main_frame = QWidget()
         self.gaze_app = GazeApp(self)
@@ -45,9 +47,11 @@ class RemoteApp(QMainWindow):
 
     def poll(self):
 
+        # Ensure connection to the server
         if self.client is None:
             self.initialize_client()
 
+        # Get the most recent gaze position
         # TODO previously we showed a "trail" of gaze positions rather
         # than just one, which looked pretty and is more informative.
         # It is a bit tricker so I am skipping for the moment to get things
@@ -67,6 +71,9 @@ class RemoteApp(QMainWindow):
         except queue.Empty:
             pass
 
+        # Update the GazeApp GUI elementes
+        self.gaze_app.update_gui()
+
     def initialize_client(self):
 
         try:
@@ -80,7 +87,10 @@ class RemoteApp(QMainWindow):
             params = json.loads(self.param_q.get())
             self.p.update(params)
 
-            # TODO update the gaze app sliders?
+            # Update our understanding of the fix window size
+            self.eyeopt["fix_window"] = self.p.fix_window
+            self.local_eyeopt["fix_window"] = self.p.fix_window
+            self.gaze_app.sliders["fix_window"].value = self.p.fix_window
 
             # Initialize the stimulus artists in the gaze window
             # This had to be deferred util we knew the active params
@@ -111,6 +121,8 @@ class GazeApp(object):
 
         self.remote_app = remote_app
         self.p = remote_app.p
+        self.eyeopt = remote_app.eyeopt
+        self.local_eyeopt = remote_app.local_eyeopt
 
         fig, ax = self.initialize_figure()
         self.fig = fig
@@ -119,9 +131,9 @@ class GazeApp(object):
         self.screen_canvas.setParent(remote_app.main_frame)
 
         update_button = QPushButton("Update")
-        update_button.clicked.connect(self.update_params)
+        update_button.clicked.connect(self.update_eyeopt)
         reset_button = QPushButton("Reset")
-        reset_button.clicked.connect(self.reset_params)
+        reset_button.clicked.connect(self.reset_eyeopt)
 
         self.buttons = Bunch(
             update=update_button,
@@ -129,9 +141,9 @@ class GazeApp(object):
             )
 
         self.sliders = Bunch(
-            x_offset=ParamSlider("x offset", self.p.x_offset, (-4, 4)),
-            y_offset=ParamSlider("y offset", self.p.y_offset, (-4, 4)),
-            fix_window=ParamSlider("fix window", self.p.fix_window, (0, 6))
+            x_offset=ParamSlider(self, "x offset", (-4, 4)),
+            y_offset=ParamSlider(self, "y offset", (-4, 4)),
+            fix_window=ParamSlider(self, "fix window", (0, 6))
             )
 
         self.initialize_layout()
@@ -260,10 +272,14 @@ class GazeApp(object):
             self.axes_background = ax_bg
 
         # Update gaze position
-        self.plot_objects.gaze.center = screen_data["gaze"]
+        gaze = np.array(screen_data["gaze"])
+        offsets = np.array([self.local_eyeopt["x_offset"],
+                            self.local_eyeopt["y_offset"]])
+        gaze += offsets
+        self.plot_objects.gaze.center = gaze
 
         # Update fix window size
-        self.plot_objects.fix.window.radius = self.sliders.fix_window.value
+        self.plot_objects.fix.window.radius = self.local_eyeopt["fix_window"]
 
         # Draw stimuli on the screen
         self.fig.canvas.restore_region(self.axes_background)
@@ -288,16 +304,24 @@ class GazeApp(object):
 
         self.screen_canvas.blit(self.ax.bbox)
 
-    def update_params(self):
-        """Method to trigger a parameter upload; triggered by a button."""
-        gaze_params = ["x_offset", "y_offset", "fix_window"]
-        new_params = {k: self.p[k] for k in gaze_params}
-        self.remote_app.param_q.put(json.dumps(new_params))
+    def update_gui(self):
+        """Sync the GUI elements with the current values."""
+        for name, slider in self.sliders.items():
+            if self.local_eyeopt[name] != self.eyeopt[name]:
+                slider.label.setStyleSheet("color: red")
+            else:
+                slider.label.setStyleSheet("color: black")
 
-    def reset_params(self):
+    def update_eyeopt(self):
+        """Method to trigger a parameter upload; triggered by a button."""
+        self.remote_app.param_q.put(json.dumps(self.local_eyeopt))
+        self.eyeopt.update(self.local_eyeopt)
+
+    def reset_eyeopt(self):
         """Method to reset sliders to original value without uploading."""
         for name, obj in self.sliders.items():
-            obj.slider.setValue(self.p[name] / obj.res)
+            obj.value = self.eyeopt[name]
+        self.local_eyeopt.update(self.eyeopt)
 
 
 class TrialApp(object):
@@ -416,11 +440,17 @@ class TrialApp(object):
 
 class ParamSlider(object):
     """Simple wrapper around a PyQT slider object, since we have a few."""
-    def __init__(self, name, start_val, range, res=.1, fmt="{:.1f}"):
+    def __init__(self, gaze_app, name, range,
+                 res=.1, label_fmt="{:.1f}"):
+
+        self.gaze_app = gaze_app
+        self.name = name
+        self.key = name.replace(" ", "_")
 
         self.res = res
-        self.fmt = fmt
-        self.label_template = name + ": " + fmt
+        self.label_template = name + ": " + label_fmt
+
+        start_val = gaze_app.local_eyeopt[self.key]
 
         self.label = QLabel(self.label_template.format(start_val))
         self.slider = slider = QSlider(Qt.Horizontal)
@@ -438,7 +468,13 @@ class ParamSlider(object):
         # TODO find best place to handle colors indicating changed values
         value = self.slider.value() * self.res
         self.label.setText(self.label_template.format(value))
+        self.gaze_app.local_eyeopt[self.key] = value
 
     @property
     def value(self):
         return self.slider.value() * self.res
+
+    @value.setter
+    def value(self, val):
+        self.slider.setValue(int(val / self.res))
+        self.label.setText(self.label_template.format(val))

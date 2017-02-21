@@ -390,7 +390,7 @@ class Experiment(object):
 
                 # TODO this really needs to be handled better
                 # Currently it's not dynamically logged. See notes above.
-                self.p.fix_window = p.fix_window
+                self.p.fix_window = p["fix_window"]
 
     # === Execution functions
 
