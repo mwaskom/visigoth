@@ -160,6 +160,7 @@ class Experiment(object):
         each study to allow for more complicated data structures or exit logic.
 
         """
+        # TODO save out the params!
         if self.trial_data and self.p.save_data:
             data = pd.DataFrame(self.trial_data)
             out_fname = self.output_stem + "_trials.csv"
@@ -209,7 +210,6 @@ class Experiment(object):
 
         # Timestamp the execution and add to parameters
         timestamp = time.localtime()
-        p.timestamp = timestamp
         p.date = time.strftime("%Y-%m-%d", timestamp)
         p.time = time.strftime("%H-%M-%S", timestamp)
 
@@ -343,7 +343,10 @@ class Experiment(object):
     def sync_remote_screen(self, stims):
         """Send information about what's on the screen to the client."""
         if self.server.connected:
+
             gaze = self.tracker.read_gaze()
+            stims = {s: getattr(self.s[s], "pos", None) for s in stims}
+
             data = json.dumps(dict(gaze=gaze,
                               stims=stims))
             self.screen_q.put(data)

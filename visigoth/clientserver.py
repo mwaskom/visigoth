@@ -160,15 +160,6 @@ class SocketServerThread(SocketThread):
 
         self.connected = False
 
-    @property
-    def gaze_params(self):
-
-        x_offset, y_offset = self.exp.tracker.offsets
-        param_dict = dict(x_offset=x_offset,
-                          y_offset=y_offset,
-                          fix_window=self.exp.p.fix_window)
-        return json.dumps(param_dict)
-
     def run(self):
 
         # TODO can we make it so that the client can be persistent?
@@ -190,7 +181,8 @@ class SocketServerThread(SocketThread):
 
                 # Handle a request for server-side params
                 if kind == self.PARAM_REQUEST:
-                    data = self.package(self.NEW_PARAMS, self.gaze_params)
+                    params = json.dumps(self.exp.p)
+                    data = self.package(self.NEW_PARAMS, params)
                     clientsocket.sendall(data)
 
                 # Check if we got something surprising

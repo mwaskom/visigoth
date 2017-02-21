@@ -83,6 +83,12 @@ class RemoteApp(QMainWindow):
             params = json.loads(self.param_q.get())
             self.p.update(params)
 
+            # TODO update the gaze app sliders?
+
+            # Initialize the stimulus artists in the gaze window
+            # This had to be deferred util we knew the active params
+            self.gaze_app.initialize_stim_artists()
+
         except socket.error:
             pass
 
@@ -150,6 +156,12 @@ class GazeApp(object):
         ax.xaxis.grid(True, **grid_kws)
         ax.yaxis.grid(True, **grid_kws)
 
+        self.axes_background = None
+
+        return fig, ax
+
+    def initialize_stim_artists(self):
+
         fix = Bunch(
             point=mpl.patches.Circle((0, 0),
                                      radius=.2,
@@ -173,14 +185,8 @@ class GazeApp(object):
         self.plot_objects = Bunch(fix=fix, gaze=gaze)
         self.plot_objects.update(self.create_stim_artists())
 
-        print(self.plot_objects.keys())
-
-        self.axes_background = None
-
         for _, stim in self.plot_objects.items():
-            self.add_artist(ax, stim)
-
-        return fig, ax
+            self.add_artist(self.ax, stim)
 
     def initialize_layout(self):
 
@@ -264,8 +270,21 @@ class GazeApp(object):
         self.fig.canvas.restore_region(self.axes_background)
 
         self.ax.draw_artist(self.plot_objects["gaze"])
-        for stim in screen_data["stims"]:
+        for stim, pos in screen_data["stims"].items():
             if stim in self.plot_objects:
+
+                # TODO This lets us move stimulus objects around in the gaze
+                # app, but it's limited to Psychopy objects with a `pos`
+                # attribute and matplotlib objects with a `center` attribute.
+                # It would be nice if this were more flexible, but it's not
+                # trivial to link arbitrary psychopy attributes to arbitrary
+                # matplotlib attributes. Maybe this mapping could be defined
+                # somehow on our versions of the Psychopy objects?
+                # Punting on this for now -- it seems to work ok and the
+                # GazeApp display is intended to be pretty minimal anyway.
+                if pos is not None:
+                    self.plot_objects[stim].center = pos
+
                 self.draw_artist(self.ax, self.plot_objects[stim])
 
         self.screen_canvas.blit(self.ax.bbox)
