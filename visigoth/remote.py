@@ -1,4 +1,4 @@
-
+"""PyQT GUI offering remote monitoring and control of experiment execution."""
 import json
 import socket
 import Queue as queue
@@ -32,12 +32,9 @@ class RemoteApp(QMainWindow):
         self.poll_dur = 20
         self.client = None
 
-        # TODO here's a problem. We need to get more parameter
-        # information from the server than this, but a lot of setup
-        # is dependent on it. We are going to need to defer the creation
-        # of stimulus artists in the GazeApp until we have established
-        # a connection to the server. This is going to take some additional
-        # thinking / work.
+        # TODO Define some parameters that we need to set up the basic
+        # GazeApp GUI here -- but we don't yet update the values later
+        # when we download params from the server. Need to work that out.
         self.p = Bunch(x_offset=0, y_offset=0, fix_window=2)
 
         self.main_frame = QWidget()
@@ -109,7 +106,7 @@ class RemoteApp(QMainWindow):
 
 
 class GazeApp(object):
-
+    """Component of the Remote GUI that monitors/controls eyetracking."""
     def __init__(self, remote_app):
 
         self.remote_app = remote_app
@@ -139,8 +136,10 @@ class GazeApp(object):
 
         self.initialize_layout()
 
-    def initialize_figure(self):
+    # ---- Initialization methods
 
+    def initialize_figure(self):
+        """Set up the basic aspects of the matplotlib screen figure."""
         fig = mpl.figure.Figure((5, 5), dpi=100, facecolor="white")
 
         ax = fig.add_subplot(111)
@@ -161,7 +160,7 @@ class GazeApp(object):
         return fig, ax
 
     def initialize_stim_artists(self):
-
+        """Set up the artists that represent stimuli and gaze location."""
         fix = Bunch(
             point=mpl.patches.Circle((0, 0),
                                      radius=.2,
@@ -189,7 +188,7 @@ class GazeApp(object):
             self.add_artist(self.ax, stim)
 
     def initialize_layout(self):
-
+        """Set up the basic layout of the PyQT GUI."""
         controls = QHBoxLayout()
 
         for key in ["x_offset", "y_offset", "fix_window"]:
@@ -212,27 +211,27 @@ class GazeApp(object):
 
         self.layout = vbox
 
-    # -----
+    # ----- Study-specific functions
 
     def create_stim_artists(self):
-        """Define addition """
-        # TODO what's the best way to link stimulus parameters
-        # (which are in the params file and determine at runtime)
-        # to the stimulus artists? Especially if we are being forward-
-        # looking and want the remote to eventually be able to change them
+        """Define additional matplotlib artists to represent stimuli.
 
-        # TODO even more important, properties like position (especially)
-        # can change. We could enforce that you can't move a stimulus and
-        # need to use multiple ones if you want it to appear in multiple
-        # places, but come on who wants that. We need a better way to link
-        # stimulus objects in the Experiment to stimulus artists in the 
-        # remote
+        Returns
+        -------
+        stims : dict
+            The keys in this dictionary should correspond to the server-side
+            stimulus names (i.e. what you define in `create_stimuli`.
+            The values should be either a single matplotlib artist, a list
+            of artists, or a dict mapping arbitrary artist subcomponent
+            names to artists.
+
+        """
         return dict()
 
-    # -----
+    # ----- Live GUI methods
 
     def add_artist(self, ax, obj):
-        """Add either each artist in an interable or a single artist."""
+        """Add either each artist in an iterable or a single artist."""
         if isinstance(obj, list):
             for artist in obj:
                 ax.add_artist(artist)
@@ -254,7 +253,7 @@ class GazeApp(object):
             ax.draw_artist(obj)
 
     def update_screen(self, screen_data):
-
+        """Re-draw the figure to show current gaze and what's on the screen."""
         if self.axes_background is None:
             self.fig.canvas.draw()
             ax_bg = self.fig.canvas.copy_from_bbox(self.ax.bbox)
@@ -290,19 +289,19 @@ class GazeApp(object):
         self.screen_canvas.blit(self.ax.bbox)
 
     def update_params(self):
-
+        """Method to trigger a parameter upload; triggered by a button."""
         gaze_params = ["x_offset", "y_offset", "fix_window"]
         new_params = {k: self.p[k] for k in gaze_params}
         self.remote_app.param_q.put(json.dumps(new_params))
 
     def reset_params(self):
-
+        """Method to reset sliders to original value without uploading."""
         for name, obj in self.sliders.items():
             obj.slider.setValue(self.p[name] / obj.res)
 
 
 class TrialApp(object):
-
+    """Component of the Remote GUI that shows data from each trial."""
     def __init__(self, remote_app):
 
         self.remote_app = remote_app
@@ -322,13 +321,24 @@ class TrialApp(object):
 
         self.layout = vbox
 
-    # -----
+    # ---- Study-specific methods
+
+    # Both of these methods can be overloaded by defining a remote.py
+    # module in your study directory. The default is to show a simple
+    # summary of when the subject responded, their accuracy, and their RT.
+
+    # However, note that the remote.py file should define
+    # `initialize_trial_figure` and `update_trial_figure`, not the names here.
 
     def initialize_figure(self):
+        """Set up the figure and axes for trial data.
 
-        # TODO this is a method that it should be able to overlaod
-        # in a study-specific remote.py file
+        This method can be overloaded in a study-specific remote.py file
+        if you want a more complicated figure than this basic example.
 
+        """
+        # Note that we do not use the matplotlib.pyplot function, but
+        # rather create the Figure object directly.
         fig = mpl.figure.Figure((5, 5), dpi=100, facecolor="white")
         axes = [fig.add_subplot(3, 1, i) for i in range(1, 4)]
 
@@ -350,18 +360,38 @@ class TrialApp(object):
         return fig, axes
 
     def update_figure(self, trial_data):
+        """Change the trial data figure with data from a new trial.
 
-        # TODO this is a method that it should be able to overlaod
-        # in a study-specific remote.py file
+        This method can be overloaded in a study-specific remote.py file
+        if you want a more complicated figure than this basic example.
 
-        # TODO note that we need to handle deserialization here
+        Parameters
+        ----------
+        trial_data : serialized object
+            The data has whatever format is defined in the server-side
+            `Experiment.serialize_trial_info` method. By default this is
+            a pandas.Series in json, but it can be made study specific
+            if you need a more complex representation of each trial's data.
+
+        """
+        # Note that we need to handle deserialization here
+        # This allows support for study-specific formats of trial_data.
+        # The easiest thing to do is to have it be a Pandas Series.
         trial_data = pd.read_json(trial_data, typ="series")
 
+        # Create a new full dataset
         self.trial_data.append(trial_data)
-
         trial_df = pd.DataFrame(self.trial_data)
 
+        # Get direct references to the different axes
+        # Note dependence on how the figure is specified in the
+        # `initialize_figure` method.
         resp_ax, cor_ax, rt_ax = self.axes
+
+        # We are taking the approach of creating new artists on each trial,
+        # drawing them, then removing them before adding the next trial's data.
+        # Another approach would be to keep around references to the artists
+        # and update their data using the appropriate matplotlib methods.
 
         resp_line, = resp_ax.plot(trial_df.trial, trial_df.responded, "ko")
         resp_ax.set(xlim=(.5, trial_df.trial.max() + .5))
@@ -373,14 +403,19 @@ class TrialApp(object):
         heights, bins = np.histogram(trial_data.rt, bins)
         rt_bars = rt_ax.bar(bins[:-1], heights, .2)
 
+        # Draw the canvas to show the new data
         self.fig_canvas.draw()
 
+        # By removing the stimulus artists after drawing the canvas,
+        # we are in effect clearing before drawing the new data on
+        # the *next* trial.
         resp_line.remove()
         cor_line.remove()
         rt_bars.remove()
 
-class ParamSlider(object):
 
+class ParamSlider(object):
+    """Simple wrapper around a PyQT slider object, since we have a few."""
     def __init__(self, name, start_val, range, res=.1, fmt="{:.1f}"):
 
         self.res = res
@@ -399,7 +434,7 @@ class ParamSlider(object):
         slider.valueChanged.connect(self.update)
 
     def update(self):
-
+        """React to a change in slider position."""
         # TODO find best place to handle colors indicating changed values
         value = self.slider.value() * self.res
         self.label.setText(self.label_template.format(value))
