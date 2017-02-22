@@ -30,6 +30,11 @@ class Experiment(object):
 
         self.clock = core.Clock()
 
+        # Initialize some related variables about the eye
+        # TODO this might be squatting on a good name
+        self.eye = Bunch(most_recent_fixation=0,
+                         most_recent_blink=0)
+
         # TODO feedback implementation needs to be improved
         self.auditory_feedback = feedback.AuditoryFeedback()
 
@@ -166,7 +171,7 @@ class Experiment(object):
             out_data_fname = self.output_stem + "_trials.csv"
             data.to_csv(out_data_fname, index=False)
 
-            out_json_fname = self.output_stim + "_params.json"
+            out_json_fname = self.output_stem + "_params.json"
             with open(out_json_fname, "w") as fid:
                 json.dump(self.p, fid, sort_keys=True, indent=4)
 
@@ -175,12 +180,10 @@ class Experiment(object):
     def initialize_params(self):
         """Determine parameters for this run of the experiment."""
 
-        """
-        TODO let's make sure this is the right organization of things.
-        Should we parse the main command line arguments outside of the
-        Experiment class and then pass in a params bunch/dict?
-        Not sure right now what's cleanest.
-        """
+        # TODO let's make sure this is the right organization of things.
+        # Should we parse the main command line arguments outside of the
+        # Experiment class and then pass in a params bunch/dict?
+        # Not sure right now what's cleanest.
 
         # Define the standard set of command line argument
         parser = commandline.define_parser("visigoth")
@@ -217,6 +220,8 @@ class Experiment(object):
         p.date = time.strftime("%Y-%m-%d", timestamp)
         p.time = time.strftime("%H-%M-%S", timestamp)
 
+        # TODO inject the visigoth version into the params bunch
+
         self.p = p
         self.debug = args.debug
 
@@ -251,7 +256,7 @@ class Experiment(object):
             # Determine the screen background color during calibration
             # Currently I'm not sure how to get iohub to apply gamma correction
             # so we need to do that ourselves here.
-            # TODO but this should probably be abstracted since it happens twice
+            # TODO but this should probably be abstracted as it happens twice
             fname = os.path.join(self.p.study_dir, "displays.yaml")
             with open(fname) as fid:
                 display_info = yaml.load(fid)
@@ -539,14 +544,45 @@ class Experiment(object):
         if adjust_for_missed:
             self.win.recordFrameIntervals = False
 
+    def check_fixation(self, allow_blinks=False, fix_pos=(0, 0)):
+        """Enforce fixation but possibly allow blinks."""
+        now = self.clock.getTime()
+        if self.tracker.check_fixation(fix_pos, self.p.fix_window):
+            # Eye is open and in fixation window
+            self.eye.most_recent_fixation = self.clock.getTime()
+            return True
+
+        if allow_blinks:
+
+            if self.tracker.check_eye_open(new_sample=False):
+                # Eye is outside of fixation, maybe at start or end of blink
+                last_fix = self.eye.most_recent_fixation
+                last_blink = self.eye.most_recent_blink
+                if (now - last_fix) < self.p.eye_fixbreak_timeout:
+                    return True
+                elif (now - last_blink) < self.p.eye_fixbreak_timeout:
+                    return True
+
+            else:
+                # Eye is closed (or otherwise not providing valid data)
+                self.eye.most_recent_blink = now
+                blink_duration = now - self.eye.most_recent_fixation
+                if blink_duration < self.p.eye_blink_timeout:
+                    return True
+
+        # Either we are outside of fixation or eye has closed for too long
+        return False
+
     def check_quit(self):
         """Check whether the quit key has been pressed and exit if so."""
         if event.getKeys(["escape"]):
             core.quit()
         return False
 
-    def iti_end(self, iti_duration):
+    def iti_end(self, iti_duration, check_quit=True):
         """Return True if current time is within a flip of the ITI end."""
+        if check_quit:
+            self.check_quit()
         now = self.clock.getTime()
         end = self.iti_start + iti_duration
         return (now + self.win.frametime) >= end

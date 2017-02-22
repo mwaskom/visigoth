@@ -129,6 +129,11 @@ def run_trial(exp, info):
         stims = ["noise_l", "noise_r", "fix", "targets"]
         if noise_frame == info.pattern_frame:
             stims = ["pattern"] + stims
+        if not exp.check_fixation(allow_blinks=True):
+            # TODO write a function to do this
+            exp.auditory_feedback("fixbreak")
+            info["result"] = "fixbreak"
+            return info
         exp.draw(stims)
 
     info["dropped_frames"] = exp.win.nDroppedFrames
@@ -140,8 +145,9 @@ def run_trial(exp, info):
 
     # Handle eye response
     if res is None:
-        # TODO wouldn't need to do this if not going fast enough
+        # TODO wouldn't need to do this if not responding fast enough
         # was handled within `AcquireTarget` instead of `wait_until`
+        # shoudld reconsider that...
         info["result"] = "nochoice"
     else:
         info.update(pd.Series(res))
