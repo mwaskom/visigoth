@@ -156,15 +156,19 @@ class Experiment(object):
 
         If the object returned by ``run_trial`` is a pandas Series and you
         don't want to do anything special at the end of the experiment, it's
-        not necessary to overload this function. Howver, it can be defined for
+        not necessary to overload this function. However, it can be defined for
         each study to allow for more complicated data structures or exit logic.
 
         """
-        # TODO save out the params!
         if self.trial_data and self.p.save_data:
+
             data = pd.DataFrame(self.trial_data)
-            out_fname = self.output_stem + "_trials.csv"
-            data.to_csv(out_fname, index=False)
+            out_data_fname = self.output_stem + "_trials.csv"
+            data.to_csv(out_data_fname, index=False)
+
+            out_json_fname = self.output_stim + "_params.json"
+            with open(out_json_fname, "w") as fid:
+                json.dump(self.p, fid, sort_keys=True, indent=4)
 
     # ==== Initialization functions ====
 
@@ -241,11 +245,13 @@ class Experiment(object):
 
     def initialize_eyetracker(self):
         """Connect to and calibrate eyetracker."""
+        # TODO Need to figure out how to handle non eye-tracking centrally
         if self.p.monitor_eye:
 
             # Determine the screen background color during calibration
             # Currently I'm not sure how to get iohub to apply gamma correction
             # so we need to do that ourselves here.
+            # TODO but this should probably be abstracted since it happens twice
             fname = os.path.join(self.p.study_dir, "displays.yaml")
             with open(fname) as fid:
                 display_info = yaml.load(fid)
@@ -340,8 +346,6 @@ class Experiment(object):
             self.win.close()
 
     # === Networking functions (communication with remote)
-
-    # TODO Need to figure out how to handle non eye-tracking centrally
 
     def sync_remote_screen(self, stims):
         """Send information about what's on the screen to the client."""
