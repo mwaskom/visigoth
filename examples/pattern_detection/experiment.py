@@ -73,6 +73,8 @@ def generate_trials(exp):
 
             target=pattern_side,
 
+            dropped_frames=np.nan,
+
             responded=False,
             response=np.nan,
             correct=np.nan,
@@ -128,6 +130,8 @@ def run_trial(exp, info):
         if noise_frame == info.pattern_frame:
             stims = ["pattern"] + stims
         exp.draw(stims)
+
+    info["dropped_frames"] = exp.win.nDroppedFrames
 
     # Collect eye response
     res = exp.wait_until(AcquireTarget(exp, info.target),

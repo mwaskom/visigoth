@@ -10,7 +10,7 @@ import yaml
 import numpy as np
 import pandas as pd
 
-from psychopy import core, tools, visual, event, monitors
+from psychopy import core, tools, visual, event, monitors, logging
 
 from .ext.bunch import Bunch
 from . import stimuli, feedback, eyetracker, commandline, clientserver
@@ -142,7 +142,7 @@ class Experiment(object):
         raise NotImplementedError
 
     def serialize_trial_info(self, trial_info):
-        """Serialze the trial results so they can be be sent to the remote.
+        """Serialize the trial results so they can be be sent to the remote.
 
         If the object returned by ``run_trial`` is a pandas Series, it's not
         necessary to overload this function. However, it can be defined for
@@ -279,6 +279,7 @@ class Experiment(object):
         monitor.setSizePix(info["resolution"])
 
         # Open the psychopy window
+        logging.console.setLevel(logging.CRITICAL)
         res = (800, 600) if debug else info["resolution"]
         self.win = win = visual.Window(units="deg",
                                        screen=0,
@@ -286,16 +287,18 @@ class Experiment(object):
                                        allowGUI=debug,
                                        color=color,
                                        size=res,
-                                       monitor=monitor)
+                                       monitor=monitor,
+                                       autoLog=False)
 
         # Test window performance
-        win.setRecordFrameIntervals(True)
+        win.recordFrameIntervals = True
         frametime, _, _ = visual.getMsPerFrame(win)
         refresh_hz = 1000 / frametime
         refresh_error = abs(info["refresh_hz"] - refresh_hz)
         if refresh_error > .5 and not debug:
             text = "Display refresh rate differs from expected by {:.2} Hz"
             raise RuntimeError(text.format(refresh_error))
+        win.recordFrameIntervals = False
 
         # Assign attributes with helpful information and log in params
         win.frametime = 1 / info["refresh_hz"]
@@ -348,7 +351,7 @@ class Experiment(object):
 
             # Pass stimuli on the screen and their position
             # (if they have a `pos` attribute).
-            # Note that we want to find a better way to sync aribtrary
+            # Note that we want to find a better way to sync arbitrary
             # Psychopy and matplotlib commands for a richer client view
             stims = {s: getattr(self.s[s], "pos", None) for s in stims}
 
@@ -366,7 +369,7 @@ class Experiment(object):
 
         A note about the scalability of this method: ultimately, we'd like
         to be able to change *any* parameters on the client side. Currently
-        we only know how to handle a subset of parametesr that pertain to
+        we only know how to handle a subset of parameters that pertain to
         eye-tracking. These are not that cleanly handled anyway, as the
         offsets "belong" to the eyetracker, but the fixation window size
         doesn't. Maybe it should?
@@ -392,15 +395,15 @@ class Experiment(object):
                 # Currently it's not dynamically logged. See notes above.
                 self.p.fix_window = p["fix_window"]
 
-    # === Execution functions
+    # === Execution functions ===
 
     # Study-specific code will generally only need to interact with these
-    # methods; the ones above are mostly called interally (despite not
+    # methods; the ones above are mostly called internally (despite not
     # having private names)
 
     def wait_until(self, func=None, timeout=np.inf, sleep=0, draw=None,
                    args=(), **kwargs):
-        """Wait limited by callback and timout, possibly drawing stimuli.
+        """Wait limited by callback and timeout, possibly drawing stimuli.
 
         Parameters
         ----------
@@ -461,7 +464,7 @@ class Experiment(object):
         # one-line drawing of a number of stimuli (identified by strings).
         # We want consider whether we want to enforce that *all* drawing must
         # happen in this method, and if we ever want to allow separation of
-        # drawing and flipping the scren. Right now we are going to assume
+        # drawing and flipping the screen. Right now we are going to assume
         # code is written that way, but not enforce it (or handle cases where
         # it is not true well)
 
@@ -475,8 +478,35 @@ class Experiment(object):
         if flip:
             self.win.flip()
 
-    def frame_range(self, seconds=None, frames=None, round_func=np.floor):
-        """Convenience function for converting to screen refresh units."""
+    def frame_range(self, seconds=None, frames=None, round_func=np.floor,
+                    adjust_for_missed=True):
+        """Generator function for timing events based on screen flips.
+
+        Either ``seconds`` or ``frames``, but not both, are required.
+
+        This function can adjust the number of flips generated in real time
+        based on the PsychoPy Window's estimate of its missed flips.
+
+        Parameters
+        ----------
+        seconds : float
+            Duration of the event in real time.
+        frames : int
+            Number of screen flips.
+        round_func : callable, optional
+            Function used to turn a continuous duration into a integral number
+            of screen flips.
+        adjust_for_missed : bool, optional
+            If True, decrement the number of total frames to generate when
+            PsychoPy thinks it has missed a flip.
+
+        Yields
+        ------
+        frame : int
+            Index into the frame, possibly discontinuous when adjusting for
+            missed flips.
+
+        """
         if seconds is None and frames is None:
             raise ValueError("Must specify `seconds` or `frames`")
         if seconds is not None and frames is not None:
@@ -485,7 +515,25 @@ class Experiment(object):
         if seconds is not None:
             frames = int(round_func(seconds * self.win.framerate))
 
-        return range(frames)
+        if adjust_for_missed:
+            self.win.recordFrameIntervals = True
+            self.win.nDroppedFrames = dropped_count = 0
+
+        frame = 0
+        while frame < frames:
+
+            yield frame
+
+            if adjust_for_missed:
+                new_dropped = self.win.nDroppedFrames - dropped_count
+                if new_dropped:
+                    dropped_count += new_dropped
+                    frame += new_dropped
+
+            frame += 1
+
+        if adjust_for_missed:
+            self.win.recordFrameIntervals = False
 
     def check_quit(self):
         """Check whether the quit key has been pressed and exit if so."""
