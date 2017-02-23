@@ -132,6 +132,7 @@ def run_trial(exp, info):
         if not exp.check_fixation(allow_blinks=True):
             # TODO write a function to do this
             exp.auditory_feedback("fixbreak")
+            exp.flicker("fix")
             info["result"] = "fixbreak"
             return info
         exp.draw(stims)

@@ -10,7 +10,7 @@ import yaml
 import numpy as np
 import pandas as pd
 
-from psychopy import core, tools, visual, event, monitors, logging
+from psychopy import core, tools, visual, event, sound, monitors, logging
 
 from .ext.bunch import Bunch
 from . import stimuli, feedback, eyetracker, commandline, clientserver
@@ -51,6 +51,7 @@ class Experiment(object):
 
             self.initialize_params()
             self.initialize_data_output()
+            self.initialize_sounds()
             self.initialize_eyetracker()
             self.initialize_server()
             self.initialize_display()
@@ -236,6 +237,26 @@ class Experiment(object):
             os.makedirs(output_dir)
 
         self.output_stem = output_stem
+
+    def initialize_sounds(self):
+        """Create PsychoPy Sound objects for auditory feedback."""
+        # TODO Psychopy 1.85 has improved sound capability
+        # need to look into that and whether it requires changes here
+
+        # Locate the sound files
+        sound_dir = os.path.join(os.path.dirname(__file__), "sounds")
+        sound_names = dict(correct="ding",
+                           wrong="signon",
+                           nofix="secalert",
+                           nochoice="click",
+                           fixbreak="click",)
+
+        # Load the sounds and save in a Bunch
+        self.sounds = Bunch()
+        for result, sound_name in sound_names.items():
+            fname = os.path.join(sound_dir, sound_name + ".wav")
+            sound_obj = sound.Sound(fname)
+            self.sounds[result] = sound_obj
 
     def initialize_server(self):
         """Start a server in an independent thread for experiment control."""
@@ -572,6 +593,20 @@ class Experiment(object):
 
         # Either we are outside of fixation or eye has closed for too long
         return False
+
+    def flicker(self, stim, duration=.5, rate=10, other_stims=None):
+        """Repeatedly turn a stimulus off and on."""
+        if other_stims is None:
+            other_stims = []
+
+        draw = False
+        for i in self.frame_range(duration):
+            if not i % int(self.win.framerate / rate):
+                draw = not draw
+            if draw:
+                self.draw([stim] + other_stims)
+            else:
+                self.draw(other_stims)
 
     def check_quit(self):
         """Check whether the quit key has been pressed and exit if so."""

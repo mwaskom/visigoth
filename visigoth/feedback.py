@@ -1,5 +1,6 @@
-# TODO Psychopy 1.85 has improved sound capability -- need to look into that
 import os
+
+# TODO Psychopy 1.85 has improved sound capability -- need to look into that
 from psychopy import sound
 
 
