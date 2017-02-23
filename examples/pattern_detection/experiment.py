@@ -8,10 +8,15 @@ from visigoth.stimuli import Point, Points, Pattern, GaussianNoise
 def create_stimuli(exp):
 
     # Fixation point
-    fix = Point(exp.win, exp.p.fix_radius)
+    fix = Point(exp.win,
+                exp.p.fix_radius,
+                exp.p.fix_iti_color)
 
     # Saccade targets
-    targets = Points(exp.win, exp.p.target_pos, exp.p.target_radius)
+    targets = Points(exp.win,
+                     exp.p.target_pos,
+                     exp.p.target_radius,
+                     exp.p.target_color)
 
     # Gaussian noise fields
     noise_kws = dict(mask="circle",
@@ -124,8 +129,14 @@ def run_trial(exp, info):
 
     # Stimulus event
     noise_frame = 0
-    for i in exp.frame_range(seconds=exp.p.wait_stim):
-        if not i % (exp.win.framerate / exp.p.noise_hz):
+    noise_modulus = exp.win.framerate / exp.p.noise_hz
+    frame_generator = exp.frame_range(seconds=exp.p.wait_stim,
+                                      yield_skipped=True)
+
+    for i, skipped in frame_generator:
+        update_noise = (not i % noise_modulus
+                        or not np.mod(skipped, noise_modulus).all())
+        if update_noise:
             exp.s.noise_l.update()
             exp.s.noise_r.update()
             noise_frame += 1

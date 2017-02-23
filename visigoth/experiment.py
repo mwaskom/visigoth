@@ -534,6 +534,8 @@ class Experiment(object):
         adjust_for_missed : bool, optional
             If True, decrement the number of total frames to generate when
             PsychoPy thinks it has missed a flip.
+        yield_skipped : bool, optional
+            If True, also return a list of flip indices that were missed
 
         Yields
         ------
@@ -560,23 +562,17 @@ class Experiment(object):
         frame = 0
         while frame < frames:
 
-            # TODO One pattern is to use the returned frame index to
-            # do things like update a stimulus at a specific rate.
-            # That will be broken (in a way that is more problematic than
-            # simply dropping a frame). Maybe we want to, e.g., also yield
-            # the skipped frames so the client can check in there
-
             if adjust_for_missed:
                 new_dropped = self.win.nDroppedFrames - dropped_count
-                skipped_frames = list(range(frame, frame + new_dropped))
                 if new_dropped:
                     dropped_count += new_dropped
                     frame += new_dropped
+                skipped_frames = list(range(frame, frame + new_dropped))
             else:
                 skipped_frames = []
 
             if yield_skipped:
-                yield skipped_frames
+                yield frame, skipped_frames
             else:
                 yield frame
 
