@@ -221,6 +221,11 @@ class Experiment(object):
         p.date = time.strftime("%Y-%m-%d", timestamp)
         p.time = time.strftime("%H-%M-%S", timestamp)
 
+        # TODO define a session variable (at the command line)
+        # Probably have it default to the date but this will let us
+        # use separate different sessions on the same day or use other
+        # identifiers defined at collection time.
+
         # TODO inject the visigoth version into the params bunch
 
         self.p = p
@@ -509,13 +514,15 @@ class Experiment(object):
             self.win.flip()
 
     def frame_range(self, seconds=None, frames=None, round_func=np.floor,
-                    adjust_for_missed=True):
+                    adjust_for_missed=True, yield_skipped=False):
         """Generator function for timing events based on screen flips.
 
         Either ``seconds`` or ``frames``, but not both, are required.
 
         This function can adjust the number of flips generated in real time
-        based on the PsychoPy Window's estimate of its missed flips.
+        based on the PsychoPy Window's estimate of its missed flips. This
+        assumes you are not resetting the win.nDroppedFrames counter while
+        the frame range is active.
 
         Parameters
         ----------
@@ -535,6 +542,9 @@ class Experiment(object):
         frame : int
             Index into the frame, possibly discontinuous when adjusting for
             missed flips.
+        skipped : list of ints, optional
+            Indices of frames that were skipped if frames have been dropped,
+            only when ``yield_skipped`` is True.
 
         """
         if seconds is None and frames is None:
@@ -552,13 +562,25 @@ class Experiment(object):
         frame = 0
         while frame < frames:
 
-            yield frame
+            # TODO One pattern is to use the returned frame index to
+            # do things like update a stimulus at a specific rate.
+            # That will be broken (in a way that is more problematic than
+            # simply dropping a frame). Maybe we want to, e.g., also yield
+            # the skipped frames so the client can check in there
 
             if adjust_for_missed:
                 new_dropped = self.win.nDroppedFrames - dropped_count
+                skipped_frames = list(range(frame, frame + new_dropped))
                 if new_dropped:
                     dropped_count += new_dropped
                     frame += new_dropped
+            else:
+                skipped_frames = []
+
+            if yield_skipped:
+                yield skipped_frames
+            else:
+                yield frame
 
             frame += 1
 

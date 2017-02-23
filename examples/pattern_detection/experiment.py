@@ -55,6 +55,9 @@ def generate_trials(exp):
         noise_contrast = flexible_values(exp.p.noise_contrast)
         noise_opacity = flexible_values(exp.p.noise_opacity)
 
+        # TODO let's define a central way to generate fields we
+        # usually/always wany in the trial info
+
         trial_info = dict(
 
             subject=exp.p.subject,
