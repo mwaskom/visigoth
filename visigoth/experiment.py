@@ -13,7 +13,7 @@ import pandas as pd
 from psychopy import core, tools, visual, event, sound, monitors, logging
 
 from .ext.bunch import Bunch
-from . import stimuli, feedback, eyetracker, commandline, clientserver
+from . import stimuli, eyetracker, commandline, clientserver
 
 
 class Experiment(object):
@@ -34,9 +34,6 @@ class Experiment(object):
         # TODO this might be squatting on a good name
         self.eye = Bunch(most_recent_fixation=0,
                          most_recent_blink=0)
-
-        # TODO feedback implementation needs to be improved
-        self.auditory_feedback = feedback.AuditoryFeedback()
 
         self.trial_data = []
 
@@ -616,7 +613,7 @@ class Experiment(object):
         # Either we are outside of fixation or eye has closed for too long
         return False
 
-    def flicker(self, stim, duration=.5, rate=10, other_stims=None):
+    def flicker(self, stim, duration=.4, rate=10, other_stims=None):
         """Repeatedly turn a stimulus off and on."""
         if other_stims is None:
             other_stims = []

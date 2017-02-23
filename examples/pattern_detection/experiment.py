@@ -115,7 +115,7 @@ def run_trial(exp, info):
 
     if res is None:
         info["result"] = "nofix"
-        exp.auditory_feedback("nofix")
+        exp.sounds.nofix.play()
         return info
 
     # Pre-stimulus fixation
@@ -134,7 +134,7 @@ def run_trial(exp, info):
             stims = ["pattern"] + stims
         if not exp.check_fixation(allow_blinks=True):
             # TODO write a function to do this
-            exp.auditory_feedback("fixbreak")
+            exp.sounds.fixbreak.play()
             exp.flicker("fix")
             info["result"] = "fixbreak"
             return info
@@ -155,7 +155,7 @@ def run_trial(exp, info):
         info["result"] = "nochoice"
     else:
         info.update(pd.Series(res))
-    exp.auditory_feedback(info.result)
+    exp.sounds[info.result].play()
 
     # Prepare for inter-trial interval
     exp.s.fix.color = exp.p.fix_iti_color
