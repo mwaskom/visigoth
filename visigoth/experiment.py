@@ -189,7 +189,7 @@ class Experiment(object):
         # Add study-specific command line arguments
         self.define_cmdline_params(parser)
 
-        # Parse the commend line args associated with this class instance
+        # Parse the command line args associated with this class instance
         # NOTE this is the part that smells bad
         args = parser.parse_args(self.arglist)
 
