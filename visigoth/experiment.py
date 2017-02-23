@@ -13,7 +13,7 @@ import pandas as pd
 from psychopy import core, tools, visual, event, sound, monitors, logging
 
 from .ext.bunch import Bunch
-from . import stimuli, eyetracker, commandline, clientserver
+from . import version, stimuli, eyetracker, commandline, clientserver
 
 
 class Experiment(object):
@@ -217,20 +217,16 @@ class Experiment(object):
         timestamp = time.localtime()
         p.date = time.strftime("%Y-%m-%d", timestamp)
         p.time = time.strftime("%H-%M-%S", timestamp)
+        p.session = p.date if args.session is None else args.session
 
-        # TODO define a session variable (at the command line)
-        # Probably have it default to the date but this will let us
-        # use separate different sessions on the same day or use other
-        # identifiers defined at collection time.
-
-        # TODO inject the visigoth version into the params bunch
+        p.visigoth_version = version.__version__
 
         self.p = p
         self.debug = args.debug
 
     def initialize_data_output(self):
         """Define stem for output filenames and ensure directory exists."""
-        default_template = "data/{subject}/{date}/{time}"
+        default_template = "data/{subject}/{session}/{time}"
         template = self.p.get("output_template", default_template)
         output_stem = template.format(**self.p)
 

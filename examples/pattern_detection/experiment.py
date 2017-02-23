@@ -66,7 +66,8 @@ def generate_trials(exp):
         trial_info = dict(
 
             subject=exp.p.subject,
-            session=exp.p.date,
+            session=exp.p.session,
+            date=exp.p.date,
             run=exp.p.run,
             trial=t,
 
