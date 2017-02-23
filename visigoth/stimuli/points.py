@@ -66,7 +66,7 @@ class Points(object):
     It is intended to be used for, e.g., saccade targets.
 
     """
-    def __init__(self, win, pos, radius=.15, color="white", **kwargs):
+    def __init__(self, win, pos, radius=.15, color=1, **kwargs):
         """Create the psychopy stimulus objects.
 
         Parameters
@@ -86,7 +86,7 @@ class Points(object):
         self.win = win
         self.dots = []
         for pos_i in pos:
-            dot = Point(win, radius=radius, color="white", pos=pos_i, **kwargs)
+            dot = Point(win, radius=radius, color=color, pos=pos_i, **kwargs)
             self.dots.append(dot)
 
         self.color = color

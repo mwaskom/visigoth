@@ -155,7 +155,12 @@ def run_trial(exp, info):
         info["result"] = "nochoice"
     else:
         info.update(pd.Series(res))
+
+    # Give feedback
     exp.sounds[info.result].play()
+    exp.show_feedback("targets", info.result, info.response)
+    exp.wait_until(timeout=exp.p.wait_feedback, draw=["targets"])
+    exp.s.targets.color = exp.p.target_color
 
     # Prepare for inter-trial interval
     exp.s.fix.color = exp.p.fix_iti_color

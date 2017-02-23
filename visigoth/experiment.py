@@ -502,6 +502,7 @@ class Experiment(object):
 
         if not isinstance(stims, list):
             stims = [stims]
+
         for stim in stims:
             self.s[stim].draw()
 
@@ -612,6 +613,19 @@ class Experiment(object):
 
         # Either we are outside of fixation or eye has closed for too long
         return False
+
+    def show_feedback(self, stim, result, idx=None):
+        """Change the color of a stimulus to show feedback."""
+        color_choices = dict(correct=(-.8, .5, -.8), wrong=(1, -.7, -.6))
+        color = color_choices.get(result, None)
+
+        if idx is None or np.isnan(idx):
+            stim_color = color
+        else:
+            stim_color = [color if i == idx else None
+                          for i, _ in enumerate(self.s[stim].color)]
+
+        self.s[stim].color = stim_color
 
     def flicker(self, stim, duration=.4, rate=10, other_stims=None):
         """Repeatedly turn a stimulus off and on."""
