@@ -29,6 +29,7 @@ class Experiment(object):
         self.server = None
 
         self.clock = core.Clock()
+        logging.defaultClock = self.clock
 
         # Initialize some related variables about the eye
         # TODO this might be squatting on a good name
@@ -505,7 +506,11 @@ class Experiment(object):
         self.sync_remote_screen(stims)
 
         if flip:
-            self.win.flip()
+            flip_time = self.win.flip()
+        else:
+            flip_time = None
+
+        return flip_time
 
     def frame_range(self, seconds=None, frames=None, round_func=np.floor,
                     adjust_for_missed=True, yield_skipped=False):
