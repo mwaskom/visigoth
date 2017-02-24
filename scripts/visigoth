@@ -21,8 +21,8 @@ if __name__ == "__main__":
     Experiment.run_trial = experiment.run_trial
     if hasattr(experiment, "define_cmdline_params"):
         Experiment.define_cmdline_params = experiment.define_cmdline_params
-    if hasattr(experiment, "update_client"):
-        Experiment.update_client = experiment.update_client
+    if hasattr(experiment, "serialize_trial_info"):
+        Experiment.serialize_trial_info = experiment.serialize_trial_info
     if hasattr(experiment, "save_data"):
         Experiment.save_data = experiment.save_data
 
