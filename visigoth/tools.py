@@ -195,7 +195,7 @@ def check_gaze(gaze, point, window):
     return delta < window
 
 
-def flexible_values(val, size=1, random_state=None, min=-np.inf, max=np.inf):
+def flexible_values(val, size=None, random_state=None, min=-np.inf, max=np.inf):
     """Flexibly determine a number of values.
 
     Input format can be:
@@ -210,7 +210,7 @@ def flexible_values(val, size=1, random_state=None, min=-np.inf, max=np.inf):
         Flexibile specification of value, set of values, or distribution
         parameters. See above for more information.
     size : int or tuple, optional
-        Output shape. A ``size`` of 1 implies a scalar result.
+        Output shape. A ``size`` of None implies a scalar result.
     random_state : numpy.random.RandomState object, optional
         Object to allow reproducible random values.
     min, max : float
@@ -235,9 +235,6 @@ def flexible_values(val, size=1, random_state=None, min=-np.inf, max=np.inf):
         out = truncated_sample(rv, size, min, max, random_state=random_state)
     else:
         raise TypeError("`val` must be scalar, set, or tuple")
-
-    if size == 1:
-        out = out.item()
 
     return out
 
