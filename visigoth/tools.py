@@ -59,12 +59,11 @@ class AcquireTarget(object):
             self.fix_window = exp.p.fix_window
             self.target_pos = exp.p.target_pos
             self.target_window = exp.p.target_window
+            self.wait_time = self.exp.p.eye_target_wait
+            self.hold_time = self.exp.p.eye_target_hold
 
         if self.check_key:
             self.keylist = exp.p.key_targets
-
-        self.wait_time = self.exp.p.eye_target_wait
-        self.hold_time = self.exp.p.eye_target_hold
 
         self.fix_break_time = None
         self.target_time = None
