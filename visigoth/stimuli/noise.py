@@ -24,6 +24,7 @@ class Noise(object):
         self._set_rv(val)
         self._contrast = val
 
+    # TODO we should be able to automatically generate these interface methods
     @property
     def opacity(self):
         """Opacity of the stimulus."""
@@ -33,6 +34,16 @@ class Noise(object):
     def opacity(self, val):
         """Opacity of the stimulus."""
         self.image.opacity = val
+
+    @property
+    def pos(self):
+        """Position of the stimulus."""
+        return self.image.pos
+
+    @pos.setter
+    def pos(self, val):
+        """Position of the stimulus."""
+        self.image.pos = val
 
     def update(self, rng=None):
         """Generate new random values."""
