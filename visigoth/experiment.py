@@ -382,10 +382,13 @@ class Experiment(object):
             # (if they have a `pos` attribute).
             # Note that we want to find a better way to sync arbitrary
             # Psychopy and matplotlib commands for a richer client view
-            stims = {s: getattr(self.s[s], "pos", None) for s in stims}
+            stim_data = {}
+            for s in stims:
+                pos = getattr(self.s[s], "pos", None)
+                pos = pos if pos is None else tuple(pos)
+                stim_data[s] = pos
 
-            data = json.dumps(dict(gaze=gaze,
-                              stims=stims))
+            data = json.dumps(dict(gaze=gaze, stims=stim_data))
             self.screen_q.put(data)
 
     def sync_remote_trials(self, trial_info):
