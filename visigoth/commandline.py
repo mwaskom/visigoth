@@ -17,6 +17,7 @@ def define_experiment_parser():
     parser.add_argument("-p", "--paramset")
     parser.add_argument("-s", "--subject", default="test")
     parser.add_argument("--session")
+    parser.add_argument("--mouse", action="store_true", dest="eye_simulate")
     parser.add_argument("-r", "--run", type=int, default=1)
     parser.add_argument("--nosave", action="store_false", dest="save_data")
     parser.add_argument("--debug", action="store_true")

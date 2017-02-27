@@ -25,7 +25,6 @@ base = dict(
     contrast_gen=[.04, .07, .09, .10, .11, .13, .16],
 
     monitor_eye=True,
-    eye_simulate=True,
 
     eye_fixation=True,
     eye_response=True,

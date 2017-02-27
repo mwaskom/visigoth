@@ -30,7 +30,6 @@ base = dict(
     noise_hz=5,
 
     monitor_eye=True,
-    eye_simulate=True,
 
     eye_fixation=True,
     eye_response=True,

@@ -24,7 +24,6 @@ base = dict(
 
     monitor_eye=True,
 
-    eye_simulate=True,
     eye_fixation=True,
     eye_response=True,
 
