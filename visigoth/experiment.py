@@ -55,7 +55,7 @@ class Experiment(object):
             self.initialize_display()
             self.initialize_stimuli()
 
-            # TODO add scanner trigger/dummy scans
+            # TODO need to add scanner trigger/dummy scans
 
             # Initialize the experimental run
             self.clock.reset()
@@ -75,6 +75,8 @@ class Experiment(object):
                 self.sync_remote_params()
 
                 self.check_quit()
+
+        # TODO need to add a function for showing feedback at end of run
 
         finally:
 
@@ -208,6 +210,7 @@ class Experiment(object):
                 raise RuntimeError(err)
             else:
                 param_dict = getattr(params, args.paramset)
+                # TODO maybe give paramset a better default name?
 
         # Define the parameters object with information from the params
         # module and from the command line invocation
