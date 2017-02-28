@@ -32,8 +32,10 @@ if __name__ == "__main__":
 
         print("Could not import study-specific remote methods")
 
+    host = "localhost" if args.localhost else args.host
+
     # Start the PyQT GUI Application
     app = QApplication([])
-    win = RemoteApp()
+    win = RemoteApp(host)
     win.show()
     app.exec_()

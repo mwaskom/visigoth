@@ -64,7 +64,7 @@ class SocketClientThread(SocketThread):
         self.cmd_q = remote.cmd_q
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect(("localhost", 50001))
+        self.socket.connect((remote.host, 50001))
         self.socket.settimeout(.01)
 
     def run(self):
@@ -153,7 +153,7 @@ class SocketServerThread(SocketThread):
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.socket.bind(("localhost", 50001))
+        self.socket.bind(("0.0.0.0", 50001))
         self.socket.listen(2)
 
         self.daemon = True

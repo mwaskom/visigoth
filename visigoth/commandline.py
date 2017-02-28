@@ -30,5 +30,7 @@ def define_remote_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("study_dir", default=".", nargs="?")
+    parser.add_argument("--host", default="192.168.100.1")
+    parser.add_argument("--localhost", action="store_true")
 
     return parser

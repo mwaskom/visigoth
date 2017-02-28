@@ -19,9 +19,9 @@ from .ext.bunch import Bunch
 
 class RemoteApp(QMainWindow):
 
-    def __init__(self, parent=None):
+    def __init__(self, host):
 
-        QMainWindow.__init__(self, parent)
+        QMainWindow.__init__(self, None)
         self.setWindowTitle("Visigoth Remote")
 
         self.screen_q = queue.Queue()
@@ -30,6 +30,8 @@ class RemoteApp(QMainWindow):
         self.cmd_q = queue.Queue()
 
         self.poll_dur = 20
+
+        self.host = host
         self.client = None
 
         # Intialize the parameters and eyeopts
