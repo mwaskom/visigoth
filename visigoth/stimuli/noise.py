@@ -8,6 +8,7 @@ class Noise(object):
 
     def __init__(self, win, contrast, pix_per_deg, **kwargs):
 
+        self.win = win
         self.image = ImageStim(win, **kwargs)
         if pix_per_deg is None:
             pix_per_deg = win.pix_per_deg
@@ -56,25 +57,32 @@ class Noise(object):
 
     def draw(self):
         """Draw the stimulus to the window."""
+        self.win.blendMode = "add"
         self.image.draw()
+        self.win.blendMode = "avg"
 
 
 class GaussianNoise(Noise):
     """Noise field with Gaussian statistics parameterized by contrast."""
     def __init__(self, win, contrast=1, pix_per_deg=None, **kwargs):
 
-        self._constant = .7  # Approximately matches RMS contrast of grating
-        self.mean = win.color.mean(axis=-1)
-        self.contrast = contrast
-
         super(GaussianNoise, self).__init__(
             win, contrast, pix_per_deg, **kwargs)
+
+        self._constant = .7  # Approximately matches RMS contrast of grating
+        self.mean = 0
+        self.contrast = contrast
 
         self.update()
 
     def _set_rv(self, contrast):
 
-        self.sd = (self.mean + 1) * self._constant * contrast
+        # Scale "Michelson contrast" by background
+        scaling_factor = self.win.color.mean() + 1
+
+        # Convert from "Michelson" contrast to gaussian RMS
+        self.sd = scaling_factor * self._constant * contrast
+
         self.rv = stats.norm(self.mean, self.sd)
 
 
@@ -82,18 +90,25 @@ class UniformNoise(Noise):
     """Noise field with uniform statistics parameterized by contrast."""
     def __init__(self, win, contrast=1, pix_per_deg=None, **kwargs):
 
-        self.mean = win.color.mean(axis=-1)
-        self.contrast = contrast
-
         super(UniformNoise, self).__init__(
             win, contrast, pix_per_deg, **kwargs)
+
+        self.mean = 0
+        self.contrast = contrast
 
         self.update()
 
     def _set_rv(self, contrast):
 
-        mean = (self.mean + 1) / 2
-        range = contrast * (2 * mean)
-        low = mean - range / 2
-        low, range = low * 2 - 1, range * 2
+        # Scale Michelson contrast by background
+        scaling_factor = self.win.color.mean() + 1
+
+        # Determine width and the lower bound of the interval
+        # (This is the scipy parameterization not [low, high])
+        width = scaling_factor * contrast
+        low = self.mean - width / 2
+
+        # Multiply by 2 as values are in [-1, 1]
+        low, range = low * 2, range * 2
+
         self.rv = stats.uniform(low, range)

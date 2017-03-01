@@ -25,7 +25,6 @@ base = dict(
 
     pattern_contrast=[0, .02, .04, .08, .16, .32],
     noise_contrast=[0, .1, .2, .4],
-    noise_opacity=.5,
     noise_resolution=20,
     noise_hz=5,
 

@@ -58,7 +58,6 @@ def generate_trials(exp):
         pattern_frame = flexible_values(range(1, noise_frames + 1))
 
         noise_contrast = flexible_values(exp.p.noise_contrast)
-        noise_opacity = flexible_values(exp.p.noise_opacity)
 
         # TODO let's define a central way to generate fields we
         # usually/always wany in the trial info
@@ -74,7 +73,6 @@ def generate_trials(exp):
             iti=iti,
 
             noise_contrast=noise_contrast,
-            noise_opacity=noise_opacity,
 
             pattern_contrast=pattern_contrast,
             pattern_side=pattern_side,
@@ -104,8 +102,6 @@ def run_trial(exp, info):
 
     exp.s.noise_l.contrast = info.noise_contrast
     exp.s.noise_r.contrast = info.noise_contrast
-    exp.s.noise_l.opacity = info.noise_opacity
-    exp.s.noise_r.opacity = info.noise_opacity
     exp.s.noise_l.update()
     exp.s.noise_r.update()
 

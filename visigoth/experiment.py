@@ -322,7 +322,8 @@ class Experiment(object):
                                        color=color,
                                        size=res,
                                        monitor=monitor,
-                                       autoLog=False)
+                                       autoLog=False,
+                                       useFBO=True)
 
         # Test window performance
         win.recordFrameIntervals = True
