@@ -58,7 +58,6 @@ def generate_trials(exp):
         pattern_frame = flexible_values(range(1, noise_frames + 1))
 
         noise_contrast = flexible_values(exp.p.noise_contrast)
-        noise_opacity = flexible_values(exp.p.noise_opacity)
 
         # TODO let's define a central way to generate fields we
         # usually/always wany in the trial info
@@ -74,7 +73,6 @@ def generate_trials(exp):
             iti=iti,
 
             noise_contrast=noise_contrast,
-            noise_opacity=noise_opacity,
 
             pattern_contrast=pattern_contrast,
             pattern_side=pattern_side,
@@ -104,8 +102,6 @@ def run_trial(exp, info):
 
     exp.s.noise_l.contrast = info.noise_contrast
     exp.s.noise_r.contrast = info.noise_contrast
-    exp.s.noise_l.opacity = info.noise_opacity
-    exp.s.noise_r.opacity = info.noise_opacity
     exp.s.noise_l.update()
     exp.s.noise_r.update()
 
@@ -143,7 +139,7 @@ def run_trial(exp, info):
             noise_frame += 1
         stims = ["noise_l", "noise_r", "fix", "targets"]
         if noise_frame == info.pattern_frame:
-            stims = ["pattern"] + stims
+            stims = stims + ["pattern"]
         if not exp.check_fixation(allow_blinks=True):
             # TODO write a function to do this
             exp.sounds.fixbreak.play()

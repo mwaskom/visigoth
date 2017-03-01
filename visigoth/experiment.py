@@ -323,9 +323,7 @@ class Experiment(object):
                                        size=res,
                                        monitor=monitor,
                                        autoLog=False,
-                                       blendMode="add",  # TODO TESTING
-                                       useFBO=True,
-                                       )
+                                       useFBO=True)
 
         # Test window performance
         win.recordFrameIntervals = True
