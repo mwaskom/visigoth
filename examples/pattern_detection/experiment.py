@@ -139,7 +139,7 @@ def run_trial(exp, info):
             noise_frame += 1
         stims = ["noise_l", "noise_r", "fix", "targets"]
         if noise_frame == info.pattern_frame:
-            stims = stims + ["pattern"]
+            stims = ["pattern"] + stims
         if not exp.check_fixation(allow_blinks=True):
             # TODO write a function to do this
             exp.sounds.fixbreak.play()
