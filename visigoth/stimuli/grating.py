@@ -16,8 +16,10 @@ GL = pyglet.gl
 from psychopy.visual.basevisual import ColorMixin, ContainerMixin, TextureMixin
 from psychopy.visual.grating import GratingStim
 from psychopy.tools.attributetools import attributeSetter
-
-from psychopy import _shadersPyglet as _shaders
+try:
+    from psychopy.visual import shaders
+except ImportError:
+    from psychopy import shadersPyglet as shaders
 
 # Framgent shader for the gabor stimulus. This is needed to add the pedestal to
 # the color values for each location. I'm keeping it in this file to make the
@@ -85,7 +87,7 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
             opacity=opacity, depth=depth, rgbPedestal=rgbPedestal,
             interpolate=interpolate, autoDraw=autoDraw, maskParams=maskParams)
 
-        mask_shader = _shaders.compileProgram(_shaders.vertSimple,
+        mask_shader = shaders.compileProgram(shaders.vertSimple,
                                               fragSignedColorTexMask)
         self._progSignedTexMask = mask_shader
 
