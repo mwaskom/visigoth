@@ -19,7 +19,7 @@ from psychopy.tools.attributetools import attributeSetter
 try:
     from psychopy.visual import shaders
 except ImportError:
-    from psychopy import shadersPyglet as shaders
+    from psychopy import _shadersPyglet as shaders
 
 # Framgent shader for the gabor stimulus. This is needed to add the pedestal to
 # the color values for each location. I'm keeping it in this file to make the
