@@ -24,7 +24,7 @@ GL = pyglet.gl
 
 from psychopy.visual.elementarray import ElementArrayStim
 from psychopy.visual.basevisual import MinimalStim, TextureMixin
-from psychopy import _shadersPyglet as _shaders
+from psychopy.visual import shaders as _shaders
 
 # Framgent shader for the gabor stimulus. This is needed to add the pedestal to
 # the color values for each location. I'm keeping it in this file to make the

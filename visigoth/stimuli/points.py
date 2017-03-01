@@ -1,3 +1,4 @@
+import numpy as np
 from psychopy import visual
 
 
@@ -28,13 +29,12 @@ class Point(object):
         self.win = win
         self.dot = visual.Circle(win,
                                  radius=radius,
-                                 fillColor=color,
-                                 lineColor=color,
                                  interpolate=True,
                                  autoLog=False,
                                  **kwargs)
 
-        self._color = color
+        self.color = color
+
 
     @property
     def color(self):
@@ -42,8 +42,19 @@ class Point(object):
 
     @color.setter
     def color(self, color):
-        if color is None:
-            color = self.win.color
+        if self.win.blendMode == "add":
+            if color is None:
+                color = (0, 0, 0)
+            elif self.win.blendMode == "add":
+                if np.isscalar(color):
+                    color = (color, color, color)
+                color = np.asarray(color)
+
+                bgcolor = self.win.color
+                color = color - bgcolor
+        else:
+            if color is None:
+                color = self.win.color
         self._color = color
         self.dot.fillColor = color
         self.dot.lineColor = color
