@@ -223,7 +223,7 @@ class Experiment(object):
 
         lines = []
 
-        target_acc = self.p.perf_acc_target
+        target_acc = self.p.perform_acc_target
         if mean_acc is not None and target_acc is not None:
             lines.append(
                 "You were correct on {:.0%} of trials".format(mean_acc)
@@ -233,7 +233,7 @@ class Experiment(object):
             else:
                 lines.append("Please try to be more accurate!")
 
-        target_rt = self.p.perf_rt_target
+        target_rt = self.p.perform_rt_target
         if mean_rt is not None and target_rt is not None:
             lines.append("")
             lines.append(
