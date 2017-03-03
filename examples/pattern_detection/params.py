@@ -38,6 +38,9 @@ base = dict(
     eye_target_wait=.5,
     eye_target_hold=.3,
 
+    target_acc=.8,
+    target_rt=.7,
+
     n_trials=200,
 
     wait_iti=1,

@@ -28,6 +28,9 @@ class Experiment(object):
         self.tracker = None
         self.server = None
 
+        self._aborted = False
+        self._clean_exit = True
+
         self.clock = core.Clock()
         logging.defaultClock = self.clock
 
@@ -74,13 +77,20 @@ class Experiment(object):
 
                 self.sync_remote_params()
 
-                self.check_quit()
+                self.check_abort()
 
-        # TODO need to add a function for showing feedback at end of run
+            # TODO need to add leadout to specified run time
+
+        except:
+
+            # Aborting raises an exception but isn't considered an error
+            self._clean_exit = self._aborted
+            raise
 
         finally:
 
-            # Experiment shutdown
+            if self._clean_exit:
+                self.show_performance(*self.compute_performance())
 
             self.save_data()
             self.shutdown_server()
@@ -175,6 +185,74 @@ class Experiment(object):
             out_json_fname = self.output_stem + "_params.json"
             with open(out_json_fname, "w") as fid:
                 json.dump(self.p, fid, sort_keys=True, indent=4)
+
+    def compute_performance(self):
+        """Extract performance metrics from trial data log.
+
+        If the object returned by ``run_trial`` is a pandas Series with fields
+        ``correct`` and ``rt``, and if the ``show_performance`` method expects
+        to get an arglist that has ``mean_acc, mean_rt``, then it is not
+        necessary to overload this function.
+
+        """
+        if self.trial_data:
+            data = pd.DataFrame(self.trial_data)
+            if "correct" in data:
+                mean_acc = data["correct"].mean()
+            else:
+                mean_acc = None
+            if "rt" in data:
+                mean_rt = data["rt"].mean()
+            else:
+                mean_rt = None
+            return mean_acc, mean_rt
+        else:
+            return None, None
+
+    def show_performance(self, mean_acc, mean_rt):
+        """Show end-of-run feedback to the subject about performance.
+
+        This method can be overloaded if you want to show something other than
+        mean accuracy and mean rt. Whether either metric is reported to the
+        subject is controlled by fields in the param file that specify the
+        target values for each measure.
+
+        """
+        if mean_acc is None and mean_rt is None:
+            return
+
+        lines = []
+
+        target_acc = self.p.get("target_acc", None)
+        if mean_acc is not None and target_acc is not None:
+            lines.append(
+                "You were correct on {:.0%} of trials".format(mean_acc)
+                )
+            if mean_acc >= target_acc:
+                lines.append("Great job!")
+            else:
+                lines.append("Please try to be more accurate!")
+
+        target_rt = self.p.get("target_rt", None)
+        if mean_rt is not None and target_rt is not None:
+            lines.append("")
+            lines.append(
+                "You took {:.1f} seconds to respond on average".format(mean_rt)
+                )
+            if mean_rt <= target_rt:
+                lines.append("Great job!")
+            else:
+                lines.append("Please try to respond faster!")
+
+        if lines:
+            n = len(lines)
+            height = .5
+            heights = (np.arange(n)[::-1] - (n / 2 - .5)) * height
+            for line, y in zip(lines, heights):
+                visual.TextStim(self.win, line,
+                                pos=(0, y), height=height).draw()
+            self.win.flip()
+            event.waitKeys(["enter", "return"])
 
     # ==== Initialization functions ====
 
@@ -645,16 +723,17 @@ class Experiment(object):
             else:
                 self.draw(other_stims)
 
-    def check_quit(self):
+    def check_abort(self):
         """Check whether the quit key has been pressed and exit if so."""
         if event.getKeys(["escape"]):
+            self._aborted = True
             core.quit()
         return False
 
-    def iti_end(self, iti_duration, check_quit=True):
+    def iti_end(self, iti_duration, check_abort=True):
         """Return True if current time is within a flip of the ITI end."""
-        if check_quit:
-            self.check_quit()
+        if check_abort:
+            self.check_abort()
         now = self.clock.getTime()
         end = self.iti_start + iti_duration
         return (now + self.win.frametime) >= end
