@@ -11,19 +11,20 @@ class AcquireFixation(object):
 
     def __init__(self, exp):
 
-        self.check_eye = exp.p.get("eye_fixation", False)
-        self.check_key = exp.p.get("key_fixation", False)
+        self.check_eye = exp.p.eye_fixation
+        self.check_key = bool(exp.p.key_fixation)
 
         self.tracker = exp.tracker
 
         # TODO get from stimulus objects themselves?
-        self.fix_pos = exp.p.get("fix_pos", (0, 0))
-        self.fix_window = exp.p.get("fix_window", 2)
+        self.fix_pos = exp.p.fix_pos
+        self.fix_window = exp.p.fix_window
 
-        key_ready = exp.p.get("key_ready", "space")
-        if not isinstance(key_ready, list):
-            key_ready = [key_ready]
-        self.keylist = key_ready
+        if self.check_key:
+            key_ready = exp.p.key_fixation
+            if not isinstance(key_ready, list):
+                key_ready = [key_ready]
+            self.keylist = key_ready
 
         # TODO should probably clear events on initialization
 
@@ -49,13 +50,13 @@ class AcquireTarget(object):
 
         self.clock = core.Clock()
 
-        self.check_eye = exp.p.get("eye_response", False)
-        self.check_key = exp.p.get("key_response", False)
+        self.check_eye = exp.p.eye_response
+        self.check_key = exp.p.key_response
 
         self.tracker = exp.tracker
 
         if self.check_eye:
-            self.fix_pos = exp.p.get("fix_pos", (0, 0))
+            self.fix_pos = exp.p.fix_pos
             self.fix_window = exp.p.fix_window
             self.target_pos = exp.p.target_pos
             self.target_window = exp.p.target_window
@@ -63,7 +64,7 @@ class AcquireTarget(object):
             self.hold_time = self.exp.p.eye_target_hold
 
         if self.check_key:
-            self.keylist = exp.p.key_targets
+            self.keylist = exp.p.key_targets  # TODO not a great name?
 
         self.fix_break_time = None
         self.target_time = None

@@ -223,7 +223,7 @@ class Experiment(object):
 
         lines = []
 
-        target_acc = self.p.get("target_acc", None)
+        target_acc = self.p.perf_acc_target
         if mean_acc is not None and target_acc is not None:
             lines.append(
                 "You were correct on {:.0%} of trials".format(mean_acc)
@@ -233,7 +233,7 @@ class Experiment(object):
             else:
                 lines.append("Please try to be more accurate!")
 
-        target_rt = self.p.get("target_rt", None)
+        target_rt = self.p.perf_rt_target
         if mean_rt is not None and target_rt is not None:
             lines.append("")
             lines.append(
@@ -274,21 +274,23 @@ class Experiment(object):
         # NOTE this is the part that smells bad
         args = parser.parse_args(self.arglist)
 
+        # Start with the set of default parameters
+        param_dict = default_params.copy()
+
         # Import the params module and extract the params for this run
         import params
-
         dicts = [v for k, v in vars(params).iteritems()
                  if isinstance(v, dict) and not re.match("__\w+__", k)]
 
         if len(dicts) == 1:
-            param_dict = dicts[0]
+            param_dict.update(dicts[0])
         else:
             if args.paramset is None:
                 err = "Must specify `-paramset` when multiple are defined"
                 raise RuntimeError(err)
             else:
-                param_dict = getattr(params, args.paramset)
                 # TODO maybe give paramset a better default name?
+                param_dict.update(getattr(params, args.paramset))
 
         # Define the parameters object with information from the params
         # module and from the command line invocation
@@ -308,9 +310,7 @@ class Experiment(object):
 
     def initialize_data_output(self):
         """Define stem for output filenames and ensure directory exists."""
-        default_template = "data/{subject}/{session}/{time}"
-        template = self.p.get("output_template", default_template)
-        output_stem = template.format(**self.p)
+        output_stem = self.p.output_template.format(**self.p)
 
         output_dir = os.path.dirname(output_stem)
         if self.p.save_data and not os.path.exists(output_dir):
@@ -673,8 +673,10 @@ class Experiment(object):
         if adjust_for_missed:
             self.win.recordFrameIntervals = False
 
-    def check_fixation(self, allow_blinks=False, fix_pos=(0, 0)):
+    def check_fixation(self, allow_blinks=False, fix_pos=None):
         """Enforce fixation but possibly allow blinks."""
+        if fix_pos is None:
+            fix_pos = self.p.fix_pos
         now = self.clock.getTime()
         if self.tracker.check_fixation(fix_pos, self.p.fix_window):
             # Eye is open and in fixation window
@@ -743,3 +745,46 @@ class Experiment(object):
         now = self.clock.getTime()
         end = self.iti_start + iti_duration
         return (now + self.win.frametime) >= end
+
+
+default_params = dict(
+
+    display_luminance=None,
+
+    fix_pos=(0, 0),
+    fix_radius=.15,
+    fix_window=2,
+    fix_iti_color=None,
+    fix_ready_color=(.8, .6, -.8),
+    fix_trial_color=(.8, .6, -.8),
+
+    target_pos=[],
+    target_radius=.25,
+    target_window=5,
+    target_color=(.8, .6, -.8),
+
+    monitor_key=False,
+    monitor_eye=False,
+
+    key_fixation=False,
+    key_response=False,
+
+    eye_fixation=False,
+    eye_response=False,
+
+    eye_fixbreak_timeout=0,
+    eye_blink_timeout=0,
+
+    eye_target_wait=.5,
+    eye_target_hold=.25,
+
+    wait_iti=1,
+    wait_fix=5,
+    wait_resp=5,
+
+    perform_acc_target=None,
+    perform_rt_target=None,
+
+    output_template="data/{subject}/{session}/{time}",
+
+)

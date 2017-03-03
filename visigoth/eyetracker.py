@@ -24,7 +24,6 @@ class EyeTracker(object):
         self.exp = exp
 
         # Extract relevant parameters
-        # TODO Maybe handle simulation on cmdline not in params file
         self.simulate = exp.p.eye_simulate
         self.save_data = exp.p.save_data
         self.fix_window_radius = exp.p.fix_radius
