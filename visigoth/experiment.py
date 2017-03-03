@@ -362,8 +362,11 @@ class Experiment(object):
             with open(fname) as fid:
                 display_info = yaml.load(fid)
             info = display_info[self.p.display_name]
-            ratio = self.p.display_luminance / info["max_luminance"]
-            color = int(round(ratio ** (1 / info["gamma"]) * 255))
+            if self.p.display_luminance is None:
+                color = 128
+            else:
+                ratio = self.p.display_luminance / info["max_luminance"]
+                color = int(round(ratio ** (1 / info["gamma"]) * 255))
 
             # Configure and calibrate the eyetracker
             self.tracker = eyetracker.EyeTracker(self, color)
@@ -379,7 +382,10 @@ class Experiment(object):
         info = display_info[self.p.display_name]
 
         # Determine the background color of the display
-        color = self.p.display_luminance / info["max_luminance"] * 2 - 1
+        if self.p.display_luminance is None:
+            color = 0
+        else:
+            color = self.p.display_luminance / info["max_luminance"] * 2 - 1
 
         # Define information about the monitor
         gamma = info["gamma"] if gamma_correct else None
