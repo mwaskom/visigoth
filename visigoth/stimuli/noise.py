@@ -51,7 +51,11 @@ class Noise(object):
         if rng is None:
             rng = np.random.RandomState()
 
+        # TODO add flag to force an update on draw() if contrast has changed?
+
         vals = self.rv.rvs(size=self.size, random_state=rng)
+
+        # TODO this clip doesn't account for drawing on nonzero background
         vals = np.clip(vals, -1, 1)
         self.image.image = vals
 
