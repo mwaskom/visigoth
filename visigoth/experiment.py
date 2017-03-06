@@ -772,8 +772,10 @@ default_params = dict(
     eye_fixation=False,
     eye_response=False,
 
-    eye_fixbreak_timeout=0,
-    eye_blink_timeout=0,
+    # TODO use fixbreak timeout exclusively for allowing blinks
+    # or more generally allow small deviations from fix window?
+    eye_fixbreak_timeout=.25,
+    eye_blink_timeout=.5,
 
     eye_target_wait=.5,
     eye_target_hold=.25,
