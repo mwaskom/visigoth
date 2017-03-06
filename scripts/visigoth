@@ -25,6 +25,10 @@ if __name__ == "__main__":
         Experiment.serialize_trial_info = experiment.serialize_trial_info
     if hasattr(experiment, "save_data"):
         Experiment.save_data = experiment.save_data
+    if hasattr(experiment, "compute_performance"):
+        Experiment.compute_performance = experiment.compute_performance
+    if hasattr(experiment, "show_performance"):
+        Experiment.show_performance = experiment.show_performance
 
     # Start the expeiment
     e = Experiment(sys.argv[1:])
