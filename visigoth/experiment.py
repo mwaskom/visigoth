@@ -95,6 +95,10 @@ class Experiment(object):
             self.save_data()
             self.shutdown_server()
             self.shutdown_eyetracker()
+
+            if self._clean_exit:
+                self.wait_for_exit()
+
             self.shutdown_display()
 
     # ==== Study-specific functions ====
@@ -218,10 +222,14 @@ class Experiment(object):
         target values for each measure.
 
         """
-        if mean_acc is None and mean_rt is None:
-            return
-
         lines = ["End of the run!"]
+
+        null_values = None, np.nan
+        if mean_acc in null_values and mean_rt in null_values:
+            visual.TextStim(self.win, lines[0],
+                            pos=(0, 0), height=.5).draw()
+            self.win.flip()
+            return
 
         target_acc = self.p.perform_acc_target
         if mean_acc is not None and target_acc is not None:
@@ -253,7 +261,6 @@ class Experiment(object):
                 visual.TextStim(self.win, line,
                                 pos=(0, y), height=height).draw()
             self.win.flip()
-            event.waitKeys(["enter", "return"])
 
     # ==== Initialization functions ====
 
@@ -515,6 +522,10 @@ class Experiment(object):
                 # TODO this really needs to be handled better
                 # Currently it's not dynamically logged. See notes above.
                 self.p.fix_window = p["fix_window"]
+
+    def wait_for_exit(self):
+        """Wait until the experimenter quits."""
+        event.waitKeys(["enter", "return"])
 
     # === Execution functions ===
 
