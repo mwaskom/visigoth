@@ -221,10 +221,11 @@ class Experiment(object):
         if mean_acc is None and mean_rt is None:
             return
 
-        lines = []
+        lines = ["End of the run!"]
 
         target_acc = self.p.perform_acc_target
         if mean_acc is not None and target_acc is not None:
+            lines.append("")
             lines.append(
                 "You were correct on {:.0%} of trials".format(mean_acc)
                 )
