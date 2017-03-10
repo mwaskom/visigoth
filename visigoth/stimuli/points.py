@@ -49,6 +49,14 @@ class Point(object):
         self.dot.fillColor = color
         self.dot.lineColor = color
 
+    @property
+    def opacity(self):
+        return self.dot.opacity
+
+    @opacity.setter
+    def opacity(self, val):
+        self.dot.opacity = val
+
     def draw(self):
         self.dot.draw()
 
