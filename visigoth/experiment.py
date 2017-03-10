@@ -60,6 +60,12 @@ class Experiment(object):
 
             # TODO need to add scanner trigger/dummy scans
 
+            # Wait a certain amount of time before starting the run
+            # (e.g. for dummy fMRI scans)
+            # TODO add a countdown or something nice here
+            self.wait_until(self.check_abort,
+                            timeout=self.p.wait_pre_run)
+
             # Initialize the experimental run
             self.clock.reset()
             self.tracker.start_run()
@@ -798,6 +804,8 @@ default_params = dict(
 
     eye_target_wait=.5,
     eye_target_hold=.25,
+
+    wait_pre_run=0,
 
     wait_iti=1,
     wait_fix=5,
