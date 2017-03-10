@@ -48,7 +48,7 @@ class Experiment(object):
 
         try:
 
-            # Experiment initialization
+            # -- Experiment initialization
 
             self.initialize_params()
             self.initialize_data_output()
@@ -58,7 +58,7 @@ class Experiment(object):
             self.initialize_display()
             self.initialize_stimuli()
 
-            # TODO need to add scanner trigger/dummy scans
+            # TODO need to add scanner trigger
 
             # Wait a certain amount of time before starting the run
             # (e.g. for dummy fMRI scans)
@@ -66,12 +66,12 @@ class Experiment(object):
             self.wait_until(self.check_abort,
                             timeout=self.p.wait_pre_run)
 
-            # Initialize the experimental run
+            # -- Initialize the experimental run
             self.clock.reset()
             self.tracker.start_run()
             self.iti_start = 0
 
-            # Main experimental loop
+            # -- Main experimental loop
 
             for trial_info in self.generate_trials():
 
@@ -85,7 +85,10 @@ class Experiment(object):
 
                 self.check_abort()
 
-            # TODO need to add leadout to specified run time
+            # Wait at the end of the run for exact duration
+            if self.p.run_duration is not None:
+                timeout = self.p.run_duration - self.clock.getTime()
+                self.wait_until(self.check_abort, timeout)
 
         except:
 
@@ -813,6 +816,8 @@ default_params = dict(
 
     perform_acc_target=None,
     perform_rt_target=None,
+
+    run_duration=None,
 
     output_template="data/{subject}/{session}/{time}",
 
