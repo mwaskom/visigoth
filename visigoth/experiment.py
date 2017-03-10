@@ -445,7 +445,14 @@ class Experiment(object):
 
     def initialize_stimuli(self):
         """Setup stimulus objects."""
-        self.s = Bunch(self.create_stimuli())
+        stims = self.create_stimuli()
+
+        # Remove the experiment object from the stimuli
+        # (allows study code to simply return locals)
+        stims = {s: obj for s, obj in stims.items() if not obj is self}
+
+        # Convet to a Bunch to allow getattr access
+        self.s = Bunch(stims)
 
     # ==== Shutdown functions ====
 
