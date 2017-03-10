@@ -18,6 +18,8 @@ from . import version, stimuli, eyetracker, commandline, clientserver
 
 class Experiment(object):
 
+    abort_keys = ["escape"]
+
     def __init__(self, arglist=None):
 
         self.arglist = [] if arglist is None else arglist
@@ -58,7 +60,9 @@ class Experiment(object):
             self.initialize_display()
             self.initialize_stimuli()
 
-            # TODO need to add scanner trigger
+            # Wait for a trigger to start
+            if self.p.trigger is not None:
+                self.wait_for_trigger()
 
             # Wait a certain amount of time before starting the run
             # (e.g. for dummy fMRI scans)
@@ -463,6 +467,23 @@ class Experiment(object):
         # Convet to a Bunch to allow getattr access
         self.s = Bunch(stims)
 
+    def wait_for_trigger(self):
+        """Wait for a trigger key (or an abort)."""
+        trigger_keys = self.p.trigger
+        if not isinstance(trigger_keys, (tuple, list)):
+            trigger_keys = list(trigger_keys)
+
+        visual.TextStim(self.win, "Waiting for scanner",
+                        pos=(0, 0), height=1).draw()
+        self.win.flip()
+
+        catch_keys = self.abort_keys + trigger_keys
+        keys = event.waitKeys(keyList=catch_keys)
+
+        if set(keys) & set(self.abort_keys):
+            self._aborted = True
+            core.quit()
+
     # ==== Shutdown functions ====
 
     def shutdown_server(self):
@@ -761,7 +782,7 @@ class Experiment(object):
 
     def check_abort(self):
         """Check whether the quit key has been pressed and exit if so."""
-        if event.getKeys(["escape"]):
+        if event.getKeys(self.abort_keys):
             self._aborted = True
             core.quit()
         return False
@@ -816,6 +837,8 @@ default_params = dict(
 
     perform_acc_target=None,
     perform_rt_target=None,
+
+    trigger=None,
 
     run_duration=None,
 
