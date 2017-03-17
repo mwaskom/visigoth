@@ -803,9 +803,10 @@ default_params = dict(
     fix_pos=(0, 0),
     fix_radius=.15,
     fix_window=2,
-    fix_iti_color=None,
+    fix_color=(.8, .6, -.8),
     fix_ready_color=(.8, .6, -.8),
     fix_trial_color=(.8, .6, -.8),
+    fix_iti_color=None,
 
     target_pos=[],
     target_radius=.25,
@@ -834,6 +835,7 @@ default_params = dict(
     wait_iti=1,
     wait_fix=5,
     wait_resp=5,
+    wait_feedback=.5,
 
     perform_acc_target=None,
     perform_rt_target=None,
