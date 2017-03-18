@@ -463,7 +463,7 @@ class Experiment(object):
 
         # Remove the experiment object from the stimuli
         # (allows study code to simply return locals)
-        stims = {s: obj for s, obj in stims.items() if not obj is self}
+        stims = {s: obj for s, obj in stims.items() if obj is not self}
 
         # Convet to a Bunch to allow getattr access
         self.s = Bunch(stims)

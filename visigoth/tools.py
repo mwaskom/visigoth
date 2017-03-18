@@ -199,7 +199,8 @@ def check_gaze(gaze, point, window):
     return delta < window
 
 
-def flexible_values(val, size=None, random_state=None, min=-np.inf, max=np.inf):
+def flexible_values(val, size=None, random_state=None,
+                    min=-np.inf, max=np.inf):
     """Flexibly determine a number of values.
 
     Input format can be:

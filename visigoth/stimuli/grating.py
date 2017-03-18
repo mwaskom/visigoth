@@ -88,7 +88,7 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
             interpolate=interpolate, autoDraw=autoDraw, maskParams=maskParams)
 
         mask_shader = shaders.compileProgram(shaders.vertSimple,
-                                              fragSignedColorTexMask)
+                                             fragSignedColorTexMask)
         self._progSignedTexMask = mask_shader
 
     @attributeSetter
