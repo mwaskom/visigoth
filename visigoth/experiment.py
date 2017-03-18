@@ -869,8 +869,8 @@ default_params = dict(
     eye_fixbreak_timeout=.25,
     eye_blink_timeout=.5,
 
-    eye_target_wait=.5,
-    eye_target_hold=.25,
+    eye_target_wait=.2,
+    eye_target_hold=.3,
 
     wait_pre_run=0,
 

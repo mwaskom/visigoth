@@ -63,6 +63,9 @@ class AcquireTarget(object):
             self.wait_time = self.exp.p.eye_target_wait
             self.hold_time = self.exp.p.eye_target_hold
 
+            if exp.p.eye_simulate:
+                self.wait_time *= 2
+
         if self.check_key:
             self.keylist = exp.p.key_targets  # TODO not a great name?
 
