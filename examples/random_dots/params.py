@@ -9,7 +9,7 @@ base = dict(
     dot_coh=[0, .016, .032, .064, .128, .256, .512],
     dot_dir=[180, 0],
 
-    aperture_pos=(0, 6),
+    aperture_pos=(0, 5),
     aperture_size=10,
 
     monitor_eye=True,

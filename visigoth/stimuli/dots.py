@@ -8,7 +8,7 @@ from psychopy.visual import ElementArrayStim
 class RandomDotMotion(object):
 
     def __init__(self, win,
-                 shape="square", size=.1, color=1,
+                 shape="square", size=.05, color=1,
                  density=16.7, speed=5, interval=3,
                  pos=(0, 0), aperture=5, elliptical=True,
                  ):

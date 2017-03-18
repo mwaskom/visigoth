@@ -44,9 +44,9 @@ def generate_trials(exp):
 def run_trial(exp, info):
 
     # Inter-trial interval
-    exp.wait_until(exp.iti_end, iti_duration=info.wait_iti)
+    exp.wait_until(exp.iti_end, iti_duration=info.iti)
 
-    # Trial onset
+    # Wait for trial onset
     res = exp.wait_until(AcquireFixation(exp),
                          timeout=exp.p.wait_fix,
                          draw="fix")
@@ -56,8 +56,7 @@ def run_trial(exp, info):
         exp.sounds.nofix.play()
         return info
 
-    # Stimulus period
-
+    # Show the stimulus
     for i in exp.frame_range(seconds=exp.p.wait_resp):
 
         exp.s.dots.update(info.dot_dir, info.dot_coh)
@@ -65,7 +64,6 @@ def run_trial(exp, info):
 
         if not exp.check_fixation():
             res = exp.wait_until(AcquireTarget(exp, info.target),
-                                 timeout=exp.p.wait_resp,
                                  draw="targets")
             break
 
@@ -73,7 +71,6 @@ def run_trial(exp, info):
         res = None
 
     # Handle the response
-   
     if res is None:
         info["result"] = "fixbreak"
     else:
@@ -83,4 +80,4 @@ def run_trial(exp, info):
     exp.sounds[info.result].play()
     exp.show_feedback("targets", info.result, info.response)
     exp.wait_until(timeout=exp.p.wait_feedback, draw=["targets"])
-    exp.s.targets.color = exp.p.target_color 
+    exp.s.targets.color = exp.p.target_color
