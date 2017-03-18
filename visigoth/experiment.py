@@ -41,6 +41,7 @@ class Experiment(object):
         self.eye = Bunch(most_recent_fixation=0,
                          most_recent_blink=0)
 
+        self.trial = 0
         self.trial_data = []
 
     def run(self):
@@ -569,6 +570,47 @@ class Experiment(object):
     # Study-specific code will generally only need to interact with these
     # methods; the ones above are mostly called internally (despite not
     # having private names)
+
+    def trial_count(self, max=None):
+        """Generator of trial index."""
+        while True:
+            self.trial += 1
+            if max is not None and self.trial > max:
+                raise StopIteration
+            yield self.trial
+
+    def trial_info(self, **kwargs):
+        """Generate a Series with trial information.
+
+        This function automatically includes a set of generally-relevant
+        fields and allows specification of additional study-specific
+        fields though keyword arguments.
+
+        Returns
+        -------
+        t_info : pandas Series
+            Trial info with generic fields and study-specific fields,
+            which supersede the generic fields if overlapping.
+
+        """
+        t_info = dict(
+
+            subject=self.p.subject,
+            session=self.p.session,
+            run=self.p.run,
+            trial=self.trial,
+
+            responded=False,
+            result=np.nan,
+            response=np.nan,
+            correct=np.nan,
+            rt=np.nan,
+
+            )
+
+        t_info.update(kwargs)
+
+        return pd.Series(t_info)
 
     def wait_until(self, func=None, timeout=np.inf, sleep=0, draw=None,
                    args=(), **kwargs):

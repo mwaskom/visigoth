@@ -1,5 +1,3 @@
-import itertools
-import numpy as np
 import pandas as pd
 from visigoth import AcquireFixation, AcquireTarget, flexible_values
 from visigoth.stimuli import RandomDotMotion, Point, Points
@@ -27,34 +25,20 @@ def create_stimuli(exp):
 
 def generate_trials(exp):
 
-    for t in itertools.count(1):
+    for _ in exp.trial_count():
 
         target = flexible_values(range(len(exp.p.dot_dir)))
 
-        t_info = dict(
+        t_info = exp.trial_info(
 
-            # Basic trial information
-            subject=exp.p.subject,
-            session=exp.p.session,
-            run=exp.p.run,
-            trial=t,
-
-            wait_iti=flexible_values(exp.p.wait_iti),
+            iti=flexible_values(exp.p.wait_iti),
             dot_coh=flexible_values(exp.p.dot_coh),
             dot_dir=exp.p.dot_dir[target],
             target=target,
 
-            # Subject response fields
-            result=np.nan,
-            responded=False,
-            response=np.nan,
-            correct=np.nan,
-            rt=np.nan,
-            stim_blink=np.nan,
-
             )
 
-        yield pd.Series(t_info)
+        yield t_info
 
 
 def run_trial(exp, info):
