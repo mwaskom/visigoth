@@ -213,19 +213,14 @@ class Experiment(object):
         necessary to overload this function.
 
         """
+        mean_acc, mean_rt = None, None
         if self.trial_data:
             data = pd.DataFrame(self.trial_data)
             if "correct" in data:
                 mean_acc = data["correct"].mean()
-            else:
-                mean_acc = None
             if "rt" in data:
                 mean_rt = data["rt"].mean()
-            else:
-                mean_rt = None
-            return mean_acc, mean_rt
-        else:
-            return None, None
+        return mean_acc, mean_rt
 
     def show_performance(self, mean_acc, mean_rt):
         """Show end-of-run feedback to the subject about performance.
