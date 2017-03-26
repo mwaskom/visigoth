@@ -7,13 +7,46 @@ from psychopy.visual import ElementArrayStim
 
 
 class RandomDotMotion(object):
+    """Random dot motion stimulus (from Newsome, Movshon, and others).
 
+    To use this stimulus, you must alternate calls between ``update``, which
+    repositions the dots with a given direction and coherence, and ``draw``
+    which shows the stimulus on the window. You must call ``update`` on every
+    screen refresh to get the expected motion characteristics.
+
+    """
     def __init__(self, win,
                  shape="square", size=.05, color=1,
                  density=16.7, speed=5, interval=3,
                  pos=(0, 0), aperture=5, elliptical=True,
                  ):
-        """Classical Random Dot Motion stimulus ("Movshon noise").
+        """Initialize the stimulus.
+
+        Parameters
+        ----------
+        win : Psychopy Window
+            Window object with additional attributes added by visigoth.
+        shape : "square" | "circle"
+            Shape of each dot.
+        size : float
+            Size of each dot, in degrees.
+        color : Psychopy color
+            Color of the dots, in [-1, 1] luminance or RGB.
+        density : float
+            Dot density in dots per degrees per second.
+        speed : float
+            Speed of coherent motion, in degrees per second.
+        interval : int
+            Coherently moving dots will be redrawn in a new position every
+            ``interval`` frames.
+        pos : pair of floats
+            The x, y coordinates of the center of the dot field, in degrees.
+        aperture : float or pair of floats
+            Size of the aperture. A single value can be given for a square /
+            circular aperture. In the latter case, size is diameter.
+        elliptical : bool
+            If true, aperture is elliptical (or circular). Dots can move
+            coherently through the corners, but will not be shown.
 
         """
         if np.isscalar(aperture):
@@ -25,6 +58,7 @@ class RandomDotMotion(object):
         self.speed = speed
         self.interval = interval
         self.n_dots = int(np.round(density * ax * ay / win.framerate))
+
         self.reset()
 
         shape = None if shape == "square" else shape
@@ -55,7 +89,7 @@ class RandomDotMotion(object):
         return np.column_stack([x, y])
 
     def _update_positions(self, direction, coherence):
-
+        """Find new position for the dots with some coherent motion."""
         # Get the dots to be drawn on the next frame
         xys = next(self.dotpos)
 
@@ -99,7 +133,17 @@ class RandomDotMotion(object):
             )
 
     def update(self, direction, coherence):
-        """Advance the dot animation one frame."""
+        """Advance the dot animation one frame.
+
+        Parameters
+        ----------
+        direction : float in [0, 360]
+            Direction of coherent motion, in degrees. 0 means left to right;
+            positive angles go clockwise.
+        coherence : float in [0, 1]
+            Average proportion of dots that will be displaced coherently.
+
+        """
         self._update_positions(direction, coherence)
 
     def draw(self):
@@ -108,7 +152,14 @@ class RandomDotMotion(object):
 
 
 class RandomDotColorMotion(RandomDotMotion):
+    """Bivalent random dot stimulus with color and motion dimensions.
 
+    To use this stimulus, you must alternate calls between ``update``, which
+    repositions and recolors the dots to achieved specified motion, and
+    ``draw`` which shows the stimulus on the window. You must call ``update``
+    on every screen refresh to get the expected motion characteristics.
+
+    """
     def __init__(self, win,
                  shape="square", size=.05,
                  density=16.7, speed=5, interval=3,
@@ -116,6 +167,45 @@ class RandomDotColorMotion(RandomDotMotion):
                  pos=(0, 0), aperture=5, elliptical=True,
                  ):
         """Classical random dot motion stimulus with randomly colored dots.
+
+        Random color is generated similar to the random motion. On each frame,
+        some proportion of the dots (the color coherence) are drawn in the
+        same hue, while the hues for the others are chosen randomly from 
+        [0, 360]. All dots have the same lightness and chromacity. The colors
+        are chosen using the CIECAM02 space. Note that colors are clipped to
+        stay in the RGB gamut. This allows for relatively bright/saturated
+        colors, but means that the circular distances colors as shown may not
+        reflect the generating distribution.
+
+        Parameters
+        ----------
+        win : Psychopy Window
+            Window object with additional attributes added by visigoth.
+        shape : "square" | "circle"
+            Shape of each dot.
+        size : float
+            Size of each dot, in degrees.
+        color : Psychopy color
+            Color of the dots, in [-1, 1] luminance or RGB.
+        density : float
+            Dot density in dots per degrees per second.
+        speed : float
+            Speed of coherent motion, in degrees per second.
+        interval : int
+            Coherently moving dots will be redrawn in a new position every
+            ``interval`` frames.
+        lightness : float in [0, 100]
+            Lightness channel (J) shared by all dots.
+        chromacity : float in [0, 50]
+            Chromacity channel (C) shared by all dots.
+        pos : pair of floats
+            The x, y coordinates of the center of the dot field, in degrees.
+        aperture : float or pair of floats
+            Size of the aperture. A single value can be given for a square /
+            circular aperture. In the latter case, size is diameter.
+        elliptical : bool
+            If true, aperture is elliptical (or circular). Dots can move
+            coherently through the corners, but will not be shown.
 
         """
         init_color = 1
@@ -166,6 +256,20 @@ class RandomDotColorMotion(RandomDotMotion):
         self.array.colors = rgbs
 
     def update(self, direction, motion_coherence, hue, color_coherence):
-        """Advance the dot animation one frame."""
+        """Advance the dot animation one frame.
+
+        Parameters
+        ----------
+        direction : float in [0, 360]
+            Direction of coherent motion, in degrees. 0 means left to right;
+            positive angles go clockwise.
+        motion_coherence : float in [0, 1]
+            Average proportion of dots that will be displaced coherently.
+        hue : float in [0, 360]
+            Hue for the coherently colored dots, in degrees.
+        color_coherence : float in [0, 1]
+            Average of proportion of dots with the coherent color.
+
+        """
         self._update_positions(direction, motion_coherence)
         self._update_colors(hue, color_coherence)
