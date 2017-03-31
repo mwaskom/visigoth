@@ -289,6 +289,9 @@ class GazeApp(object):
     def update_screen(self, screen_data):
         """Re-draw the figure to show current gaze and what's on the screen."""
         if self.axes_background is None:
+            # TODO this happens once; we may want to check for a resize
+            # on every draw and recapture the background then, otherwise
+            # things will look screwy if the app is reized after the run starts
             self.fig.canvas.draw()
             ax_bg = self.fig.canvas.copy_from_bbox(self.ax.bbox)
             self.axes_background = ax_bg
