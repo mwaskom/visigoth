@@ -1,4 +1,5 @@
 import pandas as pd
+from psychopy import core
 from visigoth import AcquireFixation, AcquireTarget, flexible_values
 from visigoth.stimuli import RandomDotMotion, Point, Points
 
@@ -57,12 +58,14 @@ def run_trial(exp, info):
         return info
 
     # Show the stimulus
+    rt_clock = core.Clock()
     for i in exp.frame_range(seconds=exp.p.wait_resp):
 
         exp.s.dots.update(info.dot_dir, info.dot_coh)
         exp.draw(["fix", "targets", "dots"])
 
         if not exp.check_fixation():
+            rt = rt_clock.getTime()
             res = exp.wait_until(AcquireTarget(exp, info.target),
                                  draw="targets")
             break
@@ -75,6 +78,10 @@ def run_trial(exp, info):
         info["result"] = "fixbreak"
     else:
         info.update(pd.Series(res))
+
+    # Inject the estimated RT
+    if info["responded"]:
+        info["rt"] = rt
 
     # Give feedback
     exp.sounds[info.result].play()
