@@ -161,9 +161,13 @@ class GazeApp(object):
                ylim=(-10, 10),
                aspect="equal")
 
-        ticks = np.linspace(-10, 10, 21)
-        ax.set_xticks(ticks, minor=True)
-        ax.set_yticks(ticks, minor=True)
+        major_ticks = [-10, -5, 0, 5, 10]
+        ax.set_xticks(major_ticks)
+        ax.set_yticks(major_ticks)
+
+        minor_ticks = np.linspace(-10, 10, 21)
+        ax.set_xticks(minor_ticks, minor=True)
+        ax.set_yticks(minor_ticks, minor=True)
 
         grid_kws = dict(which="minor", lw=.5, ls="-", c=".8")
         ax.xaxis.grid(True, **grid_kws)
