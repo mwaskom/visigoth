@@ -177,14 +177,14 @@ class GazeApp(object):
         """Set up the artists that represent stimuli and gaze location."""
         gaze = mpl.patches.Circle((0, 0),
                                   radius=.3,
-                                  facecolor="b",
+                                  facecolor="#4c72b0",
                                   linewidth=0,
                                   animated=True)
 
         fix = Bunch(
             point=mpl.patches.Circle((0, 0),
                                      radius=.15,
-                                     facecolor="k",
+                                     facecolor=".1",
                                      linewidth=0,
                                      animated=True),
             window=mpl.patches.Circle((0, 0),
@@ -200,7 +200,7 @@ class GazeApp(object):
             for pos in self.p.target_pos:
                 point = mpl.patches.Circle(pos,
                                            .3,
-                                           facecolor="k",
+                                           facecolor=".1",
                                            linewidth=0,
                                            animated=True)
                 window = mpl.patches.Circle(pos,
@@ -446,7 +446,8 @@ class TrialApp(object):
         # Draw a histogram of RTs
         bins = np.arange(0, 5.2, .2)
         heights, bins = np.histogram(trial_df.rt.dropna(), bins)
-        rt_bars = rt_ax.bar(bins[:-1], heights, .2)
+        rt_bars = rt_ax.bar(bins[:-1], heights, .2,
+                            facecolor=".1", edgecolor="w", linewidth=.5)
         rt_ax.set(ylim=(0, heights.max() + 1))
 
         # Draw the canvas to show the new data
