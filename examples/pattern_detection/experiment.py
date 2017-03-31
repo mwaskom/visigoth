@@ -9,6 +9,7 @@ def create_stimuli(exp):
 
     # Fixation point
     fix = Point(exp.win,
+                exp.p.fix_pos,
                 exp.p.fix_radius,
                 exp.p.fix_iti_color)
 
