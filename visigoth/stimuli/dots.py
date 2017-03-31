@@ -163,7 +163,7 @@ class RandomDotColorMotion(RandomDotMotion):
     def __init__(self, win,
                  shape="square", size=.05,
                  density=16.7, speed=5, interval=3,
-                 lightness=50, chromacity=50,
+                 lightness=60, chromacity=50,
                  pos=(0, 0), aperture=5, elliptical=True,
                  ):
         """Classical random dot motion stimulus with randomly colored dots.
