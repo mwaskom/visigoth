@@ -445,7 +445,7 @@ class TrialApp(object):
 
         # Draw a histogram of RTs
         bins = np.arange(0, 5.2, .2)
-        heights, bins = np.histogram(trial_df.rt, bins)
+        heights, bins = np.histogram(trial_df.rt.dropna(), bins)
         rt_bars = rt_ax.bar(bins[:-1], heights, .2)
         rt_ax.set(ylim=(0, heights.max() + 1))
 
