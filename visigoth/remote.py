@@ -6,12 +6,12 @@ import Queue as queue
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
-from PyQt4.QtCore import Qt, QTimer
-from PyQt4.QtGui import (QMainWindow, QWidget,
-                         QSlider, QPushButton, QLabel,
-                         QVBoxLayout, QHBoxLayout)
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import (QMainWindow, QWidget,
+                             QSlider, QPushButton, QLabel,
+                             QVBoxLayout, QHBoxLayout)
 
 from . import clientserver
 from .ext.bunch import Bunch
