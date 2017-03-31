@@ -81,3 +81,5 @@ def run_trial(exp, info):
     exp.show_feedback("targets", info.result, info.response)
     exp.wait_until(timeout=exp.p.wait_feedback, draw=["targets"])
     exp.s.targets.color = exp.p.target_color
+
+    return info
