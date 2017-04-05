@@ -234,7 +234,15 @@ def flexible_values(val, size=None, random_state=None,
     if np.isscalar(val):
         out = np.ones(size, np.array(val).dtype) * val
     elif isinstance(val, list):
-        out = random_state.choice(val, size=size)
+        if np.ndim(val) > 1:
+            indices = list(range(len(val)))
+            idx = random_state.choice(indices, size=size)
+            if size is None:
+                out = val[idx]
+            else:
+                out = np.array([val[i] for i in idx])
+        else:
+            out = random_state.choice(val, size=size)
     elif isinstance(val, tuple):
         rv = getattr(stats, val[0])(*val[1:])
         out = truncated_sample(rv, size, min, max, random_state=random_state)
