@@ -247,7 +247,7 @@ def flexible_values(val, size=None, random_state=None,
         rv = getattr(stats, val[0])(*val[1:])
         out = truncated_sample(rv, size, min, max, random_state=random_state)
     else:
-        raise TypeError("`val` must be scalar, set, or tuple")
+        raise TypeError("`val` must be scalar, list, or tuple")
 
     return out
 
