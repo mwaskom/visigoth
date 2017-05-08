@@ -68,17 +68,19 @@ class Experiment(object):
             # Wait a certain amount of time before starting the run
             # (e.g. for dummy fMRI scans)
             # TODO add a countdown or something nice here
+            # TODO we might want to skip this line if pre-run-wait is 0
             self.wait_until(self.check_abort,
                             timeout=self.p.wait_pre_run)
 
             # -- Initialize the experimental run
-            self.clock.reset()
+            trial_generator = self.generate_trials()
             self.tracker.start_run()
+            self.clock.reset()
             self.iti_start = 0
 
             # -- Main experimental loop
 
-            for trial_info in self.generate_trials():
+            for trial_info in trial_generator:
 
                 trial_info = self.run_trial(trial_info)
                 self.iti_start = self.clock.getTime()
