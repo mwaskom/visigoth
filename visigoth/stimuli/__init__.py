@@ -1,4 +1,5 @@
 from points import Point, Points
+from cue import LineCue
 from grating import Grating
 from elementarray import ElementArray
 from pattern import Pattern

@@ -68,9 +68,9 @@ class Experiment(object):
             # Wait a certain amount of time before starting the run
             # (e.g. for dummy fMRI scans)
             # TODO add a countdown or something nice here
-            # TODO we might want to skip this line if pre-run-wait is 0
-            self.wait_until(self.check_abort,
-                            timeout=self.p.wait_pre_run)
+            if self.p.wait_pre_run:
+                self.wait_until(self.check_abort,
+                                timeout=self.p.wait_pre_run)
 
             # -- Initialize the experimental run
             trial_generator = self.generate_trials()
@@ -734,7 +734,7 @@ class Experiment(object):
             raise ValueError("Must specify only one of `seconds` or `frames`")
 
         if seconds is not None:
-            frames = int(round_func(seconds * self.win.framerate))
+            frames = int(round_func(seconds * self.win.framerate)) - 1
 
         if adjust_for_missed:
             self.win.recordFrameIntervals = True
