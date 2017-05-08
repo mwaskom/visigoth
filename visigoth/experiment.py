@@ -683,7 +683,8 @@ class Experiment(object):
         self.sync_remote_screen(stims)
 
         if flip:
-            flip_time = self.win.flip()
+            self.win.flip()
+            flip_time = self.clock.getTime()
         else:
             flip_time = None
 
