@@ -8,8 +8,6 @@ base = dict(
     fix_window=2,
 
     fix_iti_color=None,
-    fix_ready_color=1,
-    fix_trial_color=1,
 
     target_pos=[(-10, 0), (10, 0)],
     target_radius=.25,
@@ -40,5 +38,6 @@ base = dict(
     wait_prestim=.5,
     wait_stim=.2,
     wait_resp=2,
+    wait_feedback=.5,
 
 )
