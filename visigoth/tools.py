@@ -144,8 +144,9 @@ class AcquireTarget(object):
 
             # Fail if too much time has elapsed since breaking fixation
             # without landing on a target
-            if now > (self.fix_break_time + self.wait_time):
-                failure = True
+            if self.chosen_target is None:
+                if now > (self.fix_break_time + self.wait_time):
+                    failure = True
 
             # Handle a successful choice of a target
             # (not neccessarily the right one!)
