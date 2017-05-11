@@ -83,4 +83,5 @@ class Pattern(object):
         """Set the phase of each underlying grating to a random value."""
         if rng is None:
             rng = np.random.RandomState()
-        self.array.phases = rng.uniform(0, 1, self.n)
+        self.phases = rng.uniform(0, 1, self.n)
+        self.array.phases = self.phases
