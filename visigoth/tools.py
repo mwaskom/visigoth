@@ -63,6 +63,7 @@ class AcquireTarget(object):
             self.wait_time = self.exp.p.eye_target_wait
             self.hold_time = self.exp.p.eye_target_hold
 
+            # TODO it's not externally obvious that this is happening
             if exp.p.eye_simulate:
                 self.wait_time *= 2
 
