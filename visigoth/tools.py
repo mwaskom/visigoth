@@ -279,4 +279,7 @@ def truncated_sample(rv, size=1, min=-np.inf, max=np.inf, **kwargs):
     while replace.any():
         out[replace] = rv.rvs(replace.sum(), **kwargs)
         replace = (out < min) | (out > max)
-    return out.reshape(size)
+    if size is None:
+        return out.item()
+    else:
+        return out.reshape(size)
