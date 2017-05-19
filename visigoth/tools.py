@@ -274,7 +274,7 @@ def truncated_sample(rv, size=1, min=-np.inf, max=np.inf, **kwargs):
         Samples from ``rv`` that are within (min, max).
 
     """
-    sample_size = 1 if size is None else np.prod(size)
+    sample_size = int(1 if size is None else np.prod(size))
     out = np.empty(sample_size)
     replace = np.ones(sample_size, np.bool)
     while replace.any():
