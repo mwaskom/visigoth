@@ -284,3 +284,41 @@ def truncated_sample(rv, size=1, min=-np.inf, max=np.inf, **kwargs):
         return out.item()
     else:
         return out.reshape(size)
+
+
+def limited_repeat_sequence(values, max_repeats, random_state=None):
+    """Infinite generator with a constraint on number of repeats of each item.
+
+    Parameters
+    ----------
+    values : list
+        Possible values for the sequence.
+    max_repeats : int
+        Maximum number of times a given value can appear in a row.
+    random_state : numpy RandomState, optional
+        Object to control random execution.
+
+    """
+    if random_state is None:
+        random_state = np.random.RandomState()
+
+    def choose_value():
+        return values[random_state.randint(0, len(values))]
+
+    first_value = choose_value()
+    seqstate = first_value, 1
+    yield first_value
+
+    while True:
+
+        next_value = choose_value()
+
+        if seqstate[0] == next_value:
+            if seqstate[1] == max_repeats:
+                continue
+            else:
+                seqstate = next_value, seqstate[1] + 1
+        else:
+            seqstate = next_value, 1
+
+        yield seqstate[0]
