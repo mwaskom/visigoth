@@ -2,7 +2,7 @@
 import os
 import sys
 
-from PyQt4.QtGui import QApplication
+from PyQt5.QtWidgets import QApplication
 
 from visigoth.commandline import define_parser
 from visigoth.remote import RemoteApp, GazeApp, TrialApp
