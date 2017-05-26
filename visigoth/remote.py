@@ -6,12 +6,12 @@ import Queue as queue
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
-from PyQt4.QtCore import Qt, QTimer
-from PyQt4.QtGui import (QMainWindow, QWidget,
-                         QSlider, QPushButton, QLabel,
-                         QVBoxLayout, QHBoxLayout)
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import (QMainWindow, QWidget,
+                             QSlider, QPushButton, QLabel,
+                             QVBoxLayout, QHBoxLayout)
 
 from . import clientserver
 from .ext.bunch import Bunch
@@ -52,6 +52,10 @@ class RemoteApp(QMainWindow):
         # Ensure connection to the server
         if self.client is None:
             self.initialize_client()
+
+        # Ensure that we can animate the gaze
+        if self.gaze_app.axes_background is None:
+            self.gaze_app.initialize_animation()
 
         # Get the most recent gaze position
         # Previously we showed a "trail" of gaze positions rather
@@ -161,9 +165,13 @@ class GazeApp(object):
                ylim=(-10, 10),
                aspect="equal")
 
-        ticks = np.linspace(-10, 10, 21)
-        ax.set_xticks(ticks, minor=True)
-        ax.set_yticks(ticks, minor=True)
+        major_ticks = [-10, -5, 0, 5, 10]
+        ax.set_xticks(major_ticks)
+        ax.set_yticks(major_ticks)
+
+        minor_ticks = np.linspace(-10, 10, 21)
+        ax.set_xticks(minor_ticks, minor=True)
+        ax.set_yticks(minor_ticks, minor=True)
 
         grid_kws = dict(which="minor", lw=.5, ls="-", c=".8")
         ax.xaxis.grid(True, **grid_kws)
@@ -177,14 +185,14 @@ class GazeApp(object):
         """Set up the artists that represent stimuli and gaze location."""
         gaze = mpl.patches.Circle((0, 0),
                                   radius=.3,
-                                  facecolor="b",
+                                  facecolor="#4c72b0",
                                   linewidth=0,
                                   animated=True)
 
         fix = Bunch(
             point=mpl.patches.Circle((0, 0),
                                      radius=.15,
-                                     facecolor="k",
+                                     facecolor=".1",
                                      linewidth=0,
                                      animated=True),
             window=mpl.patches.Circle((0, 0),
@@ -200,7 +208,7 @@ class GazeApp(object):
             for pos in self.p.target_pos:
                 point = mpl.patches.Circle(pos,
                                            .3,
-                                           facecolor="k",
+                                           facecolor=".1",
                                            linewidth=0,
                                            animated=True)
                 window = mpl.patches.Circle(pos,
@@ -240,6 +248,15 @@ class GazeApp(object):
         vbox.addLayout(controls)
 
         self.layout = vbox
+
+    def initialize_animation(self):
+
+        # TODO this happens once; we may want to check for a resize
+        # on every draw and recapture the background then, otherwise
+        # things will look screwy if the app is reized after the run starts
+        self.fig.canvas.draw()
+        ax_bg = self.fig.canvas.copy_from_bbox(self.ax.bbox)
+        self.axes_background = ax_bg
 
     # ----- Study-specific functions
 
@@ -284,10 +301,6 @@ class GazeApp(object):
 
     def update_screen(self, screen_data):
         """Re-draw the figure to show current gaze and what's on the screen."""
-        if self.axes_background is None:
-            self.fig.canvas.draw()
-            ax_bg = self.fig.canvas.copy_from_bbox(self.ax.bbox)
-            self.axes_background = ax_bg
 
         # Update gaze position
         gaze = np.array(screen_data["gaze"])
@@ -445,8 +458,9 @@ class TrialApp(object):
 
         # Draw a histogram of RTs
         bins = np.arange(0, 5.2, .2)
-        heights, bins = np.histogram(trial_df.rt, bins)
-        rt_bars = rt_ax.bar(bins[:-1], heights, .2)
+        heights, bins = np.histogram(trial_df.rt.dropna(), bins)
+        rt_bars = rt_ax.bar(bins[:-1], heights, .2,
+                            facecolor=".1", edgecolor="w", linewidth=.5)
         rt_ax.set(ylim=(0, heights.max() + 1))
 
         # Draw the canvas to show the new data
