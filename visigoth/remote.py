@@ -53,6 +53,10 @@ class RemoteApp(QMainWindow):
         if self.client is None:
             self.initialize_client()
 
+        # Ensure that we can animate the gaze
+        if self.gaze_app.axes_background is None:
+            self.gaze_app.initialize_animation()
+
         # Get the most recent gaze position
         # Previously we showed a "trail" of gaze positions rather
         # than just one, which looked pretty and is more informative.
@@ -245,6 +249,15 @@ class GazeApp(object):
 
         self.layout = vbox
 
+    def initialize_animation(self):
+
+        # TODO this happens once; we may want to check for a resize
+        # on every draw and recapture the background then, otherwise
+        # things will look screwy if the app is reized after the run starts
+        self.fig.canvas.draw()
+        ax_bg = self.fig.canvas.copy_from_bbox(self.ax.bbox)
+        self.axes_background = ax_bg
+
     # ----- Study-specific functions
 
     def create_stim_artists(self):
@@ -288,13 +301,6 @@ class GazeApp(object):
 
     def update_screen(self, screen_data):
         """Re-draw the figure to show current gaze and what's on the screen."""
-        if self.axes_background is None:
-            # TODO this happens once; we may want to check for a resize
-            # on every draw and recapture the background then, otherwise
-            # things will look screwy if the app is reized after the run starts
-            self.fig.canvas.draw()
-            ax_bg = self.fig.canvas.copy_from_bbox(self.ax.bbox)
-            self.axes_background = ax_bg
 
         # Update gaze position
         gaze = np.array(screen_data["gaze"])
