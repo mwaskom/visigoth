@@ -743,7 +743,7 @@ class Experiment(object):
             raise ValueError("Must specify only one of `seconds` or `frames`")
 
         if seconds is not None:
-            frames = int(round_func(seconds * self.win.framerate)) - 1
+            frames = int(round_func(seconds * self.win.framerate))
 
         if adjust_for_missed:
             self.win.recordFrameIntervals = True
