@@ -702,7 +702,8 @@ class Experiment(object):
         return flip_time
 
     def frame_range(self, seconds=None, frames=None, round_func=np.floor,
-                    adjust_for_missed=True, yield_skipped=False):
+                    adjust_for_missed=True, yield_skipped=False,
+                    expected_offset=None):
         """Generator function for timing events based on screen flips.
 
         Either ``seconds`` or ``frames``, but not both, are required.
@@ -726,6 +727,10 @@ class Experiment(object):
             PsychoPy thinks it has missed a flip.
         yield_skipped : bool, optional
             If True, also return a list of flip indices that were missed
+        expected_offset : float, optional
+            Expected offset time for the stimulus. If provided, the generator
+            will check the experiment clock and end if the next flip will be
+            after the expected offset time.
 
         Yields
         ------
@@ -760,6 +765,11 @@ class Experiment(object):
                 skipped_frames = list(range(frame, frame + new_dropped))
             else:
                 skipped_frames = []
+
+            if expected_offset is not None:
+                now = self.clock.getTime()
+                if expected_offset < (now + self.win.frametime):
+                    raise StopIteration
 
             if yield_skipped:
                 yield frame, skipped_frames
