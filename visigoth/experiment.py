@@ -4,6 +4,7 @@ import os
 import re
 import time
 import json
+import hashlib
 import Queue as queue
 
 import yaml
@@ -322,6 +323,13 @@ class Experiment(object):
         p.time = time.strftime("%H-%M-%S", timestamp)
         p.session = p.date if args.session is None else args.session
 
+        # Create a name for the eyelink file (limited to 6 characeters)
+        hash_seed = "_".join([p.subject, p.date, p.time])
+        p.eyelink_fname = hashlib.md5(hash_seed).hexdigest()[:6]
+
+        # Save information about software versions
+        # TODO add visigoth git commit for pre release
+        # TODO also track git commit of study-specific code
         p.visigoth_version = version.__version__
 
         self.p = p
@@ -388,7 +396,8 @@ class Experiment(object):
                 color = int(round(ratio ** (1 / info["gamma"]) * 255))
 
             # Configure and calibrate the eyetracker
-            self.tracker = eyetracker.EyeTracker(self, color)
+            self.tracker = eyetracker.EyeTracker(self, color,
+                                                 self.p.eyelink_fname)
             self.tracker.run_calibration()
 
     def initialize_display(self, gamma_correct=True, debug=False):
@@ -734,7 +743,7 @@ class Experiment(object):
             raise ValueError("Must specify only one of `seconds` or `frames`")
 
         if seconds is not None:
-            frames = int(round_func(seconds * self.win.framerate)) - 1
+            frames = int(round_func(seconds * self.win.framerate))
 
         if adjust_for_missed:
             self.win.recordFrameIntervals = True
