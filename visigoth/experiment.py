@@ -71,6 +71,7 @@ class Experiment(object):
             # TODO add a countdown or something nice here
             if self.p.wait_pre_run:
                 self.wait_until(self.check_abort,
+                                draw=self.p.draw_pre_run,
                                 timeout=self.p.wait_pre_run)
 
             # -- Initialize the trial generator
@@ -896,6 +897,7 @@ default_params = dict(
     eye_target_hold=.3,
 
     wait_pre_run=0,
+    draw_pre_run=None,
 
     wait_iti=1,
     wait_fix=5,
