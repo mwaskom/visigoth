@@ -73,8 +73,12 @@ class Experiment(object):
                 self.wait_until(self.check_abort,
                                 timeout=self.p.wait_pre_run)
 
-            # -- Initialize the experimental run
+            # -- Initialize the trial generator
             trial_generator = self.generate_trials()
+            if self.p.initialize_trial_generator:
+                next(trial_generator)
+
+            # -- Initialize the experimental run
             self.tracker.start_run()
             self.clock.reset()
             self.iti_start = 0
@@ -858,6 +862,8 @@ class Experiment(object):
 default_params = dict(
 
     display_luminance=None,
+
+    initialize_trial_generator=False,
 
     fix_pos=(0, 0),
     fix_radius=.15,
