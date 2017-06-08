@@ -80,7 +80,8 @@ class Experiment(object):
                 next(trial_generator)
 
             # -- Initialize the experimental run
-            self.tracker.start_run()
+            if self.tracker is not None:
+                self.tracker.start_run()
             self.clock.reset()
             self.iti_start = 0
 
@@ -404,6 +405,8 @@ class Experiment(object):
             self.tracker = eyetracker.EyeTracker(self, color,
                                                  self.p.eyelink_fname)
             self.tracker.run_calibration()
+        else:
+            self.tracker = None
 
     def initialize_display(self, gamma_correct=True, debug=False):
         """Open the PsychoPy window to begin the experiment."""
