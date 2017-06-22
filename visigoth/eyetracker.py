@@ -195,12 +195,14 @@ class EyeTracker(object):
             if age < 10:
                 os.rename(edf_src_fname, edf_trg_fname)
             else:
-                w = ("'eyedat.EDF' present in this directory but is too old; "
+                w = ("######################################################\n"
+                     "'eyedat.EDF' present in this directory but is too old; "
                      "not moving to the data directory but this may indicate "
                      " problems")
                 warnings.warn(w)
         elif not self.simulate:
-            w = ("'eyedat.EDF' not present in this directory after closing "
+            w = ("#####################################################\n"
+                 "'eyedat.EDF' not present in this directory after closing "
                  "the connection to the eyetracker")
             warnings.warn(w)
 
