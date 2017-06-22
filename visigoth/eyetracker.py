@@ -24,6 +24,7 @@ class EyeTracker(object):
         self.exp = exp
 
         # Extract relevant parameters
+        self.host_address = exp.p.eye_host_address
         self.simulate = exp.p.eye_simulate
         self.save_data = exp.p.save_data
         self.fix_window_radius = exp.p.fix_radius
@@ -56,6 +57,7 @@ class EyeTracker(object):
         eye_config["name"] = "tracker"
         eye_config["model_name"] = "EYELINK 1000 DESKTOP"
         eye_config["default_native_data_file_name"] = self.edf_stem
+        eye_config["network_settings"] = self.host_address
 
         bg_color = [int(screen_color)] * 3
         cal_config = dict(auto_pace=False,
