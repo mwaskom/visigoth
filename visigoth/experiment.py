@@ -891,6 +891,8 @@ default_params = dict(
     eye_fixation=False,
     eye_response=False,
 
+    eye_host_address="100.1.1.1",
+
     # TODO use fixbreak timeout exclusively for allowing blinks
     # or more generally allow small deviations from fix window?
     eye_fixbreak_timeout=.25,
