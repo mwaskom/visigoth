@@ -1,0 +1,24 @@
+macbook-air:
+  width: 28.65
+  distance: 45
+  resolution: [1440, 900]
+  refresh_hz: 60
+  gamma: 2.13
+  max_luminance: 259.1
+
+kianilab-ps1:
+  width: 40
+  distance: 52
+  resolution: [1600, 1200]
+  refresh_hz: 75
+  max_luminance: 110.864
+  gamma: 1.938
+
+nyu-cbi-propixx:
+  width: 59.9
+  distance: 82.77
+  resolution: [1920, 1080]
+  refresh_hz: 60
+  gamma: 1
+  max_luminance: 369.5
+  date: 2017-06-08

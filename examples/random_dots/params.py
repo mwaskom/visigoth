@@ -1,7 +1,7 @@
 
 base = dict(
 
-    display_name="laptop",
+    display_name="macbook-air",
     display_luminance=0,
 
     target_pos=[(-10, 0), (10, 0)],
