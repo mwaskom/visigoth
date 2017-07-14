@@ -57,6 +57,7 @@ class Experiment(object):
             self.initialize_params()
             self.initialize_data_output()
             self.initialize_sounds()
+            self.initialize_display_info()
             self.initialize_eyetracker()
             self.initialize_server()
             self.initialize_display()
@@ -390,11 +391,7 @@ class Experiment(object):
             # Determine the screen background color during calibration
             # Currently I'm not sure how to get iohub to apply gamma correction
             # so we need to do that ourselves here.
-            # TODO but this should probably be abstracted as it happens twice
-            fname = os.path.join(self.p.study_dir, "displays.yaml")
-            with open(fname) as fid:
-                display_info = yaml.load(fid)
-            info = display_info[self.p.display_name]
+            info = self.display_info[self.p.display_name]
             if self.p.display_luminance is None:
                 color = 128
             else:
@@ -408,14 +405,24 @@ class Experiment(object):
         else:
             self.tracker = None
 
+    def initialize_display_info(self):
+        """Load display info from global and local files."""
+        # Extract the relevant display information
+        global_fname = os.path.join(os.path.dirname(__file__),
+                                    "displays.yaml")
+        with open(global_fname) as fid:
+            display_info = yaml.load(fid)
+
+        local_fname = os.path.join(self.p.study_dir, "displays.yaml")
+        if os.path.exists(local_fname):
+            with open(local_fname) as fid:
+                display_info.update(yaml.load(fid))
+
+        self.display_info = display_info
+
     def initialize_display(self, gamma_correct=True, debug=False):
         """Open the PsychoPy window to begin the experiment."""
-
-        # Extract the relevant display information
-        fname = os.path.join(self.p.study_dir, "displays.yaml")
-        with open(fname) as fid:
-            display_info = yaml.load(fid)
-        info = display_info[self.p.display_name]
+        info = self.display_info[self.p.display_name]
 
         # Determine the background color of the display
         if self.p.display_luminance is None:

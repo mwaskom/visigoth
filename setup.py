@@ -12,8 +12,6 @@ VERSION = "0.1.dev"
 
 SCRIPTS = ["scripts/visigoth", "scripts/visigoth-remote"]
 PACKAGES = ["visigoth", "visigoth.stimuli", "visigoth.ext"]
-PACKAGE_DIR = {"visigoth": "visigoth"}
-PACKAGE_DATA = {"visigoth": ["sounds/*.wav"]}
 
 
 if __name__ == "__main__":
@@ -30,7 +28,6 @@ if __name__ == "__main__":
         version=VERSION,
         scripts=SCRIPTS,
         packages=PACKAGES,
-        package_dir=PACKAGE_DIR,
-        package_data=PACKAGE_DATA,
+        include_package_data=True
 
     )

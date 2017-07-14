@@ -1,0 +1,3 @@
+include README.md
+include visigoth/displays.yaml
+include visigoth/sounds/*.wav
