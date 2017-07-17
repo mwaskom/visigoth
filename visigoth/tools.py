@@ -153,8 +153,8 @@ class AcquireTarget(object):
                             responded=True,
                             response=self.chosen_target,
                             rt=self.fix_break_time,
-                            x=gaze[0],
-                            y=gaze[1])
+                            sacc_x=gaze[0],
+                            sacc_y=gaze[1])
 
                 if self.correct_target is not None:
                     correct = self.chosen_target == self.correct_target
@@ -168,8 +168,8 @@ class AcquireTarget(object):
 
                 res = Bunch(responded=False,
                             result="nochoice",
-                            x=gaze[0],
-                            y=gaze[1])
+                            sacc_x=gaze[0],
+                            sacc_y=gaze[1])
                 return res
 
             # No determinate result yet
