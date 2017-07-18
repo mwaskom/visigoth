@@ -192,18 +192,23 @@ class EyeTracker(object):
         if os.path.exists(edf_src_fname):
             edf_mtime = os.stat(edf_src_fname).st_mtime
             age = time.time() - edf_mtime
-            if age < 10:
-                os.rename(edf_src_fname, edf_trg_fname)
-            else:
-                w = ("######################################################\n"
-                     "'eyedat.EDF' present in this directory but is too old; "
-                     "not moving to the data directory but this may indicate "
-                     " problems")
+            if age > 10:
+                w = ("\n"
+                    "########################################################\n"
+                    "Timestamp on Eyelink data file in this directory is old;\n"
+                    "this may indicate problems and should be investigated.\n"
+                    "########################################################\n"
+                    )
                 warnings.warn(w)
+            os.rename(edf_src_fname, edf_trg_fname)
         elif not self.simulate:
-            w = ("#####################################################\n"
-                 "'eyedat.EDF' not present in this directory after closing "
-                 "the connection to the eyetracker")
+            w = (
+                "\n"
+                "#########################################################\n"
+                "Eyelink data file was not present in this directory after\n"
+                "closing the connection to the eyetracker.\n"
+                "#########################################################\n"
+                )
             warnings.warn(w)
 
     def write_log_data(self):
