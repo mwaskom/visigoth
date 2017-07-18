@@ -63,10 +63,6 @@ class AcquireTarget(object):
             self.wait_time = self.exp.p.eye_target_wait
             self.hold_time = self.exp.p.eye_target_hold
 
-            # TODO it's not externally obvious that this is happening
-            if exp.p.eye_simulate:
-                self.wait_time *= 2
-
         if self.check_key:
             self.keylist = exp.p.key_targets  # TODO not a great name?
 
@@ -156,7 +152,9 @@ class AcquireTarget(object):
                 res = Bunch(eye_response=True,
                             responded=True,
                             response=self.chosen_target,
-                            rt=self.fix_break_time)
+                            rt=self.fix_break_time,
+                            sacc_x=gaze[0],
+                            sacc_y=gaze[1])
 
                 if self.correct_target is not None:
                     correct = self.chosen_target == self.correct_target
@@ -169,7 +167,9 @@ class AcquireTarget(object):
             elif failure:
 
                 res = Bunch(responded=False,
-                            result="nochoice")
+                            result="nochoice",
+                            sacc_x=gaze[0],
+                            sacc_y=gaze[1])
                 return res
 
             # No determinate result yet
