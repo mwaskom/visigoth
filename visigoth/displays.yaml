@@ -20,5 +20,5 @@ nyu-cbi-propixx:
   resolution: [1920, 1080]
   refresh_hz: 60
   gamma: 1
-  max_luminance: 369.5
-  date: 2017-06-08
+  max_luminance: 100.67
+  date: 2017-06-15
