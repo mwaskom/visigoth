@@ -19,11 +19,10 @@ from . import version, stimuli, eyetracker, commandline, clientserver
 
 
 class Experiment(object):
-
+    """Main object for controlling experiment execution."""
     abort_keys = ["escape"]
 
     def __init__(self, arglist=None):
-
         self.arglist = [] if arglist is None else arglist
 
         self.p = None
@@ -47,6 +46,7 @@ class Experiment(object):
         self.trial_data = []
 
     def run(self):
+        """Outer loop for executing the experiment."""
 
         # Everything is wrapped in a try block so that errors will exit out
         # properly and not destroy data or leave hanging connections.
@@ -211,6 +211,11 @@ class Experiment(object):
         not necessary to overload this function. However, it can be defined for
         each study to allow for more complicated data structures or exit logic.
 
+        This method has no parameters. It should access the ``trial_data``
+        attribute on the Experiment object, which is a list corresponding
+        to each trial where entries in the list are objects returned by
+        :meth:`Experiment.run_trial`.
+
         """
         if self.trial_data and self.p.save_data:
 
@@ -229,6 +234,11 @@ class Experiment(object):
         ``correct`` and ``rt``, and if the ``show_performance`` method expects
         to get an arglist that has ``mean_acc, mean_rt``, then it is not
         necessary to overload this function.
+
+        This method has no parameters. It should access the ``trial_data``
+        attribute on the Experiment object, which is a list corresponding
+        to each trial where entries in the list are objects returned by
+        :meth:`Experiment.run_trial`.
 
         """
         mean_acc, mean_rt = None, None
