@@ -495,9 +495,12 @@ class Experiment(object):
         if not isinstance(trigger_keys, (tuple, list)):
             trigger_keys = list(trigger_keys)
 
-        visual.TextStim(self.win, "Waiting for scanner",
-                        pos=(0, 0), height=1).draw()
-        self.win.flip()
+        if self.p.pre_trigger_stim is None:
+            visual.TextStim(self.win, "Waiting for scanner",
+                            pos=(0, 0), height=1).draw()
+            self.win.flip()
+        else:
+            self.draw(self.p.pre_trigger_stim, flip=True)
 
         catch_keys = self.abort_keys + trigger_keys
         keys = event.waitKeys(keyList=catch_keys)
@@ -920,6 +923,7 @@ default_params = dict(
     perform_rt_target=None,
 
     trigger=None,
+    pre_trigger_stim=None,
 
     run_duration=None,
 
