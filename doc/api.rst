@@ -101,8 +101,8 @@ Internal execution methods
    Experiment.wait_for_exit
 
 
-Experiment tools
-----------------
+Tools
+-----
 
 .. autosummary::
    :toctree: api/
@@ -113,3 +113,23 @@ Experiment tools
    flexible_values
    truncated_sample
    limited_repeat_sequence
+
+
+Stimuli
+-------
+
+.. autosummary::
+   :toctree: api/
+
+   stimuli.RandomDotMotion
+   stimuli.RandomDotColorMotion
+   stimuli.Pattern
+   stimuli.GaussianNoise
+   stimuli.UniformNoise
+   stimuli.ElementArray
+   stimuli.Grating
+   stimuli.Point
+   stimuli.Points
+   stimuli.LineCue
+   stimuli.PointCue
+   stimuli.GazeStim
