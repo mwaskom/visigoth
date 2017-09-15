@@ -15,7 +15,6 @@ Main interface
    :toctree: api/
    
    Experiment
-   Experiment.run
 
 Methods that must be defined for each study
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -97,6 +96,7 @@ Internal execution methods
 .. autosummary::
    :toctree: api/
 
+   Experiment.run
    Experiment.wait_for_trigger
    Experiment.wait_for_exit
 

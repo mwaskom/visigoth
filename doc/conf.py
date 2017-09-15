@@ -14,7 +14,6 @@
 
 import sys
 import os
-import shlex
 
 import sphinx_bootstrap_theme
 
@@ -127,10 +126,10 @@ html_theme_options = {
     'bootstrap_version': '3',
     'bootswatch_theme': "simplex",
     'navbar_links' : [
-                      ("Github", "https://github.com/mwaskom/visigoth", True),
-                      ("User Guide", "user_guide"),
-                      ("API Reference", "api"),
-                      ]
+            ("Github", "https://github.com/mwaskom/visigoth", True),
+            ("User Guide", "user_guide"),
+            ("API Reference", "api"),
+        ]
 
     }
 
