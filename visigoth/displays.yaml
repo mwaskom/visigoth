@@ -15,7 +15,7 @@ kianilab-ps1:
   gamma: 1.938
 
 nyu-cbi-propixx:
-  width: 53.8
+  width: 64.53
   distance: 82.77
   resolution: [1920, 1080]
   refresh_hz: 60
