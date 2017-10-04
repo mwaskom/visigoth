@@ -124,7 +124,7 @@ html_theme_options = {
     'source_link_position': 'footer',
     'navbar_sidebarrel': False,
     'bootstrap_version': '3',
-    'bootswatch_theme': "simplex",
+    'bootswatch_theme': "lumen",
     'navbar_links' : [
             ("Github", "https://github.com/mwaskom/visigoth", True),
             ("User Guide", "user_guide"),
