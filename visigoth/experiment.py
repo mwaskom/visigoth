@@ -420,7 +420,8 @@ class Experiment(object):
 
         self.display_info = display_info
 
-    def initialize_display(self, gamma_correct=True, debug=False):
+    def initialize_display(self, gamma_correct=True, debug=False,
+                           debug_res=(800, 600)):
         """Open the PsychoPy window to begin the experiment."""
         info = self.display_info[self.p.display_name]
 
@@ -441,7 +442,7 @@ class Experiment(object):
 
         # Open the psychopy window
         logging.console.setLevel(logging.CRITICAL)
-        res = (800, 600) if debug else info["resolution"]
+        res = debug_res if debug else info["resolution"]
         self.win = win = visual.Window(units="deg",
                                        screen=0,
                                        fullscr=not debug,
