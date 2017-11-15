@@ -3,8 +3,8 @@ macbook-air:
   distance: 45
   resolution: [1440, 900]
   refresh_hz: 60
-  gamma: 2.13
-  max_luminance: 259.1
+  gamma: 2.2
+  max_luminance: 300
 
 kianilab-ps1:
   width: 40
