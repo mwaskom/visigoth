@@ -10,6 +10,8 @@ ZIP_SAFE = False
 DOWNLOAD_URL = "https://github.com/mwaskom/visigoth"
 VERSION = "0.1.dev"
 
+INSTALL_REQUIRES = ["colorspacious"]
+
 SCRIPTS = ["scripts/visigoth", "scripts/visigoth-remote"]
 PACKAGES = ["visigoth", "visigoth.stimuli", "visigoth.ext"]
 
@@ -28,6 +30,7 @@ if __name__ == "__main__":
         version=VERSION,
         scripts=SCRIPTS,
         packages=PACKAGES,
+        install_requires=INSTALL_REQUIRES,
         include_package_data=True
 
     )
