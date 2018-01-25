@@ -6,17 +6,19 @@ import Queue
 import numpy as np
 import pandas as pd
 from scipy.spatial import distance
-from psychopy import iohub
+from psychopy import event
 from psychopy.tools.monitorunittools import pix2deg
+import pylink
+from .stimuli import Point
 
 
 class EyeTracker(object):
-    """Interface to the psychopy.iohub Eyelink interface.
+    """Interface to EyeLink eyetracker.
 
     The main reason for the additional layer of complexity is to allow simple
     eyetracker simulation with the mouse in a way that is transparent to the
     experiment code. This object also has some helpful interface functions,
-    allows for dynamic offset values, and maintains a log of samples.
+    allows for dynamic offset values, and it maintains a log of samples.
 
     """
     def __init__(self, exp, calibration_screen_color=128, edf_stem="eyedat"):
@@ -28,6 +30,9 @@ class EyeTracker(object):
         self.simulate = exp.p.eye_simulate
         self.save_data = exp.p.save_data
         self.fix_window_radius = exp.p.fix_radius
+
+        self.monitor = exp.win.monitor
+        self.center = np.divide(exp.win.size, 2.0)
 
         # Initialize the offsets with default values
         self.offsets = (0, 0)
@@ -41,57 +46,26 @@ class EyeTracker(object):
         self.log_positions = []
         self.log_offsets = []
 
-        # Configure iohub to communicate
-        self.setup_iohub(calibration_screen_color)
+        # Initialize the connection to the EyeLink box
+        self.setup_eyelink()
 
-    def setup_iohub(self, screen_color=128):
-        """Initialize iohub with relevant configuration details.
-
-        Some of these things should be made configurable either through our
-        parameters system or the iohub yaml config system but I am hardcoding
-        values in the object for now.
-
-        """
-        # Define relevant eyetracking parameters
-        eye_config = dict()
-        eye_config["name"] = "tracker"
-        eye_config["model_name"] = "EYELINK 1000 DESKTOP"
-        eye_config["default_native_data_file_name"] = self.edf_stem
-        eye_config["network_settings"] = self.host_address
-
-        bg_color = [int(screen_color)] * 3
-        cal_config = dict(auto_pace=False,
-                          type="NINE_POINTS",
-                          screen_background_color=bg_color,
-                          target_type="CIRCLE_TARGET",
-                          target_attributes=dict(outer_diameter=33,
-                                                 inner_diameter=6,
-                                                 outer_color=[255, 255, 255],
-                                                 inner_color=[0, 0, 0]))
-        eye_config["calibration"] = cal_config
-        eye_config["runtime_settings"] = dict(sampling_rate=1000,
-                                              track_eyes="LEFT")
-
-        tracker_class = "eyetracker.hw.sr_research.eyelink.EyeTracker"
-
-        # Initialize iohub to track eyes or mouse if in simulation mode
+    def setup_eyelink(self):
+        """Connect to the EyeLink box at given host address."""
         if self.simulate:
-            self.io = iohub.launchHubServer()
-            self.tracker = self.io.devices.mouse
+            self.tracker = pylink.EyeLink(self.host_address)
         else:
-            iohub_config = {tracker_class: eye_config}
-            self.io = iohub.launchHubServer(**iohub_config)
-            self.tracker = self.io.devices.tracker
+            self.tracker = event.Mouse(visible=False, win=self.exp.win)
 
     def run_calibration(self):
         """Execute the eyetracker setup (principally calibration) procedure."""
         if not self.simulate:
-            self.tracker.runSetupProcedure()
+            self.tracker.openGraphicsEx(Calibrator(self.win))
+            self.tracker.doTrackerSetup()
 
     def start_run(self):
         """Turn on recording mode and sync with the eyelink log."""
         if not self.simulate:
-            self.tracker.setRecordingState(True)
+            self.startRecording(1, 1, 1, 1)
             self.send_message("SYNCTIME")
 
     def send_message(self, msg):
@@ -99,28 +73,34 @@ class EyeTracker(object):
         if not self.simulate:
             self.tracker.sendMessage(msg)
 
-    def read_gaze(self, in_degrees=True, log=True, apply_offsets=True):
-        """Read a sample of gaze position and convert coordinates."""
+    def read_gaze(self, log=True, apply_offsets=True):
+        """Return the position of gaze in degrees, subject to offsets."""
         timestamp = self.exp.clock.getTime()
 
         if self.simulate:
+
             # Use the correct method for a mouse "tracker"
-            if any(self.tracker.getCurrentButtonStates()):
+            if any(self.tracker.getPressed()):
                 # Simualte blinks with button down
                 gaze = None
             else:
-                gaze = self.tracker.getPosition()
+                gaze = self.tracker.getPos()
+
         else:
+
             # Use the correct method for an eyetracker camera
-            gaze = self.tracker.getLastGazePosition()
-
-        # Use a standard form for invalid sample
-        if not isinstance(gaze, (tuple, list)):
-            gaze = (np.nan, np.nan)
-
-        # Convert to degrees of visual angle using monitor information
-        if in_degrees:
-            gaze = tuple(pix2deg(np.array(gaze), self.exp.win.monitor))
+            sample = self.tracker.getNewestSample()
+            if sample is None:
+                gaze = np.nan, np.nan
+            else:
+                # TODO handle left/right eye
+                gaze_eyelink = np.array(sample.getLeftEye().getGaze())
+                # TODO check this is what bad gaze is
+                if any(gaze_eyelink == pylink.MISSING_DATA):
+                    gaze = np.nan, np.nan
+                else:
+                    gaze_pix = np.subtract(gaze_eyelink, self.center)
+                    gaze = tuple(pix2deg(gaze_pix), self.monitor)
 
         # Add to the low-resolution log
         if log:
@@ -181,8 +161,16 @@ class EyeTracker(object):
     def close_connection(self):
         """Close down the connection to Eyelink and save the eye data."""
         if not self.simulate:
-            self.tracker.setRecordingState(False)
-            self.tracker.setConnectionState(False)
+            self.tracker.stopRecording()
+            self.tracker.setOfflineMode()
+            pylink.msecDelay(500)
+            self.tracker.closeDataFile()
+            if self.save_data:
+                # TODO check if we can receive directly to data directory
+                # and get rid of the move_edf_file method
+                self.tracker.receiveDataFile(self.edf_stem + ".EDF",
+                                             self.edf_stim + ".EDF")
+            self.tracker.close()
 
     def move_edf_file(self):
         """Move the Eyelink edf data to the right location."""
@@ -226,4 +214,63 @@ class EyeTracker(object):
         if self.save_data:
             self.move_edf_file()
             self.write_log_data()
-        iohub.ioHubConnection.getActiveConnection().quit()
+
+
+class Calibrator(pylink.EyeLinkCustomDisplay):
+
+    def __init__(self, win):
+
+        self.win = win
+        self.target = CalibrationTarget(win)
+
+    def get_input_key(self):
+        # TODO This will let things run but experiment keyboard won't
+        # work properly for controlling calibration. Not a problem as the
+        # experimenter always does things on the Eyelink host.
+        # Need to translate some keys into pylink constants, I think.
+        return event.getKeys()
+
+    def play_beep(self, *args):
+        # No sounds
+        pass
+
+    def draw_cal_target(self, *pos):
+
+        self.target.set_pos_pixels(pos)
+        self.target.draw()
+        self.win.flip()
+
+    def erase_cal_target(self):
+        self.win.flip()
+
+    def setup_cal_display(self):
+        self.win.flip()
+
+    def clear_cal_display(self):
+        self.win.flip()
+
+    def exit_cal_display(self):
+        self.win.flip()
+
+
+class CalibrationTarget(object):
+
+    def __init__(self, win):
+
+        self.win = win
+        self.monitor = win.monitor
+        self.center = np.divide(win.size, 2.0)
+        self.stims = [
+            Point(win, pos=(0, 0), radius=.5, color=(.8, .6, -.8)),
+            Point(win, pos=(0, 0), radius=.1, color=None)
+        ]
+
+    def set_pos_pixels(self, pos):
+
+        pos = pix2deg(np.subtract(self.center), self.monitor)
+        for stim in self.stims:
+            stim.pos = pos
+
+    def draw(self):
+        for stim in self.stims:
+            stim.draw()
