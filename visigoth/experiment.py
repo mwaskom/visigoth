@@ -58,9 +58,9 @@ class Experiment(object):
             self.initialize_data_output()
             self.initialize_sounds()
             self.initialize_display_info()
+            self.initialize_display()
             self.initialize_eyetracker()
             self.initialize_server()
-            self.initialize_display()
             self.initialize_stimuli()
 
             # Wait for a trigger to start
