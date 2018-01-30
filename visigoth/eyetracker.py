@@ -91,14 +91,23 @@ class EyeTracker(object):
 
             # Use the correct method for an eyetracker camera
             sample = self.tracker.getNewestSample()
-            gaze_eyelink = np.array(sample.getLeftEye().getGaze())
 
-            # TODO check that this is what bad gaze is
-            if any(gaze_eyelink == pylink.MISSING_DATA):
+            if sample is None:
                 gaze = np.nan, np.nan
+
             else:
-                gaze_pix = np.subtract(gaze_eyelink, self.center)
-                gaze = tuple(pix2deg(gaze_pix, self.monitor))
+                if sample.isLeftSample():
+                    gaze_eyelink = np.array(sample.getLeftEye().getGaze())
+                elif sample.isRightSample():
+                    gaze_eyelink = np.array(sample.getRightEye().getGaze())
+                else:
+                    raise RuntimeError("Must do monocular tracking!")
+
+                if any(gaze_eyelink == pylink.MISSING_DATA):
+                    gaze = np.nan, np.nan
+                else:
+                    gaze_pix = np.subtract(gaze_eyelink, self.center)
+                    gaze = tuple(pix2deg(gaze_pix, self.monitor))
 
         # Add to the low-resolution log
         if log:
@@ -196,7 +205,7 @@ class Calibrator(pylink.EyeLinkCustomDisplay):
         # work properly for controlling calibration. Not a problem as the
         # experimenter always does things on the Eyelink host.
         # Need to translate some keys into pylink constants, I think.
-        return event.getKeys()
+        return None
 
     def play_beep(self, *args):
         # No sounds
