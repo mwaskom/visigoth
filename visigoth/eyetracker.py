@@ -38,8 +38,8 @@ class EyeTracker(object):
         self.offsets = (0, 0)
 
         # Set up a base for log file names
-        self.edf_stem = edf_stem
-        self.output_stem = exp.output_stem + "_eyedat"
+        self.host_edf = edf_stem + ".EDF"
+        self.save_edf = self.exp.output_stem + "_eyedat.edf"
 
         # Initialize lists for the logged data
         self.log_timestamps = []
@@ -65,7 +65,7 @@ class EyeTracker(object):
     def start_run(self):
         """Turn on recording mode and sync with the eyelink log."""
         if not self.simulate:
-            self.tracker.openDataFile(self.edf_stem + ".EDF")
+            self.tracker.openDataFile(self.host_edf)
             self.tracker.startRecording(1, 1, 1, 1)
             self.send_message("SYNCTIME")
 
@@ -164,37 +164,8 @@ class EyeTracker(object):
             pylink.msecDelay(500)
             self.tracker.closeDataFile()
             if self.save_data:
-                # TODO check if we can receive directly to data directory
-                # and get rid of the move_edf_file method
-                self.tracker.receiveDataFile(self.edf_stem + ".EDF",
-                                             self.edf_stem + ".EDF")
+                self.tracker.receiveDataFile(self.host_edf, self.save_edf)
             self.tracker.close()
-
-    def move_edf_file(self):
-        """Move the Eyelink edf data to the right location."""
-        edf_src_fname = self.edf_stem + ".EDF"
-        edf_trg_fname = self.exp.output_stem + "_eyedat.edf"
-
-        if os.path.exists(edf_src_fname):
-            edf_mtime = os.stat(edf_src_fname).st_mtime
-            age = time.time() - edf_mtime
-            if age > 10:
-                w = ("\n"
-                     "######################################################\n"
-                     "Timestamp on Eyelink file is this directory is old;\n"
-                     "this may indicate problems and should be investigated.\n"
-                     "######################################################\n"
-                     )
-                warnings.warn(w)
-            os.rename(edf_src_fname, edf_trg_fname)
-        elif not self.simulate:
-            w = ("\n"
-                 "#########################################################\n"
-                 "Eyelink data file was not present in this directory after\n"
-                 "closing the connection to the eyetracker.\n"
-                 "#########################################################\n"
-                 )
-            warnings.warn(w)
 
     def write_log_data(self):
         """Save the low temporal resolution eye tracking data."""
@@ -210,7 +181,6 @@ class EyeTracker(object):
         """Handle all of the things that need to happen when ending a run."""
         self.close_connection()
         if self.save_data:
-            self.move_edf_file()
             self.write_log_data()
 
 
