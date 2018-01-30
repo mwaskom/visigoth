@@ -52,20 +52,21 @@ class EyeTracker(object):
     def setup_eyelink(self):
         """Connect to the EyeLink box at given host address."""
         if self.simulate:
-            self.tracker = pylink.EyeLink(self.host_address)
-        else:
             self.tracker = event.Mouse(visible=False, win=self.exp.win)
+        else:
+            self.tracker = pylink.EyeLink(self.host_address)
 
     def run_calibration(self):
         """Execute the eyetracker setup (principally calibration) procedure."""
         if not self.simulate:
-            self.tracker.openGraphicsEx(Calibrator(self.win))
+            pylink.openGraphicsEx(Calibrator(self.exp.win))
             self.tracker.doTrackerSetup()
 
     def start_run(self):
         """Turn on recording mode and sync with the eyelink log."""
         if not self.simulate:
-            self.startRecording(1, 1, 1, 1)
+            self.tracker.openDataFile(self.edf_stem + ".EDF")
+            self.tracker.startRecording(1, 1, 1, 1)
             self.send_message("SYNCTIME")
 
     def send_message(self, msg):
@@ -90,17 +91,14 @@ class EyeTracker(object):
 
             # Use the correct method for an eyetracker camera
             sample = self.tracker.getNewestSample()
-            if sample is None:
+            gaze_eyelink = np.array(sample.getLeftEye().getGaze())
+
+            # TODO check that this is what bad gaze is
+            if any(gaze_eyelink == pylink.MISSING_DATA):
                 gaze = np.nan, np.nan
             else:
-                # TODO handle left/right eye
-                gaze_eyelink = np.array(sample.getLeftEye().getGaze())
-                # TODO check this is what bad gaze is
-                if any(gaze_eyelink == pylink.MISSING_DATA):
-                    gaze = np.nan, np.nan
-                else:
-                    gaze_pix = np.subtract(gaze_eyelink, self.center)
-                    gaze = tuple(pix2deg(gaze_pix), self.monitor)
+                gaze_pix = np.subtract(gaze_eyelink, self.center)
+                gaze = tuple(pix2deg(gaze_pix, self.monitor))
 
         # Add to the low-resolution log
         if log:
@@ -169,7 +167,7 @@ class EyeTracker(object):
                 # TODO check if we can receive directly to data directory
                 # and get rid of the move_edf_file method
                 self.tracker.receiveDataFile(self.edf_stem + ".EDF",
-                                             self.edf_stim + ".EDF")
+                                             self.edf_stem + ".EDF")
             self.tracker.close()
 
     def move_edf_file(self):
@@ -261,15 +259,15 @@ class CalibrationTarget(object):
         self.monitor = win.monitor
         self.center = np.divide(win.size, 2.0)
         self.stims = [
-            Point(win, pos=(0, 0), radius=.5, color=(.8, .6, -.8)),
-            Point(win, pos=(0, 0), radius=.1, color=None)
+            Point(win, pos=(0, 0), radius=.4, color=(.8, .6, -.8)),
+            Point(win, pos=(0, 0), radius=.05, color=win.color),
         ]
 
     def set_pos_pixels(self, pos):
 
-        pos = pix2deg(np.subtract(self.center), self.monitor)
+        pos = pix2deg(np.subtract(pos, self.center), self.monitor)
         for stim in self.stims:
-            stim.pos = pos
+            stim.dot.pos = pos
 
     def draw(self):
         for stim in self.stims:
