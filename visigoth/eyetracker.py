@@ -6,7 +6,7 @@ import Queue
 import numpy as np
 import pandas as pd
 from scipy.spatial import distance
-from psychopy import event
+from psychopy import visual, event
 from psychopy.tools.monitorunittools import pix2deg
 import pylink
 from .stimuli import Point
@@ -208,7 +208,7 @@ class Calibrator(pylink.EyeLinkCustomDisplay):
         return None
 
     def play_beep(self, *args):
-        # No sounds
+        # TODO No sounds yet
         pass
 
     def draw_cal_target(self, *pos):
@@ -222,12 +222,37 @@ class Calibrator(pylink.EyeLinkCustomDisplay):
 
     def setup_cal_display(self):
         self.win.flip()
+        return 1
 
     def clear_cal_display(self):
         self.win.flip()
 
     def exit_cal_display(self):
         self.win.flip()
+
+    def setup_image_display(self, width, height):
+
+        self.eye_image = visual.ImageStim(self.win, size=5, colorSpace="rgb255")
+        self.rgb_index_array = np.zeros((width, height), np.uint8)
+
+    def exit_image_display(self):
+        self.win.flip()
+
+    def draw_image_line(self, width, line, total_lines, buff):
+
+        self.rgb_index_array[line - 1, :len(buff)] = np.asarray(buff)
+
+        if line == total_lines:
+
+            image = self.rgb_palette[self.rgb_index_array]
+            self.eye_image.setImage(image)
+            self.eye_image.draw()
+            self.win.flip()
+
+    def set_image_palette(self, r, g, b):
+
+        self.rgb_palette = np.column_stack([r, g, b])
+        print(self.rgb_palette)
 
 
 class CalibrationTarget(object):
