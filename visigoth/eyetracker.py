@@ -5,7 +5,16 @@ import pandas as pd
 from scipy.spatial import distance
 from psychopy import visual, event
 from psychopy.tools.monitorunittools import pix2deg
-import pylink
+
+try:
+    import pylink
+    from pylink import EyeLinkCustomDisplay
+    have_pylink = True
+except ImportError:
+    have_pylink = False
+    pylink = None
+    EyeLinkCustomDisplay = object
+
 from .stimuli import Point
 
 
@@ -50,7 +59,10 @@ class EyeTracker(object):
         """Connect to the EyeLink box at given host address."""
         if self.simulate:
             self.tracker = event.Mouse(visible=False, win=self.exp.win)
+
         else:
+            if not have_pylink:
+                import pylink  # Trigger full ImportError stack
             self.tracker = pylink.EyeLink(self.host_address)
 
     def run_calibration(self):
@@ -191,7 +203,7 @@ class EyeTracker(object):
             self.write_log_data()
 
 
-class Calibrator(pylink.EyeLinkCustomDisplay):
+class Calibrator(EyeLinkCustomDisplay):
 
     def __init__(self, win, target_color):
 
