@@ -199,12 +199,15 @@ class Calibrator(pylink.EyeLinkCustomDisplay):
 
         self.win = win
         self.target = CalibrationTarget(win)
+        self.eye_image_size = 384, 320
 
     def get_input_key(self):
         # TODO This will let things run but experiment keyboard won't
         # work properly for controlling calibration. Not a problem as the
         # experimenter always does things on the Eyelink host.
-        # Need to translate some keys into pylink constants, I think.
+        # TODO As one option we could also make it so we can control
+        # Pupil/CR from the scanner buttonbox, to facilitate setup.
+        # This is a good idea!
         return None
 
     def play_beep(self, *args):
@@ -231,12 +234,27 @@ class Calibrator(pylink.EyeLinkCustomDisplay):
 
     def setup_image_display(self, width, height):
 
-        size = 10, 10 * height / width
-        self.eye_image = visual.ImageStim(self.win, size=size)
+        self.eye_image = visual.ImageStim(
+            self.win,
+            size=self.eye_image_size,
+            units="pix",
+        )
 
-        # Note differences from numpy convention
-        # Also may not generalize to other eyetracker models
+        self.eye_image_title = visual.TextStim(
+            self.win,
+            pos=(0, self.eye_image_size[1] * .7),
+            color="white",
+            units="pix",
+            height=20,
+        )
+
+        # Note differences from numpy convention in terms of rows/cols
+        # Also may not generalize to other eyetracker models.
         self.rgb_index_array = np.zeros((height / 2, width / 2), np.uint8)
+
+    def image_title(self, text):
+
+        self.eye_image_title.text = text
 
     def exit_image_display(self):
 
@@ -244,6 +262,8 @@ class Calibrator(pylink.EyeLinkCustomDisplay):
 
     def draw_image_line(self, width, line, total_lines, buff):
 
+        # Note that Eyelink increases the index as you move down the screen,
+        # opposite to the convention in PsychoPy. We could also flip the array.
         self.rgb_index_array[-line] = np.asarray(buff)
 
         if line == total_lines:
@@ -252,17 +272,19 @@ class Calibrator(pylink.EyeLinkCustomDisplay):
             self.eye_image.image = image
 
             self.eye_image.draw()
+            self.eye_image_title.draw()
             self.draw_cross_hair()
 
             self.win.flip()
 
     def draw_line(self, x1, y1, x2, y2, colorindex):
 
-        # TODO need to convert based on size of image someehow
-        start = x1, y1
-        end = x2, y2
-        visual.Line(self.win, start, end, units="pix", lineColor="white").draw()
-
+        xadj, yadj = np.divide(self.eye_image_size, 2)
+        start = x1 - xadj, -y1 + yadj
+        end = x2 - xadj, -y2 + yadj
+        line = visual.Line(self.win, start, end,
+                           units="pix", lineColor="white")
+        line.draw()
 
     def set_image_palette(self, r, g, b):
 
