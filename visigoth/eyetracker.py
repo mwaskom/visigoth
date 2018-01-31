@@ -80,7 +80,7 @@ class EyeTracker(object):
             # Use the correct method for a mouse "tracker"
             if any(self.tracker.getPressed()):
                 # Simualte blinks with button down
-                gaze = None
+                gaze = np.nan, np.nan
             else:
                 gaze = self.tracker.getPos()
 
