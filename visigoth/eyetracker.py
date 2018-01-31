@@ -62,7 +62,7 @@ class EyeTracker(object):
 
         else:
             if not have_pylink:
-                import pylink  # Trigger full ImportError stack
+                raise ImportError("No module named pylink")
             self.tracker = pylink.EyeLink(self.host_address)
 
     def run_calibration(self):
@@ -88,11 +88,11 @@ class EyeTracker(object):
         """Return the position of gaze in degrees, subject to offsets."""
         timestamp = self.exp.clock.getTime()
 
+        # Allow simulation using the mouse
         if self.simulate:
 
-            # Use the correct method for a mouse "tracker"
             if any(self.tracker.getPressed()):
-                # Simualte blinks with button down
+                # Simulate blinks with button down
                 gaze = np.nan, np.nan
             else:
                 gaze = self.tracker.getPos()
