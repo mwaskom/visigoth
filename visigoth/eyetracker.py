@@ -56,14 +56,47 @@ class EyeTracker(object):
         self.setup_eyelink()
 
     def setup_eyelink(self):
-        """Connect to the EyeLink box at given host address."""
+        """Connect to the EyeLink box at given host address and run setup."""
         if self.simulate:
             self.tracker = event.Mouse(visible=False, win=self.exp.win)
 
         else:
+
             if not have_pylink:
                 raise ImportError("No module named pylink")
+
+            # Connect to the eyetracker
             self.tracker = pylink.EyeLink(self.host_address)
+
+            # Send configuration commands
+            # TODO how to control which eye to track?
+            # (we need flexibility for psychophys and scanner)
+            self.tracker.disableAutoCalibration()
+            self.tracker.setCalibrationType("HV9")
+            self.tracker.setPupilSizeDiameter("NO")
+            self.tracker.setRecordingParseType("GAZE")
+            self.tracker.setSaccadeVelocityThreshold(30)
+            self.tracker.setAccelerationThreshold(9500)
+            self.tracker.setMotionThreshold(0.15)
+            self.tracker.setPursuitFixup(60)
+            self.tracker.setUpdateInterval(0)
+
+            file_events = ["LEFT", "RIGHT",
+                           "FIXATION", "SACCADE", "BLINK",
+                           "MESSAGE", "BUTTON"]
+            self.tracker.setFileEventFilter(file_events)
+
+            link_events = ["LEFT", "RIGHT",
+                           "FIXATION", "SACCADE", "BLINK",
+                           "BUTTON"]
+            self.tracker.setLinkEventFilter(link_events)
+
+            file_data = ["GAZE", "GAZERES", "HREF", "PUPIL",
+                         "AREA", "STATUS", "BUTTON", "INPUT"]
+            self.tracker.setFileSampleFilter(file_data)
+
+            link_data = ["GAZE", "GAZERES", "AREA"]
+            self.tracker.setLinkSampleFilter(link_data)
 
     def run_calibration(self):
         """Execute the eyetracker setup (principally calibration) procedure."""
