@@ -222,7 +222,6 @@ class Calibrator(pylink.EyeLinkCustomDisplay):
 
     def setup_cal_display(self):
         self.win.flip()
-        return 1
 
     def clear_cal_display(self):
         self.win.flip()
@@ -232,27 +231,43 @@ class Calibrator(pylink.EyeLinkCustomDisplay):
 
     def setup_image_display(self, width, height):
 
-        self.eye_image = visual.ImageStim(self.win, size=5, colorSpace="rgb255")
-        self.rgb_index_array = np.zeros((width, height), np.uint8)
+        size = 10, 10 * height / width
+        self.eye_image = visual.ImageStim(self.win, size=size)
+
+        # Note differences from numpy convention
+        # Also may not generalize to other eyetracker models
+        self.rgb_index_array = np.zeros((height / 2, width / 2), np.uint8)
 
     def exit_image_display(self):
+
         self.win.flip()
 
     def draw_image_line(self, width, line, total_lines, buff):
 
-        self.rgb_index_array[line - 1, :len(buff)] = np.asarray(buff)
+        self.rgb_index_array[-line] = np.asarray(buff)
 
         if line == total_lines:
 
             image = self.rgb_palette[self.rgb_index_array]
-            self.eye_image.setImage(image)
+            self.eye_image.image = image
+
             self.eye_image.draw()
+            self.draw_cross_hair()
+
             self.win.flip()
+
+    def draw_line(self, x1, y1, x2, y2, colorindex):
+
+        # TODO need to convert based on size of image someehow
+        start = x1, y1
+        end = x2, y2
+        visual.Line(self.win, start, end, units="pix", lineColor="white").draw()
+
 
     def set_image_palette(self, r, g, b):
 
-        self.rgb_palette = np.column_stack([r, g, b])
-        print(self.rgb_palette)
+        rgb = np.column_stack([r, g, b]).astype(np.float)
+        self.rgb_palette = rgb / 255
 
 
 class CalibrationTarget(object):
