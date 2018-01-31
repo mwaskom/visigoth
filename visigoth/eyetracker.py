@@ -36,7 +36,6 @@ class EyeTracker(object):
         self.simulate = exp.p.eye_simulate
         self.save_data = exp.p.save_data
         self.fix_window_radius = exp.p.fix_radius
-
         self.monitor = exp.win.monitor
         self.center = np.divide(exp.win.size, 2.0)
 
@@ -81,21 +80,16 @@ class EyeTracker(object):
             self.tracker.setPursuitFixup(60)
             self.tracker.setUpdateInterval(0)
 
-            file_events = ["LEFT", "RIGHT",
-                           "FIXATION", "SACCADE", "BLINK",
-                           "MESSAGE", "BUTTON"]
+            file_events = "LEFT RIGHT FIXATION SACCADE BLINK MESSAGE BUTTON"
             self.tracker.setFileEventFilter(file_events)
 
-            link_events = ["LEFT", "RIGHT",
-                           "FIXATION", "SACCADE", "BLINK",
-                           "BUTTON"]
+            link_events = "LEFT RIGHT FIXATION SACCADE BLINK BUTTON"
             self.tracker.setLinkEventFilter(link_events)
 
-            file_data = ["GAZE", "GAZERES", "HREF", "PUPIL",
-                         "AREA", "STATUS", "BUTTON", "INPUT"]
+            file_data = "GAZE GAZERES HREF PUPIL AREA STATUS BUTTON INPUT"
             self.tracker.setFileSampleFilter(file_data)
 
-            link_data = ["GAZE", "GAZERES", "AREA"]
+            link_data = "GAZE GAZERES AREA"
             self.tracker.setLinkSampleFilter(link_data)
 
     def run_calibration(self):
