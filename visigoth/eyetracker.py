@@ -1,7 +1,4 @@
-import os
-import time
 import itertools
-import warnings
 import Queue
 import numpy as np
 import pandas as pd
@@ -21,7 +18,7 @@ class EyeTracker(object):
     allows for dynamic offset values, and it maintains a log of samples.
 
     """
-    def __init__(self, exp, calibration_screen_color=128, edf_stem="eyedat"):
+    def __init__(self, exp, edf_stem="eyedat"):
 
         self.exp = exp
 
