@@ -56,7 +56,8 @@ class EyeTracker(object):
     def run_calibration(self):
         """Execute the eyetracker setup (principally calibration) procedure."""
         if not self.simulate:
-            pylink.openGraphicsEx(Calibrator(self.exp.win))
+            pylink.openGraphicsEx(Calibrator(self.exp.win,
+                                             self.exp.p.fix_color))
             self.tracker.doTrackerSetup()
 
     def start_run(self):
@@ -192,10 +193,10 @@ class EyeTracker(object):
 
 class Calibrator(pylink.EyeLinkCustomDisplay):
 
-    def __init__(self, win):
+    def __init__(self, win, target_color):
 
         self.win = win
-        self.target = CalibrationTarget(win)
+        self.target = CalibrationTarget(win, target_color)
         self.eye_image_size = 384, 320
 
     def get_input_key(self):
@@ -291,13 +292,13 @@ class Calibrator(pylink.EyeLinkCustomDisplay):
 
 class CalibrationTarget(object):
 
-    def __init__(self, win):
+    def __init__(self, win, color):
 
         self.win = win
         self.monitor = win.monitor
         self.center = np.divide(win.size, 2.0)
         self.stims = [
-            Point(win, pos=(0, 0), radius=.4, color=(.8, .6, -.8)),
+            Point(win, pos=(0, 0), radius=.4, color=color),
             Point(win, pos=(0, 0), radius=.05, color=win.color),
         ]
 
