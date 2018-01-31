@@ -83,6 +83,7 @@ class Experiment(object):
             # -- Initialize the experimental run
             if self.tracker is not None:
                 self.tracker.start_run()
+            self.sounds["start"].play()
             self.clock.reset()
             self.iti_start = 0
 
@@ -359,7 +360,8 @@ class Experiment(object):
 
         # Locate the sound files
         sound_dir = os.path.join(os.path.dirname(__file__), "sounds")
-        sound_names = dict(correct="ding",
+        sound_names = dict(start="chimes",
+                           correct="ding",
                            wrong="signon",
                            nofix="secalert",
                            nochoice="click",
