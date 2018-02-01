@@ -271,6 +271,9 @@ class Calibrator(EyeLinkCustomDisplay):
 
     def setup_image_display(self, width, height):
 
+        # TODO This stuff can just happen in the constructor since we
+        # are making hard assumptions about the width and height for now
+
         self.eye_image = visual.ImageStim(
             self.win,
             size=self.eye_image_size,
@@ -288,6 +291,10 @@ class Calibrator(EyeLinkCustomDisplay):
         # Note differences from numpy convention in terms of rows/cols
         # Also may not generalize to other eyetracker models.
         self.rgb_index_array = np.zeros((height / 2, width / 2), np.uint8)
+
+        # TODO test width/height against the hardcoded values and make
+        # it more obvious when we are trying to set up on an Eyelink model
+        # that our assumptions do not extend do
 
     def image_title(self, text):
 
