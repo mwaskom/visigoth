@@ -1,6 +1,7 @@
 """Definition of the Experiment object that control most things."""
 from __future__ import division
 import os
+import os.path as op
 import re
 import time
 import json
@@ -57,10 +58,9 @@ class Experiment(object):
             self.initialize_params()
             self.initialize_data_output()
             self.initialize_sounds()
-            self.initialize_display_info()
+            self.initialize_display()
             self.initialize_eyetracker()
             self.initialize_server()
-            self.initialize_display()
             self.initialize_stimuli()
 
             # Wait for a trigger to start
@@ -83,6 +83,7 @@ class Experiment(object):
             # -- Initialize the experimental run
             if self.tracker is not None:
                 self.tracker.start_run()
+            self.sounds["start"].play()
             self.clock.reset()
             self.iti_start = 0
 
@@ -359,7 +360,8 @@ class Experiment(object):
 
         # Locate the sound files
         sound_dir = os.path.join(os.path.dirname(__file__), "sounds")
-        sound_names = dict(correct="ding",
+        sound_names = dict(start="chimes",
+                           correct="ding",
                            wrong="signon",
                            nofix="secalert",
                            nochoice="click",
@@ -383,47 +385,22 @@ class Experiment(object):
         self.server = clientserver.SocketServerThread(self)
         self.server.start()
 
-    def initialize_eyetracker(self):
-        """Connect to and calibrate eyetracker."""
-        # TODO Need to figure out how to handle non eye-tracking centrally
-        if self.p.monitor_eye:
+    def initialize_display(self, gamma_correct=True, debug=False,
+                           debug_res=(800, 600)):
+        """Open the PsychoPy window to begin the experiment."""
 
-            # Determine the screen background color during calibration
-            # Currently I'm not sure how to get iohub to apply gamma correction
-            # so we need to do that ourselves here.
-            info = self.display_info[self.p.display_name]
-            if self.p.display_luminance is None:
-                color = 128
-            else:
-                ratio = self.p.display_luminance / info["max_luminance"]
-                color = int(round(ratio ** (1 / info["gamma"]) * 255))
-
-            # Configure and calibrate the eyetracker
-            self.tracker = eyetracker.EyeTracker(self, color,
-                                                 self.p.eyelink_fname)
-            self.tracker.run_calibration()
-        else:
-            self.tracker = None
-
-    def initialize_display_info(self):
-        """Load display info from global and local files."""
         # Extract the relevant display information
-        global_fname = os.path.join(os.path.dirname(__file__),
-                                    "displays.yaml")
+        global_fname = op.join(op.dirname(__file__), "displays.yaml")
+        local_fname = op.join(self.p.study_dir, "displays.yaml")
+
         with open(global_fname) as fid:
             display_info = yaml.load(fid)
 
-        local_fname = os.path.join(self.p.study_dir, "displays.yaml")
         if os.path.exists(local_fname):
             with open(local_fname) as fid:
                 display_info.update(yaml.load(fid))
 
-        self.display_info = display_info
-
-    def initialize_display(self, gamma_correct=True, debug=False,
-                           debug_res=(800, 600)):
-        """Open the PsychoPy window to begin the experiment."""
-        info = self.display_info[self.p.display_name]
+        info = display_info[self.p.display_name]
 
         # Determine the background color of the display
         if self.p.display_luminance is None:
@@ -473,11 +450,23 @@ class Experiment(object):
                       win_deg_per_pix=win.deg_per_pix,
                       win_pix_per_deg=win.pix_per_deg)
 
-        # Initialize the gaze stimulus
-        if self.p.monitor_eye and self.p.eye_simulate:
-            stimuli.GazeStim(win, self.tracker)
-
         return win
+
+    def initialize_eyetracker(self):
+        """Connect to and calibrate eyetracker."""
+        # TODO Need to figure out how to handle non eye-tracking centrally
+        if self.p.monitor_eye:
+
+            # Configure and calibrate the eyetracker
+            self.tracker = eyetracker.EyeTracker(self, self.p.eyelink_fname)
+            self.tracker.run_calibration()
+
+            # Initialize the gaze marker when simulating
+            if self.p.eye_simulate:
+                stimuli.GazeStim(self.win, self.tracker)
+
+        else:
+            self.tracker = None
 
     def initialize_stimuli(self):
         """Setup stimulus objects."""
