@@ -11,6 +11,15 @@ kianilab-ps1:
   distance: 52
   resolution: [1600, 1200]
   refresh_hz: 75
+  max_luminance: 94.88
+  gamma: 2.148
+  date: 2018-05-25
+
+kianilab-ps1-decom:
+  width: 40
+  distance: 52
+  resolution: [1600, 1200]
+  refresh_hz: 75
   max_luminance: 110.864
   gamma: 1.938
 
