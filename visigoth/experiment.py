@@ -63,6 +63,12 @@ class Experiment(object):
             self.initialize_server()
             self.initialize_stimuli()
 
+            # --- Demo mode
+            if self.p.demo:
+                self.demo_mode()
+                self._aborted = True
+                core.quit()
+
             # Wait for a trigger to start
             if self.p.trigger is not None:
                 self.wait_for_trigger()
@@ -282,6 +288,10 @@ class Experiment(object):
                                 pos=(0, y), height=height).draw()
             self.win.flip()
 
+    def demo_mode(self):
+        """Show stimuli and other aspects of the task prior to training."""
+        pass
+
     # ==== Initialization functions ====
 
     def initialize_params(self):
@@ -339,6 +349,10 @@ class Experiment(object):
         # TODO add visigoth git commit for pre release
         # TODO also track git commit of study-specific code
         p.visigoth_version = version.__version__
+
+        # Don't save data during demo
+        if p.demo:
+            p.save_data = False
 
         self.p = p
         self.debug = args.debug

@@ -29,6 +29,8 @@ if __name__ == "__main__":
         Experiment.compute_performance = experiment.compute_performance
     if hasattr(experiment, "show_performance"):
         Experiment.show_performance = experiment.show_performance
+    if hasattr(experiment, "demo_mode"):
+        Experiment.demo_mode = experiment.demo_mode
 
     # Start the expeiment
     e = Experiment(sys.argv[1:])
