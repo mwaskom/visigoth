@@ -110,7 +110,8 @@ class Experiment(object):
             # Wait at the end of the run for exact duration
             if self.p.run_duration is not None:
                 timeout = self.p.run_duration - self.clock.getTime()
-                self.wait_until(self.check_abort, timeout)
+                self.wait_until(self.check_abort, timeout,
+                                draw=self.p.final_stim)
 
         except:
 
@@ -928,6 +929,7 @@ default_params = dict(
 
     trigger=None,
     pre_trigger_stim=None,
+    final_stim=None,
 
     run_duration=None,
 
