@@ -23,6 +23,14 @@ kianilab-ps1-decom:
   max_luminance: 110.864
   gamma: 1.938
 
+kianilab-ps2:
+  width: 33
+  distance: 55
+  resolution: [2880, 1800]
+  refresh_hz: 60
+  max_luminance: 300
+  gamma: 2.2
+
 nyu-cbi-propixx:
   width: 64.53
   distance: 82.77
