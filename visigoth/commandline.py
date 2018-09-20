@@ -21,6 +21,7 @@ def define_experiment_parser():
     parser.add_argument("-r", "--run", type=int, default=1)
     parser.add_argument("--demo", action="store_true")
     parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--display_name")
     parser.add_argument("--nosave", action="store_false", dest="save_data")
 
     return parser
