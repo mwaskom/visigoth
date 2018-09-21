@@ -641,15 +641,17 @@ class Experiment(object):
 
         return pd.Series(t_info)
 
-    def wait_until(self, func=None, timeout=np.inf, sleep=0, draw=None,
+    def wait_until(self, end=None, timeout=np.inf, sleep=0, draw=None,
                    args=(), **kwargs):
         """Wait limited by callback and timeout, possibly drawing stimuli.
 
         Parameters
         ----------
-        func : callable, optional
-            Function to call on each interval. Waiting ends if the value
-            returned by this function evaluates to True.
+        end : float or callable, optional
+            Either the time (corresponding to the experiment clock) that
+            waiting should end, or a function to call on each interval.
+            Waiting ends if the value returned by this function evaluates
+            to True.
         timeout : float, optional
             Maximum amount of time to wait regardless of ``func`` outcome.
         sleep : float, optional
@@ -678,6 +680,13 @@ class Experiment(object):
         # Don't include final window refresh in the timeout check
         if not sleep:
             timeout -= self.win.frametime
+
+        # Define the end time as a function
+        if callable(end):
+            func = end
+        else:
+            def func():
+                return (self.clock.getTime() + self.win.frametime) >= end
 
         # Maximum wait is controlled by timeout value
         clock = core.Clock()
