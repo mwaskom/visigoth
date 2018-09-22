@@ -688,7 +688,9 @@ class Experiment(object):
         # Define the end time as a function
         if callable(end):
             func = end
-        elif end is not None:
+        elif end is None:
+            func = None
+        else:
             def func():
                 return (self.clock.getTime() + self.win.frametime) >= end
 
