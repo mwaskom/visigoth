@@ -331,6 +331,10 @@ class Experiment(object):
                 # TODO maybe give paramset a better default name?
                 param_dict.update(getattr(params, args.paramset))
 
+        # Awkward solution to handling command-line display name
+        if args.display_name is None:
+            delattr(args, "display_name")
+
         # Define the parameters object with information from the params
         # module and from the command line invocation
         p = Bunch(param_dict)
