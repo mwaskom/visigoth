@@ -383,7 +383,7 @@ class Experiment(object):
                            correct="ding",
                            wrong="signon",
                            nofix="secalert",
-                           nochoice="upalert",
+                           nochoice="updalert",
                            fixbreak="click",)
 
         # Load the sounds and save in a Bunch
