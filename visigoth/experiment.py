@@ -651,11 +651,11 @@ class Experiment(object):
 
         Parameters
         ----------
-        end : float or callable, optional
+        end : float, key name, or callable, optional
             Either the time (corresponding to the experiment clock) that
-            waiting should end, or a function to call on each interval.
-            Waiting ends if the value returned by this function evaluates
-            to True.
+            waiting should end, the name of a key that would end the waiting,
+            or a function to call on each interval. Waiting ends if the value
+            returned by this function evaluates to True.
         timeout : float, optional
             Maximum amount of time to wait regardless of ``func`` outcome.
         sleep : float, optional
@@ -690,6 +690,9 @@ class Experiment(object):
             func = end
         elif end is None:
             func = None
+        elif isinstance(end, str):
+            def func():
+                return any(event.getKeys([end]))
         else:
             def func():
                 return (self.clock.getTime() + self.win.frametime) >= end
