@@ -646,7 +646,7 @@ class Experiment(object):
         return pd.Series(t_info)
 
     def wait_until(self, end=None, timeout=np.inf, sleep=0, draw=None,
-                   args=(), **kwargs):
+                   check_abort=False, args=(), **kwargs):
         """Wait limited by callback and timeout, possibly drawing stimuli.
 
         Parameters
@@ -664,6 +664,8 @@ class Experiment(object):
             by the window's framerate.
         draw : string or list of strings, optional
             Name(s) of stimuli to draw in each interval.
+        check_abort : bool
+            If True, check for the abort key after each flip.
         args : tuple
             Positional arguments to `func`.
         kwargs : key, value pairs
@@ -706,6 +708,10 @@ class Experiment(object):
                 func_val = func(*args, **kwargs)
                 if func_val:
                     return func_val
+
+            # Check for an abort
+            if check_abort:
+                self.check_abort()
 
             # Either sleep or draw and wait for the screen refresh
             if sleep:
