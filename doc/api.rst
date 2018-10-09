@@ -66,7 +66,6 @@ Initialization methods
    Experiment.initialize_sounds
    Experiment.initialize_server
    Experiment.initialize_eyetracker
-   Experiment.initialize_display_info
    Experiment.initialize_display
    Experiment.initialize_stimuli
    
