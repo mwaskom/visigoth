@@ -7,8 +7,8 @@ class BoreAperture(object):
 
         self.rect = visual.Rect(win,
                                 units="norm",
-                                width=1,
-                                height=1,
+                                width=2,
+                                height=2,
                                 fillColor=-1,
                                 lineColor=-1)
 
