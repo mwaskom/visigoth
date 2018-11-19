@@ -449,6 +449,11 @@ class Experiment(object):
                                        autoLog=False,
                                        useFBO=True)
 
+        # Additional linearization for ProPixx
+        if gamma_correct and info.get("linearize", False):
+            ramp = np.tile(np.linspace(0, 1, 256), (3, 1))
+            win.gammaRamp = ramp
+
         # Test window performance
         win.recordFrameIntervals = True
         frametime, _, _ = visual.getMsPerFrame(win)
