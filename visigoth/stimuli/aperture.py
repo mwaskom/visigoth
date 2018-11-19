@@ -10,13 +10,13 @@ class BoreAperture(object):
                                 width=1,
                                 height=1,
                                 fillColor=-1,
-                                linecolor=-1)
+                                lineColor=-1)
 
         self.circle = visual.Circle(win,
                                     radius=radius,
                                     edges=256,
-                                    lineColor=color,
                                     fillColor=color,
+                                    lineColor=color,
                                     autoLog=False)
 
     def draw(self):
