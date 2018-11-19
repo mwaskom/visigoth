@@ -456,8 +456,9 @@ class Experiment(object):
 
         # Add in an optional display aperture
         if self.p.aperture_radius is not None:
-            win.color = 0
+            win.color = -1
             visual.Circle(win,
+                          radius=self.p.aperture_radius,
                           edges=256,
                           lineColor=color,
                           fillColor=color,
