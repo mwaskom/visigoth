@@ -99,7 +99,7 @@ class ElementArray(ElementArrayStim, MinimalStim, TextureMixin):
             maskParams=maskParams)
 
         # Set the default pedestal assuming a gray window color
-        pedestal = win.color.mean() if pedestal is None else pedestal
+        pedestal = win.background_color if pedestal is None else pedestal
         self.pedestal = pedestal
 
         self._progSignedTexMask = shaders.compileProgram(

@@ -82,7 +82,7 @@ class GaussianNoise(Noise):
     def _set_rv(self, contrast):
 
         # Scale "Michelson contrast" by background
-        scaling_factor = self.win.color.mean() + 1
+        scaling_factor = self.win.background_color + 1
 
         # Convert from "Michelson" contrast to gaussian RMS
         self.sd = scaling_factor * self._constant * contrast
@@ -105,7 +105,7 @@ class UniformNoise(Noise):
     def _set_rv(self, contrast):
 
         # Scale Michelson contrast by background
-        scaling_factor = self.win.color.mean() + 1
+        scaling_factor = self.win.background_color + 1
 
         # Determine width and the lower bound of the interval
         # (This is the scipy parameterization not [low, high])

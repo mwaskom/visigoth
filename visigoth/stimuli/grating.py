@@ -75,7 +75,7 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
                  pedestal=None):
 
         # Set the default pedestal assuming a gray window color
-        pedestal = win.color.mean() if pedestal is None else pedestal
+        pedestal = win.background_color if pedestal is None else pedestal
         self.pedestal = pedestal
 
         # Initialise parent class

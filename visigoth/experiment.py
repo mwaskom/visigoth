@@ -477,6 +477,7 @@ class Experiment(object):
         win.recordFrameIntervals = False
 
         # Assign attributes with helpful information and log in params
+        win.background_color = color
         win.frametime = 1 / info["refresh_hz"]
         win.framerate = info["refresh_hz"]
         win.deg_per_pix = tools.monitorunittools.pix2deg(1, monitor)

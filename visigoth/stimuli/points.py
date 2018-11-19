@@ -44,7 +44,7 @@ class Point(object):
     @color.setter
     def color(self, color):
         if color is None:
-            color = self.win.color
+            color = self.win.background_color
         self._color = color
         self.dot.fillColor = color
         self.dot.lineColor = color
