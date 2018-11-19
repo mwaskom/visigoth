@@ -456,13 +456,9 @@ class Experiment(object):
 
         # Add in an optional display aperture
         if self.p.aperture_radius is not None:
-            win.color = -1
-            self.aperture = visual.Circle(win,
-                                          radius=self.p.aperture_radius,
-                                          edges=256,
-                                          lineColor=color,
-                                          fillColor=color,
-                                          autoLog=False)
+            self.aperture = stimuli.BoreAperture(win,
+                                                 self.p.aperture_radius,
+                                                 color)
         else:
             self.aperture is None
 
