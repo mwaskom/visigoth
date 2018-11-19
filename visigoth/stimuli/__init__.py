@@ -5,4 +5,5 @@ from elementarray import ElementArray
 from pattern import Pattern
 from noise import GaussianNoise, UniformNoise
 from dots import RandomDotMotion
+from aperture import BoreAperture
 from gaze import GazeStim
