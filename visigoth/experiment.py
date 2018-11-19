@@ -454,6 +454,16 @@ class Experiment(object):
             ramp = np.tile(np.linspace(0, 1, 256), (3, 1))
             win.gammaRamp = ramp
 
+        # Add in an optional display aperture
+        if self.p.aperture_radius is not None:
+            win.color = 0
+            visual.Circle(win,
+                          edges=256,
+                          lineColor=color,
+                          fillColor=color,
+                          autoLog=False,
+                          autoDraw=True)
+
         # Test window performance
         win.recordFrameIntervals = True
         frametime, _, _ = visual.getMsPerFrame(win)
@@ -910,6 +920,7 @@ class Experiment(object):
 default_params = dict(
 
     display_luminance=None,
+    aperture_radius=None,
 
     initialize_trial_generator=False,
 
