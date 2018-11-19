@@ -26,7 +26,7 @@ kianilab-ps1-decom:
 kianilab-ps2:
   width: 33
   distance: 55
-  resolution: [2880, 1800]
+  resolution: [1440, 900]
   refresh_hz: 60
   max_luminance: 300
   gamma: 2.2
