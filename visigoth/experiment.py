@@ -457,13 +457,14 @@ class Experiment(object):
         # Add in an optional display aperture
         if self.p.aperture_radius is not None:
             win.color = -1
-            visual.Circle(win,
-                          radius=self.p.aperture_radius,
-                          edges=256,
-                          lineColor=color,
-                          fillColor=color,
-                          autoLog=False,
-                          autoDraw=True)
+            self.aperture = visual.Circle(win,
+                                          radius=self.p.aperture_radius,
+                                          edges=256,
+                                          lineColor=color,
+                                          fillColor=color,
+                                          autoLog=False)
+        else:
+            self.aperture is None
 
         # Test window performance
         win.recordFrameIntervals = True
@@ -750,6 +751,9 @@ class Experiment(object):
 
         if not isinstance(stims, list):
             stims = [stims]
+
+        if self.aperture is not None:
+            self.aperture.draw()
 
         for stim in stims:
             self.s[stim].draw()
