@@ -82,5 +82,7 @@ if __name__ == "__main__":
     Experiment.run_trial = run_trial
 
     # Start the expeiment
-    e = Experiment(sys.argv[1:])
+    arglist = sys.argv[1:]
+    arglist.append("--nosave")
+    e = Experiment(arglist)
     e.run()
