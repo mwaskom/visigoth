@@ -9,7 +9,7 @@ from visigoth.experiment import Experiment
 from visigoth.stimuli import DummyStim
 
 
-class BullsEye(object):
+class Bullseye(object):
 
     def __init__(self, win):
 
@@ -55,7 +55,7 @@ class BullsEye(object):
 def create_stimuli(exp):
 
     fix = DummyStim()
-    bullseye = BullsEye()
+    bullseye = Bullseye(exp.win)
 
     return locals()
 
