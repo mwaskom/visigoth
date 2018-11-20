@@ -32,8 +32,8 @@ kianilab-ps2:
   gamma: 2.2
 
 nyu-cbi-propixx:
-  width: 64
-  distance: 84
+  width: 66
+  distance: 83
   resolution: [1920, 1080]
   refresh_hz: 60
   max_luminance: 100
