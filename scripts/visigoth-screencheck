@@ -2,16 +2,62 @@
 import os
 import sys
 
-from psychopy import visual, event
+from psychopy import visual
 
 from visigoth.commandline import define_parser
 from visigoth.experiment import Experiment
 from visigoth.stimuli import DummyStim
 
 
+class BullsEye(object):
+
+    def __init__(self, win):
+
+        colors = [u'#35193e', u'#701f57', u'#ad1759',
+                  u'#e13342', u'#f37651', u'#f6b48f']
+        radii = [12, 10, 8, 6, 4, 2]
+
+        self.stims = stims = []
+
+        for color, radius in zip(colors, radii):
+
+            stims.append(visual.Circle(
+                win,
+                radius,
+                128,
+                fillColor=color,
+                lineColor="white"
+            ))
+
+            stims.append(visual.Circle(
+                win,
+                .5,
+                128,
+                pos=(radius - 1, 0),
+                fillColor=win.background_color,
+                lineColor=win.background_color,
+            ))
+
+            stims.append(visual.TextStim(
+                win,
+                radius,
+                pos=(radius - 1, 0),
+                color="white",
+                height=.75,
+            ))
+
+    def draw(self):
+
+        for stim in self.stims:
+            stim.draw()
+
+
 def create_stimuli(exp):
 
-    return {"fix": DummyStim()}
+    fix = DummyStim()
+    bullseye = BullsEye()
+
+    return locals()
 
 
 def generate_trials(exp):
@@ -21,39 +67,7 @@ def generate_trials(exp):
 
 def run_trial(exp, info):
 
-    colors = [u'#35193e', u'#701f57', u'#ad1759',
-              u'#e13342', u'#f37651', u'#f6b48f']
-    radii = [12, 10, 8, 6, 4, 2]
-
-    for color, radius in zip(colors, radii):
-
-        visual.Circle(
-            exp.win,
-            radius,
-            128,
-            fillColor=color,
-            lineColor="white"
-        ).draw()
-
-        visual.Circle(
-            exp.win,
-            .5,
-            128,
-            pos=(radius - 1, 0),
-            fillColor=exp.win.color,
-            lineColor=exp.win.color,
-        ).draw()
-
-        visual.TextStim(
-            exp.win,
-            radius,
-            pos=(radius - 1, 0),
-            color="white",
-            height=.75,
-        ).draw()
-
-    exp.win.flip()
-    event.waitKeys(["return"])
+    exp.wait_until("return", draw="bullseye", check_abort=True)
 
 
 if __name__ == "__main__":
