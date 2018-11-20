@@ -1,0 +1,71 @@
+#! /usr/bin/env python2
+import os
+import sys
+
+from psychopy import visual, event
+
+from visigoth.commandline import define_parser
+from visigoth.experiment import Experiment
+
+
+def create_stimuli(exp):
+
+    return {}
+
+
+def generate_trials(exp):
+
+    yield {}
+
+
+def run_trial(exp, info):
+
+    colors = [u'#35193e', u'#701f57', u'#ad1759',
+              u'#e13342', u'#f37651', u'#f6b48f']
+    radii = [12, 10, 8, 6, 4, 2]
+
+    for color, radius in zip(colors, radii):
+
+        visual.Circle(
+            exp.win,
+            radius,
+            128,
+            fillColor=color,
+            lineColor="white"
+        ).draw()
+
+        visual.Circle(
+            exp.win,
+            .5,
+            128,
+            pos=(radius - 1, 0),
+            fillColor=exp.win.color,
+            lineColor=exp.win.color,
+        ).draw()
+
+        visual.TextStim(
+            exp.win,
+            radius,
+            pos=(radius - 1, 0),
+            color="white",
+            height=.75,
+        ).draw()
+
+    exp.win.flip()
+    event.waitKeys(["return"])
+
+
+if __name__ == "__main__":
+
+    # Parse the command lines to find study-specific code
+    parser = define_parser("visigoth")
+    args, _ = parser.parse_known_args()
+    sys.path.insert(0, os.path.realpath(args.study_dir))
+
+    Experiment.create_stimuli = create_stimuli
+    Experiment.generate_trials = generate_trials
+    Experiment.run_trial = run_trial
+
+    # Start the expeiment
+    e = Experiment(sys.argv[1:])
+    e.run()
