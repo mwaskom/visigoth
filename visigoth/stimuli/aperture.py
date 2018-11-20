@@ -3,7 +3,7 @@ from psychopy import visual
 
 class BoreAperture(object):
 
-    def __init__(self, win, radius, color):
+    def __init__(self, win, color, radius, pos):
 
         self.rect = visual.Rect(win,
                                 units="norm",
@@ -14,6 +14,7 @@ class BoreAperture(object):
 
         self.circle = visual.Circle(win,
                                     radius=radius,
+                                    pos=pos,
                                     edges=256,
                                     fillColor=color,
                                     lineColor=color,

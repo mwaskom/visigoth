@@ -457,8 +457,9 @@ class Experiment(object):
         # Add in an optional display aperture
         if self.p.aperture_radius is not None:
             self.aperture = stimuli.BoreAperture(win,
+                                                 color,
                                                  self.p.aperture_radius,
-                                                 color)
+                                                 self.p.aperture_center)
         else:
             self.aperture is None
 
@@ -922,7 +923,9 @@ class Experiment(object):
 default_params = dict(
 
     display_luminance=None,
+
     aperture_radius=None,
+    aperture_center=(0, 0),
 
     initialize_trial_generator=False,
 
