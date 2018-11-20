@@ -6,11 +6,12 @@ from psychopy import visual, event
 
 from visigoth.commandline import define_parser
 from visigoth.experiment import Experiment
+from visigoth.stimuli import DummyStim
 
 
 def create_stimuli(exp):
 
-    return {}
+    return {"fix": DummyStim()}
 
 
 def generate_trials(exp):
