@@ -92,6 +92,9 @@ class EyeTracker(object):
             link_data = "GAZE GAZERES AREA"
             self.tracker.setLinkSampleFilter(link_data)
 
+            display_size = "{:d} {:d}".format(*self.exp.win.size)
+            self.tracker.sendCommand("screen_pixel_coords 0 0 " + display_size)
+
     def run_calibration(self):
         """Execute the eyetracker setup (principally calibration) procedure."""
         if not self.simulate:
