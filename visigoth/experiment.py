@@ -461,7 +461,7 @@ class Experiment(object):
                                                  self.p.aperture_radius,
                                                  self.p.aperture_center)
         else:
-            self.aperture is None
+            self.aperture = None
 
         # Test window performance
         win.recordFrameIntervals = True
