@@ -12,7 +12,11 @@ VERSION = "0.1.dev"
 
 INSTALL_REQUIRES = ["colorspacious"]
 
-SCRIPTS = ["scripts/visigoth", "scripts/visigoth-remote"]
+SCRIPTS = [
+    "scripts/visigoth",
+    "scripts/visigoth-remote",
+    "scripts/visigoth-screencheck"
+]
 PACKAGES = ["visigoth", "visigoth.stimuli", "visigoth.ext"]
 
 
