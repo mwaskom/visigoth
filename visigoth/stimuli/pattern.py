@@ -79,9 +79,13 @@ class Pattern(object):
         """Draw the element array on the window."""
         self.array.draw()
 
-    def randomize_phases(self, rng=None):
+    def randomize_phases(self, rng=None, limits=(0, 1)):
         """Set the phase of each underlying grating to a random value."""
         if rng is None:
             rng = np.random.RandomState()
-        self.phases = rng.uniform(0, 1, self.n)
+        self.phases = rng.uniform(*limits, size=self.n)
         self.array.phases = self.phases
+
+    def counterphase(self):
+        """Advance all phases by half a cycle."""
+        self.array.phases += .5
