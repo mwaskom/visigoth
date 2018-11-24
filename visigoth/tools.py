@@ -44,7 +44,7 @@ class AcquireFixation(object):
 
 class AcquireTarget(object):
 
-    def __init__(self, exp, correct_target=None):
+    def __init__(self, exp, correct_target=None, allow_retry=False):
 
         self.exp = exp
 
@@ -52,6 +52,7 @@ class AcquireTarget(object):
 
         self.check_eye = exp.p.eye_response
         self.check_key = exp.p.key_response
+        self.allow_retry = allow_retry
 
         self.tracker = exp.tracker
 
@@ -166,6 +167,15 @@ class AcquireTarget(object):
             # Handle a failure to choose a target
             elif failure:
 
+                # Possibly revert from a failed state to a state prior to
+                # initiation of the response. Essentially a allow a "retry"
+                if self.allow_retry:
+                    self.fix_break_time = None
+                    self.chosen_target = None
+                    self.target_time = None
+                    return False
+
+                # Otherwise exit the loop with a "nochoice" result
                 res = Bunch(responded=False,
                             result="nochoice",
                             sacc_x=gaze[0],
