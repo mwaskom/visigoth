@@ -95,6 +95,11 @@ class EyeTracker(object):
             display_size = "{:d} {:d}".format(*self.exp.win.size)
             self.tracker.sendCommand("screen_pixel_coords 0 0 " + display_size)
 
+            win_ratio = np.divide(*self.exp.win.size)
+            prop = "{:.2f} {:.2f}".format(.85 / win_ratio, .85)
+            self.tracker.sendCommand("calibration_area_proportion " + prop)
+            self.tracker.sendCommand("validation_area_proportion " + prop)
+
     def run_calibration(self):
         """Execute the eyetracker setup (principally calibration) procedure."""
         if not self.simulate:
