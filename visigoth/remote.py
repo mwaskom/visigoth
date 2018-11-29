@@ -1,4 +1,5 @@
 """PyQT GUI offering remote monitoring and control of experiment execution."""
+import sys
 import json
 import socket
 import Queue as queue
@@ -6,6 +7,7 @@ import Queue as queue
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
+from matplotlib.artist import Artist
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
 from PyQt5.QtCore import Qt, QTimer
@@ -20,6 +22,16 @@ from .ext.bunch import Bunch
 class RemoteApp(QMainWindow):
 
     def __init__(self, host):
+
+        # Avoid Abort Trap when exception is raised in Python code
+        # Otherwise even simple problems will be impossible to debug
+        # The downside is that we have to manually exit out of the GUI
+        # (and maybe sometimes will be stuck?).
+        # But at least we can see the exception trace!
+        def no_abort(a, b, c):
+            sys.__excepthook__(a, b, c)
+
+        sys.excepthook = no_abort
 
         QMainWindow.__init__(self, None)
         self.setWindowTitle("Visigoth Remote")
@@ -281,23 +293,29 @@ class GazeApp(object):
         """Add either each artist in an iterable or a single artist."""
         if isinstance(obj, list):
             for artist in obj:
-                ax.add_artist(artist)
+                if isinstance(artist, Artist):
+                    ax.add_artist(artist)
         elif isinstance(obj, dict):
             for _, artist in obj.items():
-                ax.add_artist(artist)
+                if isinstance(artist, Artist):
+                    ax.add_artist(artist)
         else:
-            ax.add_artist(obj)
+            if isinstance(obj, Artist):
+                ax.add_artist(obj)
 
     def draw_artist(self, ax, obj):
         """Draw either each artist in an iterable or a single artist."""
         if isinstance(obj, list):
             for artist in obj:
-                ax.draw_artist(artist)
+                if isinstance(artist, Artist):
+                    ax.draw_artist(artist)
         elif isinstance(obj, dict):
             for _, artist in obj.items():
-                ax.draw_artist(artist)
+                if isinstance(artist, Artist):
+                    ax.draw_artist(artist)
         else:
-            ax.draw_artist(obj)
+            if isinstance(obj, Artist):
+                ax.draw_artist(obj)
 
     def update_screen(self, screen_data):
         """Re-draw the figure to show current gaze and what's on the screen."""
@@ -314,8 +332,8 @@ class GazeApp(object):
 
         # Draw stimuli on the screen
         self.fig.canvas.restore_region(self.axes_background)
-
         self.ax.draw_artist(self.plot_objects["gaze"])
+
         for stim, pos in screen_data["stims"].items():
             if stim in self.plot_objects:
 
