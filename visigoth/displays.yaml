@@ -1,6 +1,6 @@
-macbook-air:
-  width: 28.65
-  distance: 45
+mlw-mbpro:
+  width: 28.7
+  distance: 42
   resolution: [1440, 900]
   refresh_hz: 60
   gamma: 2.2
@@ -25,7 +25,7 @@ kianilab-ps1-decom:
 
 kianilab-ps2:
   width: 33
-  distance: 55
+  distance: 42
   resolution: [1440, 900]
   refresh_hz: 60
   max_luminance: 300
