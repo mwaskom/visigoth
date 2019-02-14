@@ -266,13 +266,35 @@ class Calibrator(EyeLinkCustomDisplay):
         self.target.draw()
         self.win.flip()
 
-    def erase_cal_target(self):
-        self.win.flip()
-
     def setup_cal_display(self):
+
+        gray = np.array(self.win.color) + .3
+
+        dot = visual.Circle(self.win,
+                            pos=(0, 0),
+                            radius=1,
+                            fillColor=gray,
+                            lineColor=gray,
+                            interpolate=True,
+                            autoLog=False)
+
+        rect = visual.Rect(self.win,
+                           width=8,
+                           height=8,
+                           fillColor=self.win.color,
+                           lineColor=gray,
+                           lineWidth=5,
+                           autoLog=False)
+
+        rect.draw()
+        dot.draw()
+
         self.win.flip()
 
     def clear_cal_display(self):
+        self.win.flip()
+
+    def erase_cal_target(self):
         self.win.flip()
 
     def exit_cal_display(self):
