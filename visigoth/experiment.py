@@ -113,7 +113,7 @@ class Experiment(object):
                 self.wait_until(self.check_abort, timeout,
                                 draw=self.p.final_stim)
 
-        except:
+        except Exception:
 
             # Aborting raises an exception but isn't considered an error
             self._clean_exit = self._aborted
@@ -319,7 +319,7 @@ class Experiment(object):
         # Import the params module and extract the params for this run
         import params
         dicts = [v for k, v in vars(params).iteritems()
-                 if isinstance(v, dict) and not re.match("__\w+__", k)]
+                 if isinstance(v, dict) and not re.match(r"__\w+__", k)]
 
         if len(dicts) == 1:
             param_dict.update(dicts[0])
@@ -483,6 +483,9 @@ class Experiment(object):
                       win_framerate=win.framerate,
                       win_deg_per_pix=win.deg_per_pix,
                       win_pix_per_deg=win.pix_per_deg)
+
+        # Store the display information in the params
+        self.p.update(display_info=info)
 
         return win
 
