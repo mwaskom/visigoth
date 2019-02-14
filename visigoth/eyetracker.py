@@ -268,19 +268,19 @@ class Calibrator(EyeLinkCustomDisplay):
 
     def setup_cal_display(self):
 
-        gray = np.array(self.win.color) + .3
+        gray = np.array(self.win.color) + .2
 
         dot = visual.Circle(self.win,
                             pos=(0, 0),
-                            radius=1,
+                            radius=.2,
                             fillColor=gray,
                             lineColor=gray,
                             interpolate=True,
                             autoLog=False)
 
         rect = visual.Rect(self.win,
-                           width=8,
-                           height=8,
+                           width=16,
+                           height=16,
                            fillColor=self.win.color,
                            lineColor=gray,
                            lineWidth=5,
