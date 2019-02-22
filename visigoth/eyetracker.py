@@ -127,8 +127,8 @@ class EyeTracker(object):
         # Allow simulation using the mouse
         if self.simulate:
 
-            if any(self.tracker.getPressed()):
-                # Simulate blinks with button down
+            if self.tracker.getPressed()[0]:
+                # Simulate blinks with main button down
                 gaze = np.nan, np.nan
             else:
                 gaze = self.tracker.getPos()
