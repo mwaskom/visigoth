@@ -468,7 +468,7 @@ class Experiment(object):
         frametime, _, _ = visual.getMsPerFrame(win)
         refresh_hz = 1000 / frametime
         refresh_error = abs(info["refresh_hz"] - refresh_hz)
-        if refresh_error > .5 and not debug:
+        if refresh_error > self.p.refresh_error and not debug:
             text = "Display refresh rate differs from expected by {:.2} Hz"
             raise RuntimeError(text.format(refresh_error))
         win.recordFrameIntervals = False
