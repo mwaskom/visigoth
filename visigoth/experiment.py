@@ -422,7 +422,7 @@ class Experiment(object):
         info = display_info[self.p.display_name]
 
         # Store date as a string to avoid crashing json dump downstream
-        info["date"] = time.strftime("%Y-%m-%d", info["date"])
+        info["date"] = time.strptime("%Y-%m-%d", info["date"])
 
         # Determine the background color of the display
         if self.p.display_luminance is None:
