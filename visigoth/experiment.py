@@ -777,9 +777,11 @@ class Experiment(object):
         Either ``seconds`` or ``frames``, but not both, are required.
 
         This function can adjust the number of flips generated in real time
-        based on the PsychoPy Window's estimate of its missed flips. This
-        assumes you are not resetting the win.nDroppedFrames counter while
-        the frame range is active.
+        based on the PsychoPy Window's estimate of its frame intervals. While
+        not perfect (it can fall behind with consistently missed frames), when
+        combined with ``expected_offset``, this can improve robustness to
+        intermittent timing issues. Doing so assumes that you are looping
+        over this generator and trying to draw on every screen refresh.
 
         Parameters
         ----------
@@ -820,17 +822,24 @@ class Experiment(object):
 
         if adjust_for_missed:
             self.win.recordFrameIntervals = True
-            self.win.nDroppedFrames = dropped_count = 0
+            self.win.frameIntervals = []
 
+        skip = 0
         frame = 0
         while frame < frames:
 
-            if adjust_for_missed:
-                new_dropped = self.win.nDroppedFrames - dropped_count
-                if new_dropped:
-                    dropped_count += new_dropped
-                    frame += new_dropped
-                skipped_frames = list(range(frame, frame + new_dropped))
+            if frame and adjust_for_missed:
+
+                slippage = (np.sum(self.win.frameIntervals)
+                            - (self.win.frametime * frame))
+
+                if slippage > 0:
+                    skip = int(slippage // self.win.frametime)
+                else:
+                    skip = 0
+
+                skipped_frames = list(range(frame, frame + skip))
+                frame += skip
             else:
                 skipped_frames = []
 
