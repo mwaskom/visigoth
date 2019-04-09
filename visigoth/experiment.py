@@ -413,13 +413,16 @@ class Experiment(object):
         local_fname = op.join(self.p.study_dir, "displays.yaml")
 
         with open(global_fname) as fid:
-            display_info = yaml.load(fid, Loader=yaml.BaseLoader)
+            display_info = yaml.load(fid)
 
         if os.path.exists(local_fname):
             with open(local_fname) as fid:
-                display_info.update(yaml.load(fid, Loader=yaml.BaseLoader))
+                display_info.update(yaml.load(fid))
 
         info = display_info[self.p.display_name]
+
+        # Store date as a string to avoid crashing json dump downstream
+        info["date"] = time.strftime("%Y-%m-%d", info["date"])
 
         # Determine the background color of the display
         if self.p.display_luminance is None:
