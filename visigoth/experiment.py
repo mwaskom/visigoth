@@ -413,11 +413,11 @@ class Experiment(object):
         local_fname = op.join(self.p.study_dir, "displays.yaml")
 
         with open(global_fname) as fid:
-            display_info = yaml.load(fid)
+            display_info = yaml.load(fid, Loader=yaml.BaseLoader)
 
         if os.path.exists(local_fname):
             with open(local_fname) as fid:
-                display_info.update(yaml.load(fid))
+                display_info.update(yaml.load(fid, Loader=yaml.BaseLoader))
 
         info = display_info[self.p.display_name]
 
