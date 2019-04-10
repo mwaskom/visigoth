@@ -1,4 +1,5 @@
 from points import Point, Points
+from fixation import FixationTask
 from cue import LineCue, PointCue
 from grating import Grating
 from elementarray import ElementArray
