@@ -69,6 +69,11 @@ class Experiment(object):
                 self._aborted = True
                 core.quit()
 
+            # -- Initialize the trial generator
+            trial_generator = self.generate_trials()
+            if self.p.initialize_trial_generator:
+                next(trial_generator)
+
             # Wait for a trigger to start
             if self.p.trigger is not None:
                 self.wait_for_trigger()
@@ -80,11 +85,6 @@ class Experiment(object):
                 self.wait_until(self.check_abort,
                                 draw=self.p.draw_pre_run,
                                 timeout=self.p.wait_pre_run)
-
-            # -- Initialize the trial generator
-            trial_generator = self.generate_trials()
-            if self.p.initialize_trial_generator:
-                next(trial_generator)
 
             # -- Initialize the experimental run
             if self.tracker is not None:
