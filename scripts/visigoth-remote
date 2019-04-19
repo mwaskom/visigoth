@@ -36,6 +36,6 @@ if __name__ == "__main__":
 
     # Start the PyQT GUI Application
     app = QApplication([])
-    win = RemoteApp(host)
+    win = RemoteApp(host, trial_app=args.trial_app)
     win.show()
     app.exec_()

@@ -21,7 +21,7 @@ from .ext.bunch import Bunch
 
 class RemoteApp(QMainWindow):
 
-    def __init__(self, host):
+    def __init__(self, host, trial_app=True):
 
         # Avoid Abort Trap when exception is raised in Python code
         # Otherwise even simple problems will be impossible to debug
@@ -55,7 +55,10 @@ class RemoteApp(QMainWindow):
 
         self.main_frame = QWidget()
         self.gaze_app = GazeApp(self)
-        self.trial_app = TrialApp(self)
+        if trial_app:
+            self.trial_app = TrialApp(self)
+        else:
+            self.trial_app = None
         self.initialize_layout()
         self.initialize_timers()
 
@@ -83,11 +86,12 @@ class RemoteApp(QMainWindow):
         if screen_data is not None:
             self.gaze_app.update_screen(screen_data)
 
-        try:
-            trial_data = self.trial_q.get(block=False)
-            self.trial_app.update_figure(trial_data)
-        except queue.Empty:
-            pass
+        if self.trial_app is not None:
+            try:
+                trial_data = self.trial_q.get(block=False)
+                self.trial_app.update_figure(trial_data)
+            except queue.Empty:
+                pass
 
         # Update the GazeApp GUI elementes
         self.gaze_app.update_gui()
@@ -121,7 +125,8 @@ class RemoteApp(QMainWindow):
 
         main_hbox = QHBoxLayout()
         main_hbox.addLayout(self.gaze_app.layout)
-        main_hbox.addLayout(self.trial_app.layout)
+        if self.trial_app is not None:
+            main_hbox.addLayout(self.trial_app.layout)
 
         self.main_frame.setLayout(main_hbox)
         self.setCentralWidget(self.main_frame)
