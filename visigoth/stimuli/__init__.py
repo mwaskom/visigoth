@@ -7,5 +7,5 @@ from pattern import Pattern
 from noise import GaussianNoise, UniformNoise
 from dots import RandomDotMotion
 from dummy import DummyStim
-from aperture import BoreAperture
+from aperture import BoreAperture, StimAperture
 from gaze import GazeStim

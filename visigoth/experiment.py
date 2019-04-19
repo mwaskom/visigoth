@@ -461,7 +461,6 @@ class Experiment(object):
         # Add in an optional display aperture
         if self.p.aperture_radius is not None:
             self.aperture = stimuli.BoreAperture(win,
-                                                 color,
                                                  self.p.aperture_radius,
                                                  self.p.aperture_center)
         else:
@@ -757,11 +756,11 @@ class Experiment(object):
         if not isinstance(stims, list):
             stims = [stims]
 
-        if self.aperture is not None:
-            self.aperture.draw()
-
         for stim in stims:
             self.s[stim].draw()
+
+        if self.aperture is not None:
+            self.aperture.draw()
 
         self.sync_remote_screen(stims)
 
