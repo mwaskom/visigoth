@@ -19,11 +19,11 @@ Distributed under the terms of the GNU General Public License (GPL).
 from __future__ import division
 import pyglet
 pyglet.options['debug_gl'] = False
-import ctypes
+import ctypes  # noqa: 402
 GL = pyglet.gl
 
-from psychopy.visual.elementarray import ElementArrayStim
-from psychopy.visual.basevisual import MinimalStim, TextureMixin
+from psychopy.visual.elementarray import ElementArrayStim  # noqa: 402
+from psychopy.visual.basevisual import MinimalStim, TextureMixin  # noqa: 402
 try:
     from psychopy.visual import shaders
 except ImportError:

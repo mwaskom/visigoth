@@ -1,2 +1,2 @@
 lint:
-	pep8 --exclude visigoth/ext visigoth
+	flake8 visigoth --exclude=visigoth/ext/
