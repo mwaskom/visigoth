@@ -5,6 +5,7 @@
     <div class="row">
       <div class="jumbotron">
 
+========
 visigoth
 ========
 
@@ -27,7 +28,6 @@ Psychophysics experiment control in Python
    :maxdepth: 1
 
    installing
-   release_notes
    user_guide
    api
 

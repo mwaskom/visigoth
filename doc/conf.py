@@ -14,6 +14,7 @@
 
 import sys
 import os
+import time
 
 import sphinx_bootstrap_theme
 
@@ -33,7 +34,8 @@ sys.path.insert(0, os.path.abspath('..'))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
-    'numpydoc'
+    'sphinx.ext.viewcode',
+    'numpydoc',
 ]
 
 autosummary_generate = True
@@ -55,8 +57,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'visigoth'
-copyright = u'2017, Michael Waskom'
 author = u'Michael Waskom'
+copyright = u'2016-{}, {}'.format(time.strftime("%Y"), author)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -128,7 +130,7 @@ html_theme_options = {
     'navbar_links' : [
             ("Github", "https://github.com/mwaskom/visigoth", True),
             ("User Guide", "user_guide"),
-            ("API Reference", "api"),
+            ("API", "api"),
         ]
 
     }

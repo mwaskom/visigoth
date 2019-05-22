@@ -26,8 +26,8 @@ Methods that must be defined for each study
    Experiment.generate_trials
    Experiment.run_trial
 
-Methods that can be overidden to control execution
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Methods that can be overridden to control execution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autosummary::
    :toctree: api/
@@ -117,18 +117,60 @@ Tools
 Stimuli
 -------
 
+Fixation points, saccade targets, and spatial cues
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: api/
+
+   stimuli.Point
+   stimuli.Points
+   stimuli.LineCue
+   stimuli.PointCue
+   stimuli.FixationTask
+
+Random dot motion
+~~~~~~~~~~~~~~~~~
+
 .. autosummary::
    :toctree: api/
 
    stimuli.RandomDotMotion
    stimuli.RandomDotColorMotion
+
+Gratings, hyperplaids, and noise fields
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: api/
+
+   stimuli.Grating
+   stimuli.ElementArray
    stimuli.Pattern
    stimuli.GaussianNoise
    stimuli.UniformNoise
-   stimuli.ElementArray
-   stimuli.Grating
-   stimuli.Point
-   stimuli.Points
-   stimuli.LineCue
-   stimuli.PointCue
+
+Apertures
+~~~~~~~~~
+
+.. autosummary::
+   :toctree: api/
+
+   stimuli.BoreAperture
+   stimuli.StimAperture
+
+Simulated gaze position
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+   :toctree: api/
+
    stimuli.GazeStim
+
+Eye Tracking
+------------
+
+.. autosummary::
+   :toctree: api/
+
+   eyetracker.EyeTracker

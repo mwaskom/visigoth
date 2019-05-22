@@ -107,7 +107,7 @@ class ElementArray(ElementArrayStim, MinimalStim, TextureMixin):
 
     @property
     def pedestal_contrs(self):
-        """Stimulsu contrast, accounting for pedestal"""
+        """Stimulus contrast, accounting for pedestal"""
         return self.contrs / (self.pedestal + 1)
 
     @pedestal_contrs.setter
@@ -117,11 +117,11 @@ class ElementArray(ElementArrayStim, MinimalStim, TextureMixin):
         self.contrs = adjusted_values
 
     def draw(self, win=None):
-        """
-        Draw the stimulus in its relevant window. You must call
-        this method after every MyWin.update() if you want the
-        stimulus to appear on that frame and then update the screen
-        again.
+        """Draw the stimulus in its relevant window.
+
+        You must call this method after every win.update() if you want the
+        stimulus to appear on that frame and then update the screen again.
+
         """
         if win is None:
             win = self.win
