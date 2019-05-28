@@ -13,9 +13,11 @@ import pyglet
 pyglet.options['debug_gl'] = False
 GL = pyglet.gl
 
-from psychopy.visual.basevisual import ColorMixin, ContainerMixin, TextureMixin
-from psychopy.visual.grating import GratingStim
-from psychopy.tools.attributetools import attributeSetter
+from psychopy.visual.basevisual import (ColorMixin,
+                                        ContainerMixin,
+                                        TextureMixin)  # noqa: E402
+from psychopy.visual.grating import GratingStim  # noqa: E402
+from psychopy.tools.attributetools import attributeSetter  # noqa: E402
 try:
     from psychopy.visual import shaders
 except ImportError:

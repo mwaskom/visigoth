@@ -4,7 +4,7 @@ from psychopy import visual
 
 
 class LineCue(object):
-
+    """Line extending from fixation towards a stimulus location."""
     def __init__(self, win, extent=(0, 1), width=5, color=1, **kwargs):
 
         self.extent = extent
@@ -36,7 +36,7 @@ class LineCue(object):
 
 
 class PointCue(object):
-
+    """Point extending from fixation towards at a stimulus location."""
     def __init__(self, win, norm, radius, color=1, **kwargs):
 
         self.norm = norm

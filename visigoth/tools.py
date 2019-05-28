@@ -7,8 +7,15 @@ from psychopy import core, event
 from .ext.bunch import Bunch
 
 
-class AcquireFixation(object):
+__all__ = [
+    "AcquireFixation", "AcquireTarget",
+    "check_gaze", "flexible_values", "truncated_sample",
+    "limited_repeat_sequence"
+]
 
+
+class AcquireFixation(object):
+    """Handler for waiting until subject fixates to begin trial."""
     def __init__(self, exp):
 
         self.check_eye = exp.p.eye_fixation
@@ -29,7 +36,7 @@ class AcquireFixation(object):
         # TODO should probably clear events on initialization
 
     def __call__(self):
-
+        """Check if fixation has been acquired."""
         fixation = True
 
         if self.check_key:
@@ -43,9 +50,8 @@ class AcquireFixation(object):
 
 
 class AcquireTarget(object):
-
+    """Handler for waiting until subject makes a eye or key response."""
     def __init__(self, exp, correct_target=None, allow_retry=False):
-
         self.exp = exp
 
         self.clock = core.Clock()
@@ -75,7 +81,7 @@ class AcquireTarget(object):
         # TODO should probably clear events on initialization
 
     def __call__(self):
-
+        """Check for completion of a valid response."""
         if self.check_key:
 
             # Check for a press of one of the valid keys

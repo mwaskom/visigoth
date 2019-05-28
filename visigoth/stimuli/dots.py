@@ -169,13 +169,13 @@ class RandomDotColorMotion(RandomDotMotion):
         """Classical random dot motion stimulus with randomly colored dots.
 
         Random color is generated similar to the random motion. On each frame,
-        some proportion of the dots (the color coherence) are drawn in the
-        same hue, while the hues for the others are chosen randomly from 
-        [0, 360]. All dots have the same lightness and chromacity. The colors
-        are chosen using the CIECAM02 space. Note that colors are clipped to
-        stay in the RGB gamut. This allows for relatively bright/saturated
-        colors, but means that the circular distances colors as shown may not
-        reflect the generating distribution.
+        some proportion of the dots (the color coherence) are drawn in the same
+        hue, while the hues for the others are chosen randomly from [0, 360].
+        All dots have the same lightness and chromacity. The colors are chosen
+        using the CIECAM02 space. Note that colors are clipped to stay in the
+        RGB gamut. This allows for relatively bright/saturated colors, but
+        means that the circular distances colors as shown may not reflect the
+        generating distribution.
 
         Parameters
         ----------
