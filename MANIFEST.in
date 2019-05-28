@@ -1,3 +1,5 @@
 include README.md
 include visigoth/displays.yaml
 include visigoth/sounds/*.wav
+include versioneer.py
+include visigoth/_version.py

@@ -1,4 +1,5 @@
 from setuptools import setup
+import versioneer
 
 
 DISTNAME = "visigoth"
@@ -8,7 +9,6 @@ MAINTAINER_EMAIL = "mwaskom@nyu.edu"
 LICENSE = "BSD (3-clause)"
 ZIP_SAFE = False
 DOWNLOAD_URL = "https://github.com/mwaskom/visigoth"
-VERSION = "0.1.dev"
 
 INSTALL_REQUIRES = ["colorspacious"]
 
@@ -18,6 +18,11 @@ SCRIPTS = [
     "scripts/visigoth-screencheck"
 ]
 PACKAGES = ["visigoth", "visigoth.stimuli", "visigoth.ext"]
+
+INCLUDE_PACKAGE_DATA = True
+
+VERSION = versioneer.get_version()
+CMDCLASS = versioneer.get_cmdclass()
 
 
 if __name__ == "__main__":
@@ -30,11 +35,12 @@ if __name__ == "__main__":
         description=DESCRIPTION,
         license=LICENSE,
         download_url=DOWNLOAD_URL,
+        install_requires=INSTALL_REQUIRES,
         zip_safe=ZIP_SAFE,
-        version=VERSION,
         scripts=SCRIPTS,
         packages=PACKAGES,
-        install_requires=INSTALL_REQUIRES,
-        include_package_data=True
+        include_package_data=INCLUDE_PACKAGE_DATA,
+        version=VERSION,
+        cmdclass=CMDCLASS,
 
     )
