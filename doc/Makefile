@@ -191,3 +191,7 @@ pseudoxml:
 	$(SPHINXBUILD) -b pseudoxml $(ALLSPHINXOPTS) $(BUILDDIR)/pseudoxml
 	@echo
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
+
+upload:
+	rsync -azP $(BUILDDIR)/html/ mwaskom@janus.cns.nyu.edu:html_public/software/visigoth
+	@echo "Uploaded to NYU webspace"
