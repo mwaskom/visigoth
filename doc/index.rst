@@ -38,7 +38,9 @@ Psychophysics experiment control in Python
       </div>
       <div class="col-md-8">
 
-Visigoth is a library that does stuff.
+``visigoth`` is a library for controlling psychophysics experiments in Python.
+
+Documentation is a work in progress.
 
 .. raw:: html
 
