@@ -4,8 +4,30 @@
 User Guide
 ==========
 
-Example: Random dot task
-------------------------
+Command-line help
+-----------------
+
+``visigoth``
+~~~~~~~~~~~~
+
+.. argparse::
+   :module: visigoth.commandline
+   :func: define_experiment_parser
+   :prog: visigoth
+   :nodefault:
+
+``visigoth-remote``
+~~~~~~~~~~~~~~~~~~~
+
+.. argparse::
+   :module: visigoth.commandline
+   :func: define_remote_parser
+   :prog: visigoth-remote
+   :nodefault:
+
+
+Code example: Random dot task
+-----------------------------
 
 .. code-block:: bash
 

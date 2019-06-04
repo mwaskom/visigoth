@@ -17,3 +17,8 @@ blockquote {
     padding-bottom: 4px !important;
     margin: 0 0 0px !important;
 }
+
+kbd {
+  color: #333333 !important;
+  background-color: #ffffff !important;
+}
