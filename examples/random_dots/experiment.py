@@ -49,7 +49,7 @@ def generate_trials(exp):
 def run_trial(exp, info):
     """Execute the events on a single trial."""
     # Inter-trial interval
-    exp.wait_until(exp.iti_end, iti_duration=info.iti)
+    exp.wait_until(exp.iti_end, iti_duration=info.wait_iti)
 
     # Wait for trial onset
     res = exp.wait_until(AcquireFixation(exp),
