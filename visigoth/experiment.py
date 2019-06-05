@@ -15,7 +15,7 @@ import pandas as pd
 from psychopy import core, tools, visual, event, sound, monitors, logging
 
 from .ext.bunch import Bunch
-from . import version, stimuli, eyetracker, commandline, clientserver
+from . import stimuli, eyetracker, commandline, clientserver, _version
 
 
 class Experiment(object):
@@ -361,9 +361,8 @@ class Experiment(object):
         p.eyelink_fname = hashlib.md5(hash_seed).hexdigest()[:6]
 
         # Save information about software versions
-        # TODO add visigoth git commit for pre release
         # TODO also track git commit of study-specific code
-        p.visigoth_version = version.__version__
+        p.visigoth_version = _version.get_versions()["version"]
 
         # Don't save data during demo
         if p.demo:
