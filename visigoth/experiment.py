@@ -626,7 +626,10 @@ class Experiment(object):
 
     def wait_for_exit(self):
         """Wait until the experimenter quits."""
-        event.waitKeys(["enter", "return"])
+        while True:
+            if event.getKeys(keyList=["enter", "return"]):
+                break
+            time.sleep(1)
 
     # === Execution functions ===
 
@@ -724,7 +727,7 @@ class Experiment(object):
             func = None
         elif isinstance(end, str):
             def func():
-                return any(event.getKeys([end]))
+                return any(event.getKeys(keyList=[end]))
         else:
             def func():
                 return (self.clock.getTime() + self.win.frametime) >= end
