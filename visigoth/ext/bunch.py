@@ -48,29 +48,6 @@ VERSION = tuple(map(int, __version__.split('.')))
 __all__ = ('Bunch', 'bunchify','unbunchify',)
 
 
-import platform
-
-_IS_PYTHON_3 = (platform.version() >= '3')
-
-identity = lambda x : x
-
-# u('string') replaces the forwards-incompatible u'string'
-if _IS_PYTHON_3:
-    u = identity
-else:
-    import codecs
-    def u(string):
-        return codecs.unicode_escape_decode(string)[0]
-
-# dict.iteritems(), dict.iterkeys() is also incompatible
-if _IS_PYTHON_3:
-    iteritems = dict.items
-    iterkeys  = dict.keys
-else:
-    iteritems = dict.iteritems
-    iterkeys = dict.iterkeys
-
-
 class Bunch(dict):
     """ A dictionary that provides attribute-style access.
         
@@ -290,7 +267,7 @@ def bunchify(x):
         nb. As dicts are not hashable, they cannot be nested in sets/frozensets.
     """
     if isinstance(x, dict):
-        return Bunch( (k, bunchify(v)) for k,v in iteritems(x) )
+        return Bunch( (k, bunchify(v)) for k,v in x.items() )
     elif isinstance(x, (list, tuple)):
         return type(x)( bunchify(v) for v in x )
     else:
@@ -315,7 +292,7 @@ def unbunchify(x):
         nb. As dicts are not hashable, they cannot be nested in sets/frozensets.
     """
     if isinstance(x, dict):
-        return dict( (k, unbunchify(v)) for k,v in iteritems(x) )
+        return dict( (k, unbunchify(v)) for k,v in x.items() )
     elif isinstance(x, (list, tuple)):
         return type(x)( unbunchify(v) for v in x )
     else:
@@ -397,11 +374,11 @@ try:
             >>> yaml.dump(b, default_flow_style=True)
             '!bunch.Bunch {foo: [bar, !bunch.Bunch {lol: true}], hello: 42}\\n'
         """
-        return dumper.represent_mapping(u('!bunch.Bunch'), data)
+        return dumper.represent_mapping('!bunch.Bunch', data)
     
     
-    yaml.add_constructor(u('!bunch'), from_yaml)
-    yaml.add_constructor(u('!bunch.Bunch'), from_yaml)
+    yaml.add_constructor('!bunch', from_yaml)
+    yaml.add_constructor('!bunch.Bunch', from_yaml)
     
     SafeRepresenter.add_representer(Bunch, to_yaml_safe)
     SafeRepresenter.add_multi_representer(Bunch, to_yaml_safe)

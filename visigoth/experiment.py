@@ -6,7 +6,7 @@ import re
 import time
 import json
 import hashlib
-import Queue as queue
+import queue
 
 import yaml
 import numpy as np
@@ -328,7 +328,7 @@ class Experiment(object):
 
         # Import the params module and extract the params for this run
         import params
-        dicts = [v for k, v in vars(params).iteritems()
+        dicts = [v for k, v in vars(params).items()
                  if isinstance(v, dict) and not re.match(r"__\w+__", k)]
 
         if len(dicts) == 1:
@@ -357,7 +357,7 @@ class Experiment(object):
         p.session = p.date if args.session is None else args.session
 
         # Create a name for the eyelink file (limited to 6 characeters)
-        hash_seed = "_".join([p.subject, p.date, p.time])
+        hash_seed = "_".join([p.subject, p.date, p.time]).encode()
         p.eyelink_fname = hashlib.md5(hash_seed).hexdigest()[:6]
 
         # Save information about software versions

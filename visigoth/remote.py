@@ -2,7 +2,7 @@
 import sys
 import json
 import socket
-import Queue as queue
+import queue
 
 import numpy as np
 import pandas as pd
