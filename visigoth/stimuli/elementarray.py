@@ -152,11 +152,11 @@ class ElementArray(ElementArrayStim, MinimalStim, TextureMixin):
         ped = self.pedestal
         GL.glUseProgram(self._progSignedTexMask)
         GL.glUniform1i(
-            GL.glGetUniformLocation(self._progSignedTexMask, "texture"), 0)
+            GL.glGetUniformLocation(self._progSignedTexMask, b"texture"), 0)
         GL.glUniform1i(
-            GL.glGetUniformLocation(self._progSignedTexMask, "mask"), 1)
+            GL.glGetUniformLocation(self._progSignedTexMask, b"mask"), 1)
         GL.glUniform1f(
-            GL.glGetUniformLocation(self._progSignedTexMask, "pedestal"), ped)
+            GL.glGetUniformLocation(self._progSignedTexMask, b"pedestal"), ped)
 
         # bind textures
         GL.glActiveTexture(GL.GL_TEXTURE1)

@@ -125,9 +125,9 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
 
         locator = GL.glGetUniformLocation
         props = self._progSignedTexMask
-        GL.glUniform1i(locator(props, "texture"), 0)
-        GL.glUniform1i(locator(props, "mask"), 1)
-        GL.glUniform1f(locator(props, "pedestal"), self.pedestal)
+        GL.glUniform1i(locator(props, b"texture"), 0)
+        GL.glUniform1i(locator(props, b"mask"), 1)
+        GL.glUniform1f(locator(props, b"pedestal"), self.pedestal)
 
         # mask
         GL.glActiveTexture(GL.GL_TEXTURE1)
