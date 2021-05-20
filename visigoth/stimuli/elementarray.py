@@ -135,28 +135,29 @@ class ElementArray(ElementArrayStim, MinimalStim, TextureMixin):
             self.updateTextureCoords()
 
         # scale the drawing frame and get to centre of field
-        GL.glPushMatrix()
+        GL.glPushMatrix()  # push before drawing, pop after
+        # push the data for client attributes
         GL.glPushClientAttrib(GL.GL_CLIENT_ALL_ATTRIB_BITS)
 
         # GL.glLoadIdentity()
         self.win.setScale('pix')
 
-        GL.glColorPointer(
-            4, GL.GL_DOUBLE, 0,
-            self._RGBAs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)))
-        GL.glVertexPointer(
-            3, GL.GL_DOUBLE, 0,
-            self.verticesPix.ctypes.data_as(ctypes.POINTER(ctypes.c_double)))
+        cpcd = ctypes.POINTER(ctypes.c_double)
+        GL.glColorPointer(4, GL.GL_DOUBLE, 0,
+                          self._RGBAs.ctypes.data_as(cpcd))
+        GL.glVertexPointer(3, GL.GL_DOUBLE, 0,
+                           self.verticesPix.ctypes.data_as(cpcd))
 
         # setup the shaderprogram
-        ped = self.pedestal
-        GL.glUseProgram(self._progSignedTexMask)
-        GL.glUniform1i(
-            GL.glGetUniformLocation(self._progSignedTexMask, b"texture"), 0)
-        GL.glUniform1i(
-            GL.glGetUniformLocation(self._progSignedTexMask, b"mask"), 1)
-        GL.glUniform1f(
-            GL.glGetUniformLocation(self._progSignedTexMask, b"pedestal"), ped)
+        _prog = self.win._progSignedTexMask
+        GL.glUseProgram(_prog)
+        # set the texture to be texture unit 0
+        GL.glUniform1i(GL.glGetUniformLocation(_prog, b"texture"), 0)
+        # mask is texture unit 1
+        GL.glUniform1i(GL.glGetUniformLocation(_prog, b"mask"), 1)
+        # BEGIN ADDED CODE
+        GL.glUniform1f(GL.glGetUniformLocation(_prog, b"pedestal"), self.pedestal)
+        # END ADDED CODE
 
         # bind textures
         GL.glActiveTexture(GL.GL_TEXTURE1)
@@ -176,7 +177,7 @@ class ElementArray(ElementArrayStim, MinimalStim, TextureMixin):
 
         GL.glEnableClientState(GL.GL_COLOR_ARRAY)
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-        GL.glDrawArrays(GL.GL_QUADS, 0, self.verticesPix.shape[0]*4)
+        GL.glDrawArrays(GL.GL_QUADS, 0, self.verticesPix.shape[0] * 4)
 
         # unbind the textures
         GL.glActiveTexture(GL.GL_TEXTURE1)

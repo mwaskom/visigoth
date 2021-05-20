@@ -121,14 +121,15 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
         self._needUpdate = False
         GL.glNewList(self._listID, GL.GL_COMPILE)
         # setup the shaderprogram
-        GL.glUseProgram(self._progSignedTexMask)
-
-        locator = GL.glGetUniformLocation
-        props = self._progSignedTexMask
-        GL.glUniform1i(locator(props, b"texture"), 0)
-        GL.glUniform1i(locator(props, b"mask"), 1)
-        GL.glUniform1f(locator(props, b"pedestal"), self.pedestal)
-
+        _prog = self.win._progSignedTexMask
+        GL.glUseProgram(_prog)
+        # set the texture to be texture unit 0
+        GL.glUniform1i(GL.glGetUniformLocation(_prog, b"texture"), 0)
+        # mask is texture unit 1
+        GL.glUniform1i(GL.glGetUniformLocation(_prog, b"mask"), 1)
+        # BEGIN ADDED CODE
+        GL.glUniform1f(GL.glGetUniformLocation(_prog, b"pedestal"), self.pedestal)
+        # END ADDED CODE
         # mask
         GL.glActiveTexture(GL.GL_TEXTURE1)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self._maskID)
@@ -139,15 +140,16 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
         GL.glBindTexture(GL.GL_TEXTURE_2D, self._texID)
         GL.glEnable(GL.GL_TEXTURE_2D)
 
-        Ltex = -self._cycles[0]/2 - self.phase[0]+0.5
-        Rtex = +self._cycles[0]/2 - self.phase[0]+0.5
-        Ttex = +self._cycles[1]/2 - self.phase[1]+0.5
-        Btex = -self._cycles[1]/2 - self.phase[1]+0.5
+        Ltex = (-self._cycles[0] / 2) - self.phase[0] + 0.5
+        Rtex = (+self._cycles[0] / 2) - self.phase[0] + 0.5
+        Ttex = (+self._cycles[1] / 2) - self.phase[1] + 0.5
+        Btex = (-self._cycles[1] / 2) - self.phase[1] + 0.5
         Lmask = Bmask = 0.0
-        Tmask = Rmask = 1.0
+        Tmask = Rmask = 1.0  # mask
 
+        # access just once because it's slower than basic property
         vertsPix = self.verticesPix
-        GL.glBegin(GL.GL_QUADS)
+        GL.glBegin(GL.GL_QUADS)  # draw a 4 sided polygon
         # right bottom
         GL.glMultiTexCoord2f(GL.GL_TEXTURE0, Rtex, Btex)
         GL.glMultiTexCoord2f(GL.GL_TEXTURE1, Rmask, Bmask)
