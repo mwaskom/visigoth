@@ -113,6 +113,6 @@ class UniformNoise(Noise):
         low = self.mean - width / 2
 
         # Multiply by 2 as values are in [-1, 1]
-        low, range = low * 2, range * 2
+        low, width = low * 2, width * 2
 
-        self.rv = stats.uniform(low, range)
+        self.rv = stats.uniform(low, width)

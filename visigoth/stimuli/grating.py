@@ -13,9 +13,9 @@ import pyglet
 pyglet.options['debug_gl'] = False
 GL = pyglet.gl
 
-from psychopy.visual.basevisual import (ColorMixin,
+from psychopy.visual.basevisual import (ColorMixin,  # noqa: E402
                                         ContainerMixin,
-                                        TextureMixin)  # noqa: E402
+                                        TextureMixin)
 from psychopy.visual.grating import GratingStim  # noqa: E402
 from psychopy.tools.attributetools import attributeSetter  # noqa: E402
 try:
@@ -66,7 +66,7 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
     Psychopy can be found here: http://www.psychopy.org/
 
     """
-    def __init__(self,  win, tex="sin",
+    def __init__(self, win, tex="sin",
                  mask="none", units="", pos=(0.0, 0.0), size=None,
                  sf=None, ori=0.0, phase=(0.0, 0.0),
                  texRes=128, rgb=None, dkl=None,

@@ -72,7 +72,7 @@ class RandomDotMotion(object):
             elementMask=shape,
             elementTex=None,
             xys=next(self.dotpos),
-            )
+        )
 
         self.array = array
 
@@ -130,7 +130,7 @@ class RandomDotMotion(object):
         """Generate random starting positions for each set of dots."""
         self.dotpos = itertools.cycle(
             [self._random_xys() for _ in range(self.interval)]
-            )
+        )
 
     def update(self, direction, coherence):
         """Advance the dot animation one frame.
@@ -212,7 +212,7 @@ class RandomDotColorMotion(RandomDotMotion):
         super(RandomDotColorMotion, self).__init__(
             win, shape, size, init_color, density, speed, interval,
             pos, aperture, elliptical,
-            )
+        )
         self.lightness = lightness
         self.chromacity = chromacity
         self.jch_to_rgb = cspace_converter("JCh", "sRGB1")

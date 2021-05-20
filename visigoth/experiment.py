@@ -273,7 +273,7 @@ class Experiment(object):
             lines.append("")
             lines.append(
                 "You were correct on {:.0%} of trials".format(mean_acc)
-                )
+            )
             if mean_acc >= target_acc:
                 lines.append("Great job!")
             else:
@@ -284,7 +284,7 @@ class Experiment(object):
             lines.append("")
             lines.append(
                 "You took {:.1f} seconds to respond on average".format(mean_rt)
-                )
+            )
             if mean_rt <= target_rt:
                 lines.append("Great job!")
             else:
@@ -672,7 +672,7 @@ class Experiment(object):
             correct=np.nan,
             rt=np.nan,
 
-            )
+        )
 
         t_info.update(kwargs)
 
