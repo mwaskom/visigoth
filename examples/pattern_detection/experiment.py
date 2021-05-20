@@ -55,7 +55,7 @@ def generate_trials(exp):
         pattern_contrast = flexible_values(exp.p.pattern_contrast)
         pattern_side = flexible_values([0, 1])
 
-        noise_frames = exp.p.noise_hz / exp.p.wait_stim
+        noise_frames = exp.p.noise_hz // exp.p.wait_stim
         pattern_frame = flexible_values(range(1, noise_frames + 1))
 
         noise_contrast = flexible_values(exp.p.noise_contrast)
