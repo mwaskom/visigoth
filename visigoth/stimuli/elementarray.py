@@ -72,7 +72,7 @@ class ElementArray(ElementArrayStim, MinimalStim, TextureMixin):
                  rgbs=None,
                  colors=(1.0, 1.0, 1.0),
                  colorSpace='rgb',
-                 opacities=1.0,
+                 opacities=None,
                  depths=0,
                  fieldDepth=0,
                  oris=0,
@@ -149,7 +149,7 @@ class ElementArray(ElementArrayStim, MinimalStim, TextureMixin):
                            self.verticesPix.ctypes.data_as(cpcd))
 
         # setup the shaderprogram
-        _prog = self.win._progSignedTexMask
+        _prog = self._progSignedTexMask
         GL.glUseProgram(_prog)
         # set the texture to be texture unit 0
         GL.glUniform1i(GL.glGetUniformLocation(_prog, b"texture"), 0)

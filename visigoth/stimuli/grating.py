@@ -71,7 +71,7 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
                  sf=None, ori=0.0, phase=(0.0, 0.0),
                  texRes=128, rgb=None, dkl=None,
                  lms=None, color=(1.0, 1.0, 1.0), colorSpace='rgb',
-                 contrast=1.0, opacity=1.0, depth=0,
+                 contrast=1.0, opacity=None, depth=0,
                  rgbPedestal=(0.0, 0.0, 0.0), interpolate=False, name=None,
                  autoLog=False, autoDraw=False, maskParams=None,
                  pedestal=None):
@@ -93,12 +93,18 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
                                              fragSignedColorTexMask)
         self._progSignedTexMask = mask_shader
 
-    @attributeSetter
+    @property
+    def contrast(self):
+        if hasattr(self, '_foreColor'):
+            return self._foreColor.contrast
+
+    @contrast.setter
     def contrast(self, value):
         """Stimulus contrast, accounting for pedestal."""
-        # TODO this is potentiall confusion -- revisit later
+        # TODO this is potentially confusing -- revisit later
         value = value * (self.pedestal + 1)
-        self.__dict__["contrast"] = value
+        ColorMixin.contrast.fset(self, value)
+        self._needTextureUpdate = True
         self._needUpdate = True
 
     @property
@@ -121,7 +127,7 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
         self._needUpdate = False
         GL.glNewList(self._listID, GL.GL_COMPILE)
         # setup the shaderprogram
-        _prog = self.win._progSignedTexMask
+        _prog = self._progSignedTexMask
         GL.glUseProgram(_prog)
         # set the texture to be texture unit 0
         GL.glUniform1i(GL.glGetUniformLocation(_prog, b"texture"), 0)
