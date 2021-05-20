@@ -63,7 +63,6 @@ def run_trial(exp, info):
 
     exp.s.fix.color = exp.p.fix_iti_color
     exp.draw("fix")
-    exp.win.flip()
     core.wait(info.iti)
 
     exp.s.fix.color = exp.p.fix_ready_color
@@ -74,7 +73,6 @@ def run_trial(exp, info):
 
     exp.s.fix.color = exp.p.fix_trial_color
     exp.draw(["fix", "targets"])
-    exp.win.flip()
     core.wait(exp.p.wait_prestim)
 
     phase_shift = info.motion * exp.p.stim_speed / exp.win.framerate
@@ -82,13 +80,11 @@ def run_trial(exp, info):
 
         exp.s.grating.phase += phase_shift
         exp.draw(["grating", "fix", "targets"])
-        exp.win.flip()
 
     exp.draw("targets")
     exp.wait_until(AcquireTarget(exp), draw="targets")
 
     exp.s.fix.color = exp.p.fix_iti_color
     exp.draw("fix")
-    exp.win.flip()
 
     return info
