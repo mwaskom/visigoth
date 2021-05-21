@@ -418,7 +418,7 @@ class TrialApp(object):
         """
         # Note that we do not use the matplotlib.pyplot function, but
         # rather create the Figure object directly.
-        fig = mpl.figure.Figure((5, 5), dpi=100, facecolor="white")
+        fig = Figure((5, 5), dpi=100, facecolor="white")
         axes = [fig.add_subplot(3, 1, i) for i in range(1, 4)]
 
         axes[0].set(ylim=(-.1, 1.1),

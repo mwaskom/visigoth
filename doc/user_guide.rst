@@ -44,3 +44,8 @@ Parameters module (``params.py``)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. literalinclude:: ../examples/random_dots/params.py
+
+Remote module (``remote.py``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. literalinclude:: ../examples/random_dots/remote.py
