@@ -12,7 +12,7 @@ import yaml
 import numpy as np
 import pandas as pd
 
-from psychopy import core, tools, visual, event, sound, monitors, logging
+from psychopy import core, tools, visual, event, monitors, logging
 
 from .ext.bunch import Bunch
 from . import stimuli, eyetracker, commandline, clientserver, _version
@@ -383,8 +383,9 @@ class Experiment(object):
 
     def initialize_sounds(self):
         """Create PsychoPy Sound objects for auditory feedback."""
-        # TODO Psychopy 1.85 has improved sound capability
-        # need to look into that and whether it requires changes here
+        from psychopy import prefs
+        prefs.hardware["audiolib"] = ["PTB", "sounddevice"]
+        from psychopy import sound
 
         # Locate the sound files
         sound_dir = os.path.join(os.path.dirname(__file__), "sounds")
