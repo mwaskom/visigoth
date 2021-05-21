@@ -1,2 +1,2 @@
 lint:
-	flake8 visigoth --exclude=visigoth/ext/
+	flake8 visigoth

@@ -6,7 +6,7 @@ import re
 import time
 import json
 import hashlib
-import Queue as queue
+import queue
 
 import yaml
 import numpy as np
@@ -273,7 +273,7 @@ class Experiment(object):
             lines.append("")
             lines.append(
                 "You were correct on {:.0%} of trials".format(mean_acc)
-                )
+            )
             if mean_acc >= target_acc:
                 lines.append("Great job!")
             else:
@@ -284,7 +284,7 @@ class Experiment(object):
             lines.append("")
             lines.append(
                 "You took {:.1f} seconds to respond on average".format(mean_rt)
-                )
+            )
             if mean_rt <= target_rt:
                 lines.append("Great job!")
             else:
@@ -328,7 +328,7 @@ class Experiment(object):
 
         # Import the params module and extract the params for this run
         import params
-        dicts = [v for k, v in vars(params).iteritems()
+        dicts = [v for k, v in vars(params).items()
                  if isinstance(v, dict) and not re.match(r"__\w+__", k)]
 
         if len(dicts) == 1:
@@ -357,7 +357,7 @@ class Experiment(object):
         p.session = p.date if args.session is None else args.session
 
         # Create a name for the eyelink file (limited to 6 characeters)
-        hash_seed = "_".join([p.subject, p.date, p.time])
+        hash_seed = "_".join([p.subject, p.date, p.time]).encode()
         p.eyelink_fname = hashlib.md5(hash_seed).hexdigest()[:6]
 
         # Save information about software versions
@@ -422,11 +422,11 @@ class Experiment(object):
         local_fname = op.join(self.p.study_dir, "displays.yaml")
 
         with open(global_fname) as fid:
-            display_info = yaml.load(fid)
+            display_info = yaml.load(fid, Loader=yaml.FullLoader)
 
         if os.path.exists(local_fname):
             with open(local_fname) as fid:
-                display_info.update(yaml.load(fid))
+                display_info.update(yaml.load(fid, Loader=yaml.FullLoader))
 
         info = display_info[self.p.display_name]
 
@@ -672,7 +672,7 @@ class Experiment(object):
             correct=np.nan,
             rt=np.nan,
 
-            )
+        )
 
         t_info.update(kwargs)
 

@@ -1,7 +1,7 @@
 
 base = dict(
 
-    display_name="macbook-air",
+    display_name="mlw-mbpro",
     display_luminance=50,
 
     fix_radius=.15,

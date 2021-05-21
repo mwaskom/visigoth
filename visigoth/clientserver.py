@@ -2,7 +2,7 @@ import time
 import json
 import socket
 import threading
-import Queue as queue
+import queue
 
 
 class SocketThread(threading.Thread):

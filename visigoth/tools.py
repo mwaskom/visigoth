@@ -249,6 +249,9 @@ def flexible_values(val, size=None, random_state=None,
     if random_state is None:
         random_state = np.random.RandomState()
 
+    if isinstance(val, range):
+        val = list(val)
+
     if np.isscalar(val):
         out = np.ones(size, np.array(val).dtype) * val
     elif isinstance(val, list):

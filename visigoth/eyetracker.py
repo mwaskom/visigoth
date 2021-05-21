@@ -1,5 +1,5 @@
 import itertools
-import Queue
+import queue
 import numpy as np
 import pandas as pd
 from scipy.spatial import distance
@@ -208,7 +208,7 @@ class EyeTracker(object):
             params = self.param_q.get(timeout=.15)
             self.fix_window_radius = params[0]
             self.offsets = tuple(params[1:])
-        except Queue.Empty:
+        except queue.Empty:
             pass
 
     def close_connection(self):

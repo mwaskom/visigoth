@@ -9,7 +9,7 @@ from visigoth.stimuli import Point, Points, Grating
 
 def create_stimuli(exp):
 
-    fix = Point(exp.win, exp.p.fix_radius)
+    fix = Point(exp.win, exp.p.fix_pos, exp.p.fix_radius)
     targets = Points(exp.win, exp.p.target_pos, exp.p.target_radius)
     grating = Grating(exp.win,
                       sf=exp.p.stim_sf,
@@ -63,7 +63,6 @@ def run_trial(exp, info):
 
     exp.s.fix.color = exp.p.fix_iti_color
     exp.draw("fix")
-    exp.win.flip()
     core.wait(info.iti)
 
     exp.s.fix.color = exp.p.fix_ready_color
@@ -74,21 +73,18 @@ def run_trial(exp, info):
 
     exp.s.fix.color = exp.p.fix_trial_color
     exp.draw(["fix", "targets"])
-    exp.win.flip()
     core.wait(exp.p.wait_prestim)
 
-    phase_shift = info.motion * exp.p.stim_speed / exp.win.refresh_hz
+    phase_shift = info.motion * exp.p.stim_speed / exp.win.framerate
     for _ in exp.frame_range(seconds=exp.p.wait_stim):
 
         exp.s.grating.phase += phase_shift
         exp.draw(["grating", "fix", "targets"])
-        exp.win.flip()
 
     exp.draw("targets")
-    _, response = exp.wait_until(AcquireTarget(exp), draw="targets")
+    exp.wait_until(AcquireTarget(exp), draw="targets")
 
     exp.s.fix.color = exp.p.fix_iti_color
     exp.draw("fix")
-    exp.win.flip()
 
     return info

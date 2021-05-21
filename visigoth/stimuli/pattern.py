@@ -25,13 +25,14 @@ class Pattern(object):
         # The main object is our own wrapper around the Psychopy
         # ElementArrayStim object, which takes the luminance pedestal from
         # the window background
-        array = ElementArray(win,
-                             xys=xys,
-                             oris=oris,
-                             opacities=opacities,
-                             nElements=n,
-                             **kwargs
-                             )
+        array = ElementArray(
+            win,
+            xys=xys,
+            oris=oris,
+            opacities=opacities,
+            nElements=n,
+            **kwargs
+        )
         self.array = array
 
         if contrast is None:

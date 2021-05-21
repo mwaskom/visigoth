@@ -2,7 +2,7 @@
 import sys
 import json
 import socket
-import Queue as queue
+import queue
 
 import numpy as np
 import pandas as pd
@@ -161,13 +161,13 @@ class GazeApp(object):
         self.buttons = Bunch(
             update=update_button,
             reset=reset_button
-            )
+        )
 
         self.sliders = Bunch(
             x_offset=ParamSlider(self, "x offset", (-4, 4)),
             y_offset=ParamSlider(self, "y offset", (-4, 4)),
             fix_window=ParamSlider(self, "fix window", (0, 6))
-            )
+        )
 
         self.initialize_layout()
 
@@ -218,7 +218,7 @@ class GazeApp(object):
                                       linestyle="dashed",
                                       edgecolor=".3",
                                       animated=True)
-            )
+        )
 
         targets = []
         if "target_pos" in self.p:

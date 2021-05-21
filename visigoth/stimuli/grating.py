@@ -13,9 +13,9 @@ import pyglet
 pyglet.options['debug_gl'] = False
 GL = pyglet.gl
 
-from psychopy.visual.basevisual import (ColorMixin,
+from psychopy.visual.basevisual import (ColorMixin,  # noqa: E402
                                         ContainerMixin,
-                                        TextureMixin)  # noqa: E402
+                                        TextureMixin)
 from psychopy.visual.grating import GratingStim  # noqa: E402
 from psychopy.tools.attributetools import attributeSetter  # noqa: E402
 try:
@@ -66,12 +66,12 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
     Psychopy can be found here: http://www.psychopy.org/
 
     """
-    def __init__(self,  win, tex="sin",
+    def __init__(self, win, tex="sin",
                  mask="none", units="", pos=(0.0, 0.0), size=None,
                  sf=None, ori=0.0, phase=(0.0, 0.0),
                  texRes=128, rgb=None, dkl=None,
                  lms=None, color=(1.0, 1.0, 1.0), colorSpace='rgb',
-                 contrast=1.0, opacity=1.0, depth=0,
+                 contrast=1.0, opacity=None, depth=0,
                  rgbPedestal=(0.0, 0.0, 0.0), interpolate=False, name=None,
                  autoLog=False, autoDraw=False, maskParams=None,
                  pedestal=None):
@@ -93,12 +93,18 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
                                              fragSignedColorTexMask)
         self._progSignedTexMask = mask_shader
 
-    @attributeSetter
+    @property
+    def contrast(self):
+        if hasattr(self, '_foreColor'):
+            return self._foreColor.contrast
+
+    @contrast.setter
     def contrast(self, value):
         """Stimulus contrast, accounting for pedestal."""
-        # TODO this is potentiall confusion -- revisit later
+        # TODO this is potentially confusing -- revisit later
         value = value * (self.pedestal + 1)
-        self.__dict__["contrast"] = value
+        ColorMixin.contrast.fset(self, value)
+        self._needTextureUpdate = True
         self._needUpdate = True
 
     @property
@@ -121,14 +127,15 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
         self._needUpdate = False
         GL.glNewList(self._listID, GL.GL_COMPILE)
         # setup the shaderprogram
-        GL.glUseProgram(self._progSignedTexMask)
-
-        locator = GL.glGetUniformLocation
-        props = self._progSignedTexMask
-        GL.glUniform1i(locator(props, "texture"), 0)
-        GL.glUniform1i(locator(props, "mask"), 1)
-        GL.glUniform1f(locator(props, "pedestal"), self.pedestal)
-
+        _prog = self._progSignedTexMask
+        GL.glUseProgram(_prog)
+        # set the texture to be texture unit 0
+        GL.glUniform1i(GL.glGetUniformLocation(_prog, b"texture"), 0)
+        # mask is texture unit 1
+        GL.glUniform1i(GL.glGetUniformLocation(_prog, b"mask"), 1)
+        # BEGIN ADDED CODE
+        GL.glUniform1f(GL.glGetUniformLocation(_prog, b"pedestal"), self.pedestal)
+        # END ADDED CODE
         # mask
         GL.glActiveTexture(GL.GL_TEXTURE1)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self._maskID)
@@ -139,15 +146,16 @@ class Grating(GratingStim, TextureMixin, ColorMixin, ContainerMixin):
         GL.glBindTexture(GL.GL_TEXTURE_2D, self._texID)
         GL.glEnable(GL.GL_TEXTURE_2D)
 
-        Ltex = -self._cycles[0]/2 - self.phase[0]+0.5
-        Rtex = +self._cycles[0]/2 - self.phase[0]+0.5
-        Ttex = +self._cycles[1]/2 - self.phase[1]+0.5
-        Btex = -self._cycles[1]/2 - self.phase[1]+0.5
+        Ltex = (-self._cycles[0] / 2) - self.phase[0] + 0.5
+        Rtex = (+self._cycles[0] / 2) - self.phase[0] + 0.5
+        Ttex = (+self._cycles[1] / 2) - self.phase[1] + 0.5
+        Btex = (-self._cycles[1] / 2) - self.phase[1] + 0.5
         Lmask = Bmask = 0.0
-        Tmask = Rmask = 1.0
+        Tmask = Rmask = 1.0  # mask
 
+        # access just once because it's slower than basic property
         vertsPix = self.verticesPix
-        GL.glBegin(GL.GL_QUADS)
+        GL.glBegin(GL.GL_QUADS)  # draw a 4 sided polygon
         # right bottom
         GL.glMultiTexCoord2f(GL.GL_TEXTURE0, Rtex, Btex)
         GL.glMultiTexCoord2f(GL.GL_TEXTURE1, Rmask, Bmask)
