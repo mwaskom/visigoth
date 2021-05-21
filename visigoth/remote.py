@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import matplotlib as mpl
 from matplotlib.artist import Artist
+from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
 from PyQt5.QtCore import Qt, QTimer
@@ -175,7 +176,7 @@ class GazeApp(object):
 
     def initialize_figure(self):
         """Set up the basic aspects of the matplotlib screen figure."""
-        fig = mpl.figure.Figure((5, 5), dpi=100, facecolor="white")
+        fig = Figure((5, 5), dpi=100, facecolor="white")
 
         ax = fig.add_subplot(111)
         ax.set(xlim=(-10, 10),

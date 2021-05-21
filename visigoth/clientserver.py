@@ -28,7 +28,7 @@ class SocketThread(threading.Thread):
         size = str(len(data)).zfill(self.HEADER_SIZE - 1)
 
         package = "".join([kind, size, data])
-        return package
+        return package.encode("ascii")
 
     def recvall(self, size, source=None):
 
@@ -38,12 +38,13 @@ class SocketThread(threading.Thread):
         data = ""
         missing = size - len(data)
         while missing:
-            data = "".join([data, source.recv(missing)])
+            data = "".join([data, source.recv(missing).decode("ascii")])
             missing = size - len(data)
         return data
 
-    def read_header(self, s):
+    def read_header(self, b):
 
+        s = b.decode("ascii")
         if s:
             kind = int(s[0])
             size = int(s[1:])
@@ -187,7 +188,7 @@ class SocketServerThread(SocketThread):
 
                 # Check if we got something surprising
                 elif kind != self.SERVER_REQUEST:
-                    raise RuntimeError("Unexpected request from the client.")
+                    raise RuntimeError(f"Unexpected request from the client: {kind}.")
 
                 # -- Otherwise it is up to the server what to send
 
