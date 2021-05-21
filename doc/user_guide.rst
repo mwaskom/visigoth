@@ -34,6 +34,7 @@ Code example: Random dot task
     random_dots/
         experiment.py
         params.py
+        remote.py
 
 Experiment module (``experiment.py``)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
