@@ -7,7 +7,7 @@ from visigoth.stimuli import RandomDotMotion, Point, Points
 
 def create_stimuli(exp):
     """Initialize the stimulus objects used in the experiment."""
-    # Central ixation point
+    # Central fixation point
     fix = Point(exp.win,
                 exp.p.fix_pos,
                 exp.p.fix_radius,

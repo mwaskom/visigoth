@@ -643,7 +643,7 @@ class Experiment(object):
         while True:
             self.trial += 1
             if max is not None and self.trial > max:
-                raise StopIteration
+                return
             yield self.trial
 
     def trial_info(self, **kwargs):
@@ -862,7 +862,7 @@ class Experiment(object):
             if expected_offset is not None:
                 now = self.clock.getTime()
                 if expected_offset < (now + self.win.frametime):
-                    raise StopIteration
+                    return
 
             if yield_skipped:
                 yield frame, skipped_frames

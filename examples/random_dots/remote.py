@@ -19,7 +19,7 @@ def initialize_trial_figure(app):
 
     # Note that we use mpl.figure.Figure, not pyplot.figure
     fig = Figure((5, 5), dpi=100, facecolor="white")
-    axes = [fig.add_subplot(3, 1, i) for i in range(1, 4)]
+    axes = fig.subplots(3)
 
     axes[0].set(ylim=(-.1, 1.1),
                 yticks=[0, 1],
