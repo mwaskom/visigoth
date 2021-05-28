@@ -28,7 +28,8 @@ Psychophysics experiment control in Python
    :maxdepth: 1
 
    installing
-   user_guide
+   demo
+   commandline
    api
 
 .. raw:: html

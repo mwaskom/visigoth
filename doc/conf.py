@@ -130,7 +130,6 @@ html_theme_options = {
     'bootswatch_theme': "lumen",
     'navbar_links' : [
             ("Github", "https://github.com/mwaskom/visigoth", True),
-            ("User Guide", "user_guide"),
             ("API", "api"),
         ]
 
